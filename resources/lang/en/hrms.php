@@ -124,6 +124,47 @@ return [
     'employment_information' => 'Employment Information',
     'personal_information' => 'Personal Information',
     'contact_information' => 'Contact Information',
+    
+    // Employee specific translations
+    'employee' => [
+        'created_successfully' => 'Employee created successfully',
+        'updated_successfully' => 'Employee updated successfully',
+        'deleted_successfully' => 'Employee deleted successfully',
+        'terminated_successfully' => 'Employee terminated successfully',
+        'reactivated_successfully' => 'Employee reactivated successfully',
+        'cannot_delete_has_dependencies' => 'Cannot delete employee: has contracts, payslips, or direct reports',
+        'cannot_be_own_manager' => 'Employee cannot be their own manager',
+        'not_terminated' => 'Employee is not terminated',
+        'termination_reason' => 'Termination Reason',
+        'termination_date' => 'Termination Date',
+        'terminate' => 'Terminate',
+        'reactivate' => 'Reactivate',
+        'export' => 'Export',
+        'statistics' => 'Statistics',
+        'years_of_service' => 'Years of Service',
+        'direct_reports' => 'Direct Reports',
+        'has_user_account' => 'Has User Account',
+        'salary_visibility' => 'Salary Visibility',
+        'employment_type' => 'Employment Type',
+        'full_name' => 'Full Name',
+        'display_name' => 'Display Name',
+        'hierarchy_level' => 'Hierarchy Level',
+        'is_overtime_eligible' => 'Overtime Eligible',
+        'total_employees' => 'Total Employees',
+        'active_employees' => 'Active Employees',
+        'new_hires_this_month' => 'New Hires This Month',
+        'by_department' => 'By Department',
+        'by_position' => 'By Position',
+        'by_employment_type' => 'By Employment Type',
+    ],
+    
+    // Status translations
+    'status' => [
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+        'terminated' => 'Terminated',
+        'on_leave' => 'On Leave',
+    ],
 
     // Document Types
     'national_id' => 'National ID',
