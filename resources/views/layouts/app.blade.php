@@ -255,12 +255,27 @@
                                         </h6>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{{ route('profile') }}">
-                                        <i class="fas fa-user-circle"></i> {{ __('My Profile') }}
-                                    </a></li>
                                     @if(Auth::user()->employee)
+                                        <li><a class="dropdown-item" href="{{ route('employee-portal.dashboard') }}">
+                                            <i class="fas fa-tachometer-alt"></i> {{ __('My Dashboard') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="{{ route('employee-portal.profile') }}">
+                                            <i class="fas fa-user-edit"></i> {{ __('My Profile') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="{{ route('employee-portal.documents') }}">
+                                            <i class="fas fa-folder-open"></i> {{ __('My Documents') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="{{ route('employee-portal.payslips') }}">
+                                            <i class="fas fa-file-invoice-dollar"></i> {{ __('My Payslips') }}
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    @endif
+                                    <li><a class="dropdown-item" href="{{ route('profile') }}">
+                                        <i class="fas fa-user-circle"></i> {{ __('Account Settings') }}
+                                    </a></li>
+                                    @if(Auth::user()->employee && Auth::user()->hasAnyRole(['HR_Admin_Manager', 'HR_Coordinator', 'IT_Admin']))
                                         <li><a class="dropdown-item" href="{{ route('employees.show', Auth::user()->employee) }}">
-                                            <i class="fas fa-id-card"></i> {{ __('My Employee Record') }}
+                                            <i class="fas fa-id-card"></i> {{ __('Employee Record') }}
                                         </a></li>
                                     @endif
                                     <li><hr class="dropdown-divider"></li>

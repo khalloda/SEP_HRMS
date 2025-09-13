@@ -190,6 +190,26 @@ Route::middleware(['auth'])->group(function () {
         Route::get('weekly-digest/statistics', [\App\Http\Controllers\WeeklyDigestController::class, 'statistics'])
             ->name('weekly-digest.statistics');
     });
+
+    // Employee Self-Service Portal
+    Route::prefix('my')->name('employee-portal.')->group(function () {
+        Route::get('dashboard', [\App\Http\Controllers\EmployeePortalController::class, 'dashboard'])
+            ->name('dashboard');
+        Route::get('profile', [\App\Http\Controllers\EmployeePortalController::class, 'profile'])
+            ->name('profile');
+        Route::put('profile', [\App\Http\Controllers\EmployeePortalController::class, 'updateProfile'])
+            ->name('profile.update');
+        Route::get('documents', [\App\Http\Controllers\EmployeePortalController::class, 'documents'])
+            ->name('documents');
+        Route::get('payslips', [\App\Http\Controllers\EmployeePortalController::class, 'payslips'])
+            ->name('payslips');
+        Route::get('attendance', [\App\Http\Controllers\EmployeePortalController::class, 'attendance'])
+            ->name('attendance');
+        Route::get('request-letter', [\App\Http\Controllers\EmployeePortalController::class, 'requestLetter'])
+            ->name('request-letter');
+        Route::post('request-letter', [\App\Http\Controllers\EmployeePortalController::class, 'submitLetterRequest'])
+            ->name('request-letter.submit');
+    });
 });
 
 // Language switching (available to all users)
