@@ -88,7 +88,7 @@
 
                 <!-- Employment Type Filter -->
                 <div class="col-md-2">
-                    <label for="employment_type_id" class="form-label">{{ __('hrms.employee.employment_type') }}</label>
+                    <label for="employment_type_id" class="form-label">{{ __('Employment Type') }}</label>
                     <select name="employment_type_id" id="employment_type_id" class="form-select">
                         <option value="">{{ __('All Types') }}</option>
                         @foreach($employmentTypes as $type)
@@ -209,11 +209,19 @@
                                         <code class="text-dark">{{ $employee->code }}</code>
                                     </td>
                                     <td>
-                                        <div>
-                                            <strong>{{ $employee->display_name }}</strong>
-                                            @if($employee->email)
-                                                <br><small class="text-muted">{{ $employee->email }}</small>
-                                            @endif
+                                        <div class="d-flex align-items-center">
+                                            <!-- Employee Photo Thumbnail -->
+                                            <img src="{{ $employee->photo_url }}" 
+                                                 alt="{{ $employee->display_name }}" 
+                                                 class="rounded-circle me-3 border border-2 border-brand-gold"
+                                                 style="width: 40px; height: 40px; object-fit: cover;">
+                                            
+                                            <div>
+                                                <strong>{{ $employee->display_name }}</strong>
+                                                @if($employee->email)
+                                                    <br><small class="text-muted">{{ $employee->email }}</small>
+                                                @endif
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
@@ -231,16 +239,16 @@
                                     <td>
                                         @switch($employee->status)
                                             @case('active')
-                                                <span class="badge bg-success">{{ __('hrms.status.active') }}</span>
+                                                <span class="badge bg-success">{{ __('hrms.active') }}</span>
                                                 @break
                                             @case('inactive')
-                                                <span class="badge bg-warning">{{ __('hrms.status.inactive') }}</span>
+                                                <span class="badge bg-warning">{{ __('hrms.inactive') }}</span>
                                                 @break
                                             @case('terminated')
-                                                <span class="badge bg-danger">{{ __('hrms.status.terminated') }}</span>
+                                                <span class="badge bg-danger">{{ __('hrms.terminated') }}</span>
                                                 @break
                                             @case('on_leave')
-                                                <span class="badge bg-info">{{ __('hrms.status.on_leave') }}</span>
+                                                <span class="badge bg-info">{{ __('hrms.on_leave') }}</span>
                                                 @break
                                         @endswitch
                                     </td>

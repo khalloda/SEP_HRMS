@@ -30,6 +30,11 @@ class Employee extends Model
         'manager_id',
         'national_id',
         'salary_visibility_flag',
+        'photo_path',
+        'photo_original_name',
+        'photo_size',
+        'photo_mime_type',
+        'photo_uploaded_at',
     ];
 
     /**
@@ -39,6 +44,7 @@ class Employee extends Model
         'hire_date' => 'date',
         'salary_visibility_flag' => 'boolean',
         'national_id' => 'encrypted',
+        'photo_uploaded_at' => 'datetime',
     ];
 
     /**
@@ -124,6 +130,14 @@ class Employee extends Model
     }
 
     /**
+     * Get documents for this employee.
+     */
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    /**
      * Get the employee's active contract.
      */
     public function activeContract()
@@ -131,13 +145,6 @@ class Employee extends Model
         return $this->hasOne(Contract::class)->where('status', 'active');
     }
 
-    /**
-     * Get the employee's documents.
-     */
-    public function documents()
-    {
-        return $this->hasMany(Document::class);
-    }
 
     /**
      * Get the employee's payslips.
@@ -355,7 +362,8 @@ class Employee extends Model
             ->logOnly([
                 'code', 'first_name', 'last_name', 'arabic_name', 'email', 
                 'phone', 'hire_date', 'status', 'department_id', 'position_id', 
-                'employment_type_id', 'manager_id', 'salary_visibility_flag'
+                'employment_type_id', 'manager_id', 'salary_visibility_flag',
+                'photo_original_name', 'photo_uploaded_at'
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
@@ -388,6 +396,92 @@ class Employee extends Model
             'active_contract' => $this->activeContract !== null,
             'documents_count' => $this->documents()->count(),
         ];
+    }
+
+    /**
+     * Get the employee's photo URL.
+     */
+    public function getPhotoUrlAttribute()
+    {
+        if (!$this->photo_path) {
+            return $this->getDefaultPhotoUrl();
+        }
+
+        return route('employee.photo', ['employee' => $this->id]);
+    }
+
+    /**
+     * Get the default photo URL (avatar placeholder).
+     */
+    public function getDefaultPhotoUrl()
+    {
+        $name = urlencode($this->full_name);
+        return "https://ui-avatars.com/api/?name={$name}&size=200&background=c6a44a&color=2e4029&font-size=0.6&bold=true";
+    }
+
+    /**
+     * Check if employee has a photo uploaded.
+     */
+    public function hasPhoto(): bool
+    {
+        return !empty($this->photo_path) && \Storage::disk('private')->exists($this->photo_path);
+    }
+
+    /**
+     * Get photo file size in human readable format.
+     */
+    public function getPhotoSizeFormatted()
+    {
+        if (!$this->photo_size) {
+            return null;
+        }
+
+        $bytes = $this->photo_size;
+        $units = ['B', 'KB', 'MB', 'GB'];
+        
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+        
+        return round($bytes, 2) . ' ' . $units[$i];
+    }
+
+    /**
+     * Delete the employee's photo file.
+     */
+    public function deletePhoto(): bool
+    {
+        if ($this->photo_path && \Storage::disk('private')->exists($this->photo_path)) {
+            $deleted = \Storage::disk('private')->delete($this->photo_path);
+            
+            if ($deleted) {
+                $this->update([
+                    'photo_path' => null,
+                    'photo_original_name' => null,
+                    'photo_size' => null,
+                    'photo_mime_type' => null,
+                    'photo_uploaded_at' => null,
+                ]);
+                
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Update photo information after upload.
+     */
+    public function updatePhoto($path, $originalName, $size, $mimeType): bool
+    {
+        return $this->update([
+            'photo_path' => $path,
+            'photo_original_name' => $originalName,
+            'photo_size' => $size,
+            'photo_mime_type' => $mimeType,
+            'photo_uploaded_at' => now(),
+        ]);
     }
 
     /**

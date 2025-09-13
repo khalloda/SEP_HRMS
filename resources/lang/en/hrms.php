@@ -115,6 +115,7 @@ return [
     'no_results' => 'No results found',
     'loading' => 'Loading...',
     'confirm_delete' => 'Are you sure you want to delete this item?',
+    'recent_activity' => 'Recent Activity',
     
     // Employee Management
     'add_employee' => 'Add Employee',
@@ -143,6 +144,7 @@ return [
         'statistics' => 'Statistics',
         'years_of_service' => 'Years of Service',
         'direct_reports' => 'Direct Reports',
+        'direct_report' => 'Direct Report',
         'has_user_account' => 'Has User Account',
         'salary_visibility' => 'Salary Visibility',
         'employment_type' => 'Employment Type',
@@ -156,15 +158,24 @@ return [
         'by_department' => 'By Department',
         'by_position' => 'By Position',
         'by_employment_type' => 'By Employment Type',
+        // Photo Management
+        'photo' => 'Photo',
+        'upload_photo' => 'Upload Photo',
+        'change_photo' => 'Change Photo',
+        'delete_photo' => 'Delete Photo',
+        'photo_uploaded_successfully' => 'Photo uploaded successfully',
+        'photo_deleted_successfully' => 'Photo deleted successfully',
+        'no_photo_to_delete' => 'No photo to delete',
+        'photo_requirements' => 'Photo must be JPEG, PNG, JPG, or GIF format and under 5MB',
+        'default_photo' => 'Default Photo',
+        'photo_info' => 'Photo Information',
+        'original_filename' => 'Original Filename',
+        'file_size' => 'File Size',
+        'uploaded_date' => 'Uploaded Date',
+        'photo_actions' => 'Photo Actions',
     ],
     
-    // Status translations
-    'status' => [
-        'active' => 'Active',
-        'inactive' => 'Inactive',
-        'terminated' => 'Terminated',
-        'on_leave' => 'On Leave',
-    ],
+    // Status translations (individual status items are defined above as simple strings)
 
     // Document Types
     'national_id' => 'National ID',
@@ -172,6 +183,37 @@ return [
     'contract_document' => 'Contract Document',
     'employment_proof' => 'Employment Proof',
     'hr_letter' => 'HR Letter',
+
+    // Status translations (nested for backward compatibility)
+    'status' => [
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+        'terminated' => 'Terminated',
+        'on_leave' => 'On Leave',
+    ],
+
+    // Activity Log Messages
+    'activity' => [
+        'Employee created' => 'Employee created',
+        'Employee updated' => 'Employee updated',
+        'Employee deleted' => 'Employee deleted',
+        'Employee terminated' => 'Employee terminated',
+        'Employee reactivated' => 'Employee reactivated',
+        'Employee photo uploaded' => 'Employee photo uploaded',
+        'Employee photo deleted' => 'Employee photo deleted',
+        'Document uploaded' => 'Document uploaded',
+        'Document updated' => 'Document updated',
+        'Document deleted' => 'Document deleted',
+        'Document downloaded' => 'Document downloaded',
+        'Salary component created' => 'Salary component created',
+        'Salary component updated' => 'Salary component updated',
+        'Salary component deleted' => 'Salary component deleted',
+        'User logged in' => 'User logged in',
+        'User logged out' => 'User logged out',
+        'User registered' => 'User registered',
+        'User profile updated' => 'User profile updated',
+        'User account linked to employee' => 'User account linked to employee',
+    ],
 
     // Language Toggle
     'language' => 'Language',

@@ -4,7 +4,10 @@
       "Bash(composer create-project:*)",
       "Bash(php:*)",
       "Bash(curl:*)",
-      "Read(//d/Claude/**)"
+      "Read(//d/Claude/**)",
+      "Bash(composer:*)",
+      "WebFetch(domain:flareapp.io)",
+      "Bash(mysql:*)"
     ],
     "deny": [],
     "ask": []

@@ -126,6 +126,21 @@
                                 {{ __('hrms.employees') }}
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ route('documents.index') }}">
+                                {{ __('hrms.documents') }}
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="payrollDropdown" role="button" data-bs-toggle="dropdown">
+                                {{ __('hrms.payroll') }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('salary-components.index') }}">
+                                    <i class="fas fa-list"></i> {{ __('Salary Components') }}
+                                </a></li>
+                            </ul>
+                        </li>
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
@@ -148,12 +163,53 @@
                             </ul>
                         </li>
 
-                        <!-- User menu will be added when authentication is implemented -->
-                        <li class="nav-item">
-                            <span class="nav-link text-white">
-                                <i class="fas fa-user"></i> {{ __('Development Mode') }}
-                            </span>
-                        </li>
+                        <!-- User Menu -->
+                        @auth
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user"></i> {{ Auth::user()->name }}
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <h6 class="dropdown-header">
+                                            {{ Auth::user()->name }}
+                                            @if(Auth::user()->employee)
+                                                <br><small class="text-muted">{{ Auth::user()->employee->code }}</small>
+                                            @endif
+                                        </h6>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ route('profile') }}">
+                                        <i class="fas fa-user-circle"></i> {{ __('My Profile') }}
+                                    </a></li>
+                                    @if(Auth::user()->employee)
+                                        <li><a class="dropdown-item" href="{{ route('employees.show', Auth::user()->employee) }}">
+                                            <i class="fas fa-id-card"></i> {{ __('My Employee Record') }}
+                                        </a></li>
+                                    @endif
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-sign-out-alt"></i> {{ __('Logout') }}
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        @else
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="{{ route('login') }}">
+                                    <i class="fas fa-sign-in-alt"></i> {{ __('Login') }}
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="{{ route('register') }}">
+                                    <i class="fas fa-user-plus"></i> {{ __('Register') }}
+                                </a>
+                            </li>
+                        @endauth
                     </ul>
                 </div>
             </div>

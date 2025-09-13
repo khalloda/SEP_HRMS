@@ -1,66 +1,307 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sarie Eldin & Partners HRMS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel](https://img.shields.io/badge/Laravel-10.49.0-red.svg)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.4-blue.svg)](https://www.php.net)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple.svg)](https://getbootstrap.com)
 
-## About Laravel
+A comprehensive Human Resource Management System (HRMS) built for **Sarie Eldin & Partners Legal Advisors**, a law firm managing ~50 employees. This system provides complete employee lifecycle management, document handling, payroll structure setup, and role-based access control with bilingual Arabic/English support.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### ✅ **Phase 1 - Foundation Complete**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+#### 🔐 **Authentication & User Management**
+- Complete user authentication (login, register, logout, profile management)
+- Role-Based Access Control (RBAC) with 6 specialized roles
+- User-employee linking system
+- Activity logging for full audit trails
+- Session management with "Remember Me" functionality
 
-## Learning Laravel
+#### 👥 **Employee Management**
+- Full employee CRUD operations with advanced filtering
+- Employee search with fulltext and basic search fallback
+- Employee statistics and analytics dashboard
+- Export functionality (Excel, PDF, CSV ready)
+- Employee termination and reactivation workflows
+- Manager hierarchies and reporting structures
+- Employee directory with professional responsive interface
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+#### 📄 **Document Management**
+- Complete document upload and management system
+- Document versioning with history tracking
+- Document tagging and categorization
+- Document expiry tracking with alerts
+- Role-based document visibility and access control
+- Watermarking support for confidential documents
+- File validation (10MB limit, multiple formats)
+- Secure private file storage with signed downloads
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+#### 💰 **Payroll Structure Setup**
+- Salary component management (earnings, deductions, information)
+- Predefined salary components with one-click seeding
+- Multiple calculation modes (fixed, formula-based, variable)
+- Role-based salary visibility (Net/Gross restrictions)
+- Priority ordering for payroll calculations
+- Component dependencies and relationships
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🌐 **Core Features**
+- **Bilingual Support**: English/Arabic with RTL layout
+- **Professional UI**: Corporate Sarie Eldin branding with gold/green theme
+- **Responsive Design**: Bootstrap 5 with mobile optimization
+- **Security**: Field-level encryption, role-based permissions
+- **Audit Trails**: Complete activity logging for compliance
 
-## Laravel Sponsors
+## 🛠️ Technology Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Backend**: Laravel 10.49.0 with PHP 8.4
+- **Database**: MySQL 8.0 with utf8mb4 (Arabic support)
+- **Frontend**: Bootstrap 5.3 with custom Sarie Eldin styling
+- **Authentication**: Laravel Sanctum with Spatie Permission
+- **File Storage**: Laravel private disk for secure document handling
+- **Localization**: Laravel multilingual with Arabic RTL support
+- **Activity Logging**: Spatie ActivityLog for audit compliance
 
-### Premium Partners
+## 📋 Installation
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Prerequisites
+- PHP 8.4+
+- MySQL 8.0+
+- Composer
+- Web server (Apache/Nginx)
 
-## Contributing
+### Setup Instructions
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. **Clone the repository**
+   ```bash
+   git clone [repository-url]
+   cd SEP_HRMS
+   ```
 
-## Code of Conduct
+2. **Install dependencies**
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. **Environment configuration**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-## Security Vulnerabilities
+4. **Database setup**
+   ```bash
+   # Configure database in .env file
+   DB_CONNECTION=mysql
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_DATABASE=sep_hrms
+   DB_USERNAME=root
+   DB_PASSWORD=1234
+   
+   # Import the complete schema
+   # Use phpMyAdmin or MySQL CLI to import docs/HRMS_Schema.sql
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. **Initialize application**
+   ```bash
+   # Fix any missing database tables
+   php artisan hrms:create-missing-tables
+   
+   # Create default users and roles
+   php artisan db:seed --class=DefaultUsersSeeder
+   
+   # Create storage links
+   php artisan storage:link
+   ```
 
-## License
+6. **Start development server**
+   ```bash
+   php artisan serve --host=0.0.0.0 --port=8000
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+7. **Access the application**
+   - URL: `http://localhost:8000`
+   - Default login: `hr@sarieldin.com` / `password123`
+
+## 👤 Default User Accounts
+
+The system comes with pre-configured user accounts for testing:
+
+| Role | Email | Password | Permissions |
+|------|-------|----------|-------------|
+| HR Admin Manager | `hr@sarieldin.com` | `password123` | Full system access |
+| Accounting Manager | `accounting@sarieldin.com` | `password123` | Full payroll access |
+| IT Administrator | `it@sarieldin.com` | `password123` | System administration |
+| HR Coordinator | `hrcoord@sarieldin.com` | `password123` | Employee/document management |
+| Demo Employee | `demo@sarieldin.com` | `password123` | Self-service portal |
+
+⚠️ **Important**: Change these passwords in production!
+
+## 🔗 Application URLs
+
+### Main Application
+- **Dashboard**: `/` - HRMS dashboard with statistics
+- **Login**: `/login` - User authentication
+- **Profile**: `/profile` - User profile management
+
+### Employee Management
+- **Employee Directory**: `/employees` - Complete employee listing
+- **Add Employee**: `/employees/create` - New employee registration
+- **Employee Details**: `/employees/{id}` - Individual employee profile
+
+### Document Management
+- **Document Library**: `/documents` - Document management interface
+- **Upload Document**: `/documents/create` - File upload system
+- **Document Details**: `/documents/{id}` - Document viewer with versions
+
+### Payroll Management
+- **Salary Components**: `/salary-components` - Component management
+- **Create Component**: `/salary-components/create` - New component setup
+
+## 🎨 Design & Branding
+
+The application features professional corporate design matching Sarie Eldin & Partners branding:
+
+- **Primary Colors**: Gold (#c6a44a), Dark Green (#2e4029), Cream (#f9f5e6)
+- **Typography**: Professional serif/sans-serif combination
+- **Layout**: Clean, responsive Bootstrap 5 interface
+- **Languages**: English and Arabic with proper RTL support
+
+## 🔒 Security Features
+
+- **Role-Based Access Control**: 6 specialized roles with granular permissions
+- **Data Encryption**: Sensitive fields (National ID, salary) encrypted at rest
+- **Document Security**: Private file storage with signed URLs
+- **Activity Logging**: Complete audit trail for compliance
+- **Session Security**: Secure authentication with configurable timeouts
+
+## 🛡️ User Roles & Permissions
+
+| Role | Employee Management | Document Access | Payroll Access | System Admin |
+|------|-------------------|-----------------|----------------|--------------|
+| **HR Admin Manager** | Full CRUD | All documents | Full including Net/Gross | Yes |
+| **Accounting Manager** | View only | Financial docs | Full including Net/Gross | Limited |
+| **HR Coordinator** | Full CRUD | All except payslips | No Net/Gross access | No |
+| **Accountant** | View only | Financial docs | No Net/Gross access | No |
+| **Employee** | Own record only | Own documents | Own payslips | No |
+| **IT Admin** | Limited | System docs | No access | Full |
+
+## 📁 Project Structure
+
+```
+SEP_HRMS/
+├── app/
+│   ├── Console/Commands/          # Custom Artisan commands
+│   ├── Http/Controllers/          # Application controllers
+│   │   ├── Auth/                 # Authentication controllers
+│   │   ├── EmployeeController.php # Employee management
+│   │   ├── DocumentController.php # Document management
+│   │   └── SalaryComponentController.php # Payroll setup
+│   ├── Models/                   # Eloquent models
+│   │   ├── User.php             # User authentication
+│   │   ├── Employee.php         # Employee data
+│   │   ├── Document.php         # Document management
+│   │   └── SalaryComponent.php  # Payroll components
+│   └── Policies/                # Authorization policies
+├── database/
+│   ├── migrations/              # Database migrations
+│   └── seeders/                 # Database seeders
+├── resources/
+│   ├── lang/                    # Localization files (EN/AR)
+│   └── views/                   # Blade templates
+├── routes/                      # Application routes
+├── storage/                     # File storage
+└── docs/                       # Project documentation
+```
+
+## 🔄 Development Workflow
+
+### Available Artisan Commands
+
+```bash
+# Development server
+php artisan serve --host=0.0.0.0 --port=8000
+
+# Database management
+php artisan migrate:status                    # Check migrations
+php artisan hrms:create-missing-tables       # Fix missing tables
+php artisan db:seed --class=DefaultUsersSeeder # Create default users
+
+# Application maintenance
+php artisan config:clear                     # Clear config cache
+php artisan route:clear                      # Clear route cache
+php artisan view:clear                       # Clear view cache
+php artisan cache:clear                      # Clear application cache
+
+# View system information
+php artisan route:list                       # List all routes
+```
+
+## 🚀 Deployment
+
+### GoDaddy cPanel Deployment
+
+This application is designed for deployment on GoDaddy cPanel hosting:
+
+1. **Build for production**
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
+
+2. **Create deployment package**
+   ```bash
+   # Create ZIP file including /vendor directory
+   zip -r hrms-production.zip . -x "node_modules/*" ".git/*"
+   ```
+
+3. **cPanel deployment**
+   - Upload ZIP file via cPanel File Manager
+   - Extract to `/home/user/app` directory
+   - Configure `.env` via File Manager
+   - Import database via phpMyAdmin
+   - Set document root to `/public`
+
+4. **Post-deployment**
+   - Configure cron jobs for scheduled tasks
+   - Set up SSL certificate
+   - Configure email settings
+
+## 📋 Roadmap
+
+### 🔄 Phase 2 - Operations (Next)
+- [ ] Employee photo management with media library
+- [ ] Salary structure assignment to employees  
+- [ ] Payroll run processing and payslip generation
+- [ ] Contract lifecycle management
+- [ ] Advanced dashboard analytics
+
+### 🔄 Phase 3 - Integration
+- [ ] ZKTeco attendance device integration
+- [ ] Automated email notifications
+- [ ] Advanced reporting system
+- [ ] Mobile-responsive enhancements
+
+### 🔄 Phase 4 - Advanced Features
+- [ ] API endpoints for mobile app
+- [ ] Advanced security features
+- [ ] Performance optimization
+- [ ] Third-party integrations (Zoho Books)
+
+## 📞 Support & Documentation
+
+- **Main Documentation**: `CLAUDE.md` - Complete development guide
+- **Database Schema**: `docs/HRMS_Schema.sql` - Complete database structure
+- **Requirements**: `docs/HRMS_PRD_SarieEldin.md` - Product requirements
+- **Architecture**: `docs/HRMS_ERD.md` - Entity relationship diagram
+
+## 📄 License
+
+This project is proprietary software developed for Sarie Eldin & Partners Legal Advisors.
+
+---
+
+**Sarie Eldin & Partners HRMS v1.0** - *Comprehensive Human Resource Management Solution*

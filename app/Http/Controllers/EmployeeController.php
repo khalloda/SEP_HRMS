@@ -18,8 +18,8 @@ class EmployeeController extends Controller
      */
     public function index(Request $request)
     {
-        // Check permission (temporarily commented for development)
-        // Gate::authorize('viewAny', Employee::class);
+        // Check permission
+        Gate::authorize('viewAny', Employee::class);
 
         // Start with base query including relations
         $query = Employee::query()->withRelations();
@@ -91,10 +91,10 @@ class EmployeeController extends Controller
             ->get(['id', 'first_name', 'last_name']);
 
         $statusOptions = [
-            'active' => __('hrms.status.active'),
-            'inactive' => __('hrms.status.inactive'),
-            'terminated' => __('hrms.status.terminated'),
-            'on_leave' => __('hrms.status.on_leave'),
+            'active' => __('hrms.active'),
+            'inactive' => __('hrms.inactive'),
+            'terminated' => __('hrms.terminated'),
+            'on_leave' => __('hrms.on_leave'),
         ];
 
         return view('employees.index', compact(
@@ -108,7 +108,7 @@ class EmployeeController extends Controller
      */
     public function create()
     {
-        // Gate::authorize('create', Employee::class);
+        Gate::authorize('create', Employee::class);
 
         $departments = Department::ordered()->get();
         $positions = Position::ordered()->get();
@@ -125,7 +125,7 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
-        // Gate::authorize('create', Employee::class);
+        Gate::authorize('create', Employee::class);
 
         $validated = $request->validate([
             'first_name' => 'required|string|max:80',
@@ -163,7 +163,7 @@ class EmployeeController extends Controller
      */
     public function show(Employee $employee)
     {
-        // Gate::authorize('view', $employee);
+        Gate::authorize('view', $employee);
 
         $employee->load(['department', 'position', 'employmentType', 'manager', 'directReports', 'user']);
         
@@ -171,8 +171,8 @@ class EmployeeController extends Controller
         $stats = $employee->getStats();
         
         // Get recent activity logs
-        $activities = activity()
-            ->forSubject($employee)
+        $activities = \Spatie\Activitylog\Models\Activity::where('subject_type', Employee::class)
+            ->where('subject_id', $employee->id)
             ->latest()
             ->limit(10)
             ->get();
@@ -440,6 +440,96 @@ class EmployeeController extends Controller
                 ];
             })
         ]);
+    }
+
+    /**
+     * Upload employee photo.
+     */
+    public function uploadPhoto(Request $request, Employee $employee)
+    {
+        Gate::authorize('update', $employee);
+
+        $request->validate([
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+        ]);
+
+        DB::transaction(function () use ($request, $employee) {
+            // Delete existing photo if exists
+            if ($employee->hasPhoto()) {
+                $employee->deletePhoto();
+            }
+
+            $file = $request->file('photo');
+            $filename = 'employee_photos/' . $employee->code . '_' . time() . '.' . $file->getClientOriginalExtension();
+            
+            // Store file in private disk
+            $path = $file->storeAs('', $filename, 'private');
+            
+            // Update employee photo information
+            $employee->updatePhoto(
+                $path,
+                $file->getClientOriginalName(),
+                $file->getSize(),
+                $file->getMimeType()
+            );
+
+            // Log the activity
+            activity('employee')
+                ->performedOn($employee)
+                ->withProperties(['photo_name' => $file->getClientOriginalName()])
+                ->log('Employee photo uploaded');
+        });
+
+        return redirect()->route('employees.show', $employee)
+            ->with('success', __('hrms.employee.photo_uploaded_successfully'));
+    }
+
+    /**
+     * Serve employee photo.
+     */
+    public function servePhoto(Employee $employee)
+    {
+        Gate::authorize('view', $employee);
+
+        if (!$employee->hasPhoto()) {
+            abort(404);
+        }
+
+        $path = storage_path('app/private/' . $employee->photo_path);
+        
+        if (!file_exists($path)) {
+            abort(404);
+        }
+
+        return response()->file($path, [
+            'Content-Type' => $employee->photo_mime_type,
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
+    /**
+     * Delete employee photo.
+     */
+    public function deletePhoto(Employee $employee)
+    {
+        Gate::authorize('update', $employee);
+
+        if (!$employee->hasPhoto()) {
+            return redirect()->route('employees.show', $employee)
+                ->with('error', __('hrms.employee.no_photo_to_delete'));
+        }
+
+        DB::transaction(function () use ($employee) {
+            $employee->deletePhoto();
+
+            // Log the activity
+            activity('employee')
+                ->performedOn($employee)
+                ->log('Employee photo deleted');
+        });
+
+        return redirect()->route('employees.show', $employee)
+            ->with('success', __('hrms.employee.photo_deleted_successfully'));
     }
 
     // Private helper methods for exports would go here...

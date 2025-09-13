@@ -206,7 +206,7 @@
                 <div class="card mb-4">
                     <div class="card-header card-header-custom">
                         <h5 class="mb-0">
-                            <i class="fas fa-history"></i> {{ __('Recent Activity') }}
+                            <i class="fas fa-history"></i> {{ __('hrms.recent_activity') }}
                         </h5>
                     </div>
                     <div class="card-body">
@@ -218,7 +218,13 @@
                                     </div>
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <div class="fw-bold">{{ $activity->description }}</div>
+                                    <div class="fw-bold">
+                                        @if(__('hrms.activity.' . $activity->description) !== 'hrms.activity.' . $activity->description)
+                                            {{ __('hrms.activity.' . $activity->description) }}
+                                        @else
+                                            {{ $activity->description }}
+                                        @endif
+                                    </div>
                                     <div class="text-muted small">
                                         {{ $activity->created_at->diffForHumans() }}
                                         @if($activity->causer)
@@ -235,6 +241,63 @@
 
         <!-- Side Panel -->
         <div class="col-lg-4">
+            <!-- Employee Photo -->
+            <div class="card mb-4">
+                <div class="card-header card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle"></i> {{ __('hrms.employee.photo') }}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Current Photo Display -->
+                    <div class="mb-3">
+                        <img src="{{ $employee->photo_url }}" 
+                             alt="{{ $employee->display_name }}" 
+                             class="img-fluid rounded-circle border border-3 border-brand-gold shadow-sm"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+                    </div>
+                    
+                    @if($employee->hasPhoto())
+                        <!-- Photo Information -->
+                        <div class="photo-info mb-3">
+                            <small class="text-muted d-block">{{ __('hrms.employee.original_filename') }}: {{ $employee->photo_original_name }}</small>
+                            <small class="text-muted d-block">{{ __('hrms.employee.file_size') }}: {{ $employee->getPhotoSizeFormatted() }}</small>
+                            <small class="text-muted d-block">{{ __('hrms.employee.uploaded_date') }}: {{ $employee->photo_uploaded_at?->format('Y-m-d H:i') }}</small>
+                        </div>
+                    @else
+                        <p class="text-muted mb-3">{{ __('hrms.employee.default_photo') }}</p>
+                    @endif
+
+                    <!-- Photo Management Actions -->
+                    @can('update', $employee)
+                        <div class="d-grid gap-2">
+                            <!-- Upload/Change Photo Button -->
+                            <button type="button" class="btn btn-brand-primary btn-sm" data-bs-toggle="modal" data-bs-target="#photoUploadModal">
+                                <i class="fas fa-camera"></i> 
+                                {{ $employee->hasPhoto() ? __('hrms.employee.change_photo') : __('hrms.employee.upload_photo') }}
+                            </button>
+                            
+                            <!-- Delete Photo Button -->
+                            @if($employee->hasPhoto())
+                                <form method="POST" action="{{ route('employees.delete-photo', $employee) }}" 
+                                      onsubmit="return confirm('{{ __('Are you sure you want to delete this photo?') }}')" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                        <i class="fas fa-trash"></i> {{ __('hrms.employee.delete_photo') }}
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                        
+                        <!-- Photo Requirements -->
+                        <small class="text-muted mt-2 d-block">
+                            {{ __('hrms.employee.photo_requirements') }}
+                        </small>
+                    @endcan
+                </div>
+            </div>
+            
             <!-- Quick Stats -->
             <div class="card mb-4">
                 <div class="card-header card-header-custom">
@@ -372,6 +435,53 @@
             </div>
         @endif
     @endcan
+
+    <!-- Photo Upload Modal -->
+    @can('update', $employee)
+        <div class="modal fade" id="photoUploadModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('employees.upload-photo', $employee) }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-camera"></i> 
+                                {{ $employee->hasPhoto() ? __('hrms.employee.change_photo') : __('hrms.employee.upload_photo') }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="photo" class="form-label">{{ __('hrms.employee.photo') }}</label>
+                                <input type="file" class="form-control" id="photo" name="photo" 
+                                       accept="image/jpeg,image/png,image/jpg,image/gif" required>
+                                <div class="form-text">{{ __('hrms.employee.photo_requirements') }}</div>
+                            </div>
+                            
+                            <!-- Photo Preview -->
+                            <div class="mb-3 text-center" id="photoPreview" style="display: none;">
+                                <img id="previewImage" src="" alt="Preview" 
+                                     class="img-fluid rounded border" style="max-height: 200px;">
+                            </div>
+                            
+                            @if($employee->hasPhoto())
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    {{ __('This will replace the current photo.') }}
+                                </div>
+                            @endif
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('hrms.cancel') }}</button>
+                            <button type="submit" class="btn btn-brand-primary">
+                                <i class="fas fa-upload"></i> {{ __('hrms.employee.upload_photo') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endcan
 @endsection
 
 @push('styles')
@@ -385,4 +495,28 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Photo preview functionality
+        document.getElementById('photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('photoPreview');
+                    const previewImage = document.getElementById('previewImage');
+                    previewImage.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('photoPreview').style.display = 'none';
+            }
+        });
+
+        // Reset modal when hidden
+        document.getElementById('photoUploadModal').addEventListener('hidden.bs.modal', function() {
+            document.getElementById('photo').value = '';
+            document.getElementById('photoPreview').style.display = 'none';
+        });
+    </script>
 @endpush
