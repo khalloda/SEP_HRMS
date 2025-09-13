@@ -113,6 +113,29 @@ Route::middleware(['auth'])->group(function () {
         Route::get('salary-structures/{salaryStructure}/calculate', [\App\Http\Controllers\SalaryStructureController::class, 'calculate'])
             ->name('employees.salary-structures.calculate');
     });
+
+    // Payroll runs management
+    Route::resource('payroll', \App\Http\Controllers\PayrollController::class);
+    Route::post('payroll/{payrollRun}/calculate', [\App\Http\Controllers\PayrollController::class, 'calculate'])
+        ->name('payroll.calculate');
+    Route::post('payroll/{payrollRun}/lock', [\App\Http\Controllers\PayrollController::class, 'lock'])
+        ->name('payroll.lock');
+    Route::post('payroll/{payrollRun}/unlock', [\App\Http\Controllers\PayrollController::class, 'unlock'])
+        ->name('payroll.unlock');
+    Route::post('payroll/{payrollRun}/approve', [\App\Http\Controllers\PayrollController::class, 'approve'])
+        ->name('payroll.approve');
+    Route::post('payroll/{payrollRun}/reject', [\App\Http\Controllers\PayrollController::class, 'reject'])
+        ->name('payroll.reject');
+    Route::post('payroll/{payrollRun}/post', [\App\Http\Controllers\PayrollController::class, 'post'])
+        ->name('payroll.post');
+    Route::post('payroll/{payrollRun}/cancel', [\App\Http\Controllers\PayrollController::class, 'cancel'])
+        ->name('payroll.cancel');
+    Route::get('payroll/{payrollRun}/payslips', [\App\Http\Controllers\PayrollController::class, 'payslips'])
+        ->name('payroll.payslips');
+    Route::get('payroll/{payrollRun}/export', [\App\Http\Controllers\PayrollController::class, 'export'])
+        ->name('payroll.export');
+    Route::get('payroll-statistics', [\App\Http\Controllers\PayrollController::class, 'statistics'])
+        ->name('payroll.statistics');
 });
 
 // Language switching (available to all users)
