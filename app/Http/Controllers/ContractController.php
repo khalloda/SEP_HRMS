@@ -84,14 +84,14 @@ class ContractController extends Controller
         $contractTypes = collect(Contract::TYPES)->map(function ($type, $key) {
             return [
                 'value' => $key,
-                'label' => __('hrms.contract_types.' . $key, $type)
+                'label' => __('hrms.contract_types.' . $key) ?: $type
             ];
         });
 
         $contractStatuses = collect(Contract::STATUSES)->map(function ($status, $key) {
             return [
                 'value' => $key,
-                'label' => __('hrms.contract_status.' . $key, $status)
+                'label' => __('hrms.contract_status.' . $key) ?: $status
             ];
         });
 

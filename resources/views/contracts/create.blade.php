@@ -53,7 +53,7 @@
                                     <option value="">{{ __('hrms.select_contract_type') }}</option>
                                     @foreach($contractTypes as $key => $type)
                                         <option value="{{ $key }}" {{ old('type') == $key ? 'selected' : '' }}>
-                                            {{ __('hrms.contract_types.' . $key, $type) }}
+                                            {{ __('hrms.contract_types.' . $key) ?: $type }}
                                         </option>
                                     @endforeach
                                 </select>
