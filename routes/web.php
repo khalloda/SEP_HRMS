@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\Auth\AuthController;
 
 /*
@@ -60,6 +61,19 @@ Route::middleware(['auth'])->group(function () {
         ->name('employee.photo');
     Route::delete('employees/{employee}/photo', [EmployeeController::class, 'deletePhoto'])
         ->name('employees.delete-photo');
+        
+    // Contract management routes
+    Route::resource('contracts', ContractController::class);
+    Route::post('contracts/{contract}/renew', [ContractController::class, 'renew'])
+        ->name('contracts.renew');
+    Route::post('contracts/{contract}/terminate', [ContractController::class, 'terminate'])
+        ->name('contracts.terminate');
+    Route::get('contracts-requiring-attention', [ContractController::class, 'getContractsRequiringAttention'])
+        ->name('contracts.requiring-attention');
+    Route::get('contracts-export', [ContractController::class, 'export'])
+        ->name('contracts.export');
+    Route::post('contracts-bulk-operation', [ContractController::class, 'bulkOperation'])
+        ->name('contracts.bulk-operation');
         
     // Document management routes
     Route::resource('documents', \App\Http\Controllers\DocumentController::class);

@@ -27,9 +27,22 @@ This is an HRMS (Human Resource Management System) for Sarie Eldin & Partners  
 - Employee export functionality (Excel, PDF, CSV ready)
 - Employee termination and reactivation workflows
 - Manager hierarchies and reporting structures
+- Employee photo upload and management system
 - Employee model with encryption and fulltext search
 - Responsive Employee views with Sarie Eldin branding
 - Employee Policy for role-based authorization
+
+#### Contract Management System
+- Complete Contract CRUD operations with advanced filtering
+- Contract expiry tracking with three-tier alert system (urgent/critical/soon)
+- Contract renewal and termination workflows
+- Smart contract terms auto-population based on contract type
+- Contract statistics and analytics dashboard
+- Contract type management (permanent, fixed-term, probation, internship, consultancy)
+- Role-based contract access control and visibility
+- Contract Policy with comprehensive authorization rules
+- Activity logging for contract lifecycle management
+- Bulk contract operations support
 
 #### Document Management System
 - Complete document upload and management interface  
@@ -201,14 +214,27 @@ The complete schema is in `docs/HRMS_Schema.sql` with:
 - `app/Http/Controllers/Auth/AuthController.php`: Complete authentication with login, register, profile management
 - `app/Http/Middleware/SetLocale.php`: Language switching middleware
 - `database/seeders/DefaultUsersSeeder.php`: Default user accounts with role assignments
-- `app/Policies/`: Role-based policies for all models (Employee, Document, SalaryComponent)
+- `app/Policies/`: Role-based policies for all models (Employee, Document, SalaryComponent, Contract)
 
 ### Employee Management System
-- `app/Models/Employee.php`: Full employee model with relationships, search, encryption
-- `app/Http/Controllers/EmployeeController.php`: Complete CRUD with filtering, export, statistics
+- `app/Models/Employee.php`: Full employee model with relationships, search, encryption, photo management
+- `app/Http/Controllers/EmployeeController.php`: Complete CRUD with filtering, export, statistics, photo upload
+- `app/Policies/EmployeePolicy.php`: Comprehensive role-based access control
 - `resources/views/employees/`: Professional responsive views (index, create, edit, show)
 - Employee search with fulltext and fallback capabilities
 - Manager hierarchies and reporting structures
+- Photo upload/management with private storage
+
+### Contract Management System
+- `app/Models/Contract.php`: Comprehensive contract model with expiry tracking, renewal logic
+- `app/Http/Controllers/ContractController.php`: Complete CRUD with filtering, renewal, termination, bulk operations
+- `app/Policies/ContractPolicy.php`: Role-based contract access control and authorization
+- `resources/views/contracts/`: Professional contract management interface (index, create, show)
+- Contract types: permanent, fixed-term, probation, internship, consultancy
+- Smart contract terms auto-population based on contract type
+- Three-tier expiry alert system (urgent ≤7 days, critical ≤15 days, soon ≤30 days)
+- Contract renewal and termination workflows with audit trails
+- Bulk contract operations support
 
 ### Document Management System  
 - `app/Models/Document.php`: Document model with versioning, tagging, expiry tracking
@@ -217,6 +243,7 @@ The complete schema is in `docs/HRMS_Schema.sql` with:
 - `app/Http/Controllers/DocumentController.php`: Complete document CRUD with file handling
 - `app/Policies/DocumentPolicy.php`: Role-based document access control
 - `resources/views/documents/`: Professional document management interface
+- Private file storage with secure download routes
 
 ### Payroll Structure System
 - `app/Models/SalaryComponent.php`: Earnings, deductions, and info components
@@ -236,12 +263,21 @@ The complete schema is in `docs/HRMS_Schema.sql` with:
 - `resources/views/layouts/app.blade.php`: Professional branded layout with navigation
 - `resources/views/dashboard.blade.php`: HRMS dashboard with statistics
 - `routes/web.php`: Complete route registration for all modules
-- Bilingual localization with Arabic RTL support
+- Comprehensive bilingual localization (English/Arabic) with RTL support
+- Private file storage system with secure access controls
+
+### Localization System
+- `resources/lang/en/hrms.php`: Complete English HRMS translations
+- `resources/lang/ar/hrms.php`: Complete Arabic translations with RTL support
+- `resources/lang/ar/auth.php`: Arabic authentication messages
+- `resources/lang/ar/validation.php`: Complete Arabic validation messages
+- Full employee, contract, document, and payroll terminology coverage
+- Activity log translations for audit trail localization
 
 ## Development Priorities
 
-✅ **Phase 1 (Foundation) - COMPLETE**: Users/RBAC, employees, documents, payroll structure setup
-🔄 **Phase 2 (Operations)**: Employee photos, payroll runs, salary assignments, contract management
+✅ **Phase 1 (Foundation) - COMPLETE**: Users/RBAC, employees, contracts, documents, payroll structure setup
+✅ **Phase 2 (Operations) - PARTIALLY COMPLETE**: Employee photos ✅, contract management ✅, payroll runs pending
 🔄 **Phase 3 (Attendance)**: API integration, rollup calculations, time tracking
 🔄 **Phase 4 (Compliance)**: Advanced reporting, audit trails, automated notifications
 🔄 **Phase 5 (Self-Service)**: Employee portal, mobile-responsive features
@@ -263,11 +299,20 @@ The complete schema is in `docs/HRMS_Schema.sql` with:
 - **Employee Details**: `/employees/{id}` - Individual employee view
 - **Employee Statistics**: `/employees-statistics` - Employee analytics API
 
+### Contract Management
+- **Contracts List**: `/contracts` - Contract directory with advanced filtering
+- **Add Contract**: `/contracts/create` - New contract creation
+- **Contract Details**: `/contracts/{id}` - Individual contract view with terms
+- **Contract Renewal**: `/contracts/{id}/renew` - Contract renewal workflow
+- **Contract Termination**: `/contracts/{id}/terminate` - Contract termination
+- **Contracts Requiring Attention**: `/contracts-requiring-attention` - Expiry alerts API
+
 ### Document Management  
 - **Documents List**: `/documents` - Document library with filters
 - **Upload Document**: `/documents/create` - File upload interface
 - **Document Details**: `/documents/{id}` - Document view with versions
 - **Download Document**: `/documents/{id}/download` - Secure file download
+- **Employee Contracts**: `/documents/employee-contracts` - Contract documents API
 
 ### Payroll Management
 - **Salary Components**: `/salary-components` - Component management

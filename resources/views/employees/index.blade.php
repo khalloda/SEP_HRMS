@@ -198,7 +198,7 @@
                                 <th>{{ __('hrms.department') }}</th>
                                 <th>{{ __('hrms.position') }}</th>
                                 <th>{{ __('hrms.hire_date') }}</th>
-                                <th>{{ __('hrms.status') }}</th>
+                                <th>{{ __('hrms.status.status') }}</th>
                                 <th class="text-center">{{ __('hrms.actions') }}</th>
                             </tr>
                         </thead>
