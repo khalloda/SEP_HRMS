@@ -7,7 +7,9 @@
       "Read(//d/Claude/**)",
       "Bash(composer:*)",
       "WebFetch(domain:flareapp.io)",
-      "Bash(mysql:*)"
+      "Bash(mysql:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

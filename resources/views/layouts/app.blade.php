@@ -190,6 +190,34 @@
                             </a>
                         </li>
 
+                        <!-- Reports & Analytics -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-chart-bar"></i> {{ __('Reports') }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('reports.index') }}">
+                                    <i class="fas fa-tachometer-alt"></i> {{ __('Reports Dashboard') }}
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('reports.employee.list') }}">
+                                    <i class="fas fa-users"></i> {{ __('Employee Directory') }}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ route('reports.contract.status') }}">
+                                    <i class="fas fa-file-contract"></i> {{ __('Contract Status') }}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ route('reports.payroll.summary') }}">
+                                    <i class="fas fa-file-invoice-dollar"></i> {{ __('Payroll Summary') }}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ route('reports.document.inventory') }}">
+                                    <i class="fas fa-folder-open"></i> {{ __('Document Inventory') }}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ route('reports.attendance.summary') }}">
+                                    <i class="fas fa-clock"></i> {{ __('Attendance Summary') }}
+                                </a></li>
+                            </ul>
+                        </li>
+
                         <!-- Administration (HR Admin and IT Admin only) -->
                         @auth
                             @if(Auth::user()->hasAnyRole(['HR_Admin_Manager', 'IT_Admin']))

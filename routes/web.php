@@ -210,6 +210,34 @@ Route::middleware(['auth'])->group(function () {
         Route::post('request-letter', [\App\Http\Controllers\EmployeePortalController::class, 'submitLetterRequest'])
             ->name('request-letter.submit');
     });
+
+    // Reports & Analytics System
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ReportsController::class, 'index'])
+            ->name('index');
+
+        // Employee Reports
+        Route::get('employee-list', [\App\Http\Controllers\ReportsController::class, 'employeeList'])
+            ->name('employee.list');
+        Route::get('employee-demographics', [\App\Http\Controllers\ReportsController::class, 'employeeDemographics'])
+            ->name('employee.demographics');
+
+        // Contract Reports
+        Route::get('contract-status', [\App\Http\Controllers\ReportsController::class, 'contractStatus'])
+            ->name('contract.status');
+
+        // Payroll Reports
+        Route::get('payroll-summary', [\App\Http\Controllers\ReportsController::class, 'payrollSummary'])
+            ->name('payroll.summary');
+
+        // Attendance Reports
+        Route::get('attendance-summary', [\App\Http\Controllers\ReportsController::class, 'attendanceSummary'])
+            ->name('attendance.summary');
+
+        // Document Reports
+        Route::get('document-inventory', [\App\Http\Controllers\ReportsController::class, 'documentInventory'])
+            ->name('document.inventory');
+    });
 });
 
 // Language switching (available to all users)
