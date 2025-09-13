@@ -25,9 +25,17 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // Get comprehensive dashboard analytics
+        // Get comprehensive dashboard analytics with role-based customization
         $analytics = $this->dashboardService->getDashboardAnalytics($user);
 
+        // Check if user prefers personalized dashboard
+        $usePersonalizedDashboard = $user->hasAnyRole(['HR_Admin_Manager', 'Accounting_Manager', 'HR_Coordinator', 'Employee', 'IT_Admin']);
+
+        if ($usePersonalizedDashboard) {
+            return view('dashboard-personalized', compact('analytics'));
+        }
+
+        // Legacy dashboard fallback for other roles
         // Legacy compatibility - keep existing alerts structure
         $expiryAlerts = [];
         if (Gate::allows('viewAny', Contract::class)) {

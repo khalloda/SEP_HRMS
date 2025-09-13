@@ -23,7 +23,7 @@ class DashboardService
         $cacheKey = "dashboard_analytics_" . $user->id . "_" . now()->format('Y-m-d-H');
 
         return Cache::remember($cacheKey, 3600, function () use ($user) {
-            return [
+            $baseAnalytics = [
                 'employee_stats' => $this->getEmployeeStatistics($user),
                 'contract_analytics' => $this->getContractAnalytics($user),
                 'payroll_insights' => $this->getPayrollInsights($user),
@@ -31,7 +31,225 @@ class DashboardService
                 'alerts' => $this->getCriticalAlerts($user),
                 'charts_data' => $this->getChartsData($user),
             ];
+
+            // Add role-specific customizations
+            $baseAnalytics['role_config'] = $this->getRoleBasedDashboardConfig($user);
+            $baseAnalytics['personalized_widgets'] = $this->getPersonalizedWidgets($user);
+            $baseAnalytics['quick_actions'] = $this->getQuickActionsForRole($user);
+
+            return $baseAnalytics;
         });
+    }
+
+    /**
+     * Get role-based dashboard configuration.
+     */
+    public function getRoleBasedDashboardConfig($user): array
+    {
+        $config = [
+            'visible_sections' => [],
+            'priority_widgets' => [],
+            'restricted_data' => [],
+            'custom_title' => '',
+            'theme_color' => 'primary',
+        ];
+
+        if ($user->hasRole('HR_Admin_Manager')) {
+            $config = [
+                'visible_sections' => ['employees', 'contracts', 'payroll', 'documents', 'compliance', 'reports'],
+                'priority_widgets' => ['employee_stats', 'contract_expiry', 'payroll_summary', 'compliance_alerts'],
+                'restricted_data' => [],
+                'custom_title' => __('HR Administration Dashboard'),
+                'theme_color' => 'success',
+            ];
+        } elseif ($user->hasRole('Accounting_Manager')) {
+            $config = [
+                'visible_sections' => ['payroll', 'contracts', 'employees', 'reports'],
+                'priority_widgets' => ['payroll_summary', 'salary_analysis', 'contract_costs', 'financial_reports'],
+                'restricted_data' => [],
+                'custom_title' => __('Accounting Management Dashboard'),
+                'theme_color' => 'warning',
+            ];
+        } elseif ($user->hasRole('HR_Coordinator')) {
+            $config = [
+                'visible_sections' => ['employees', 'contracts', 'documents', 'reports'],
+                'priority_widgets' => ['employee_stats', 'document_expiry', 'new_hires', 'contract_renewals'],
+                'restricted_data' => ['net_salary', 'gross_salary'],
+                'custom_title' => __('HR Coordination Dashboard'),
+                'theme_color' => 'info',
+            ];
+        } elseif ($user->hasRole('Accountant')) {
+            $config = [
+                'visible_sections' => ['payroll', 'reports'],
+                'priority_widgets' => ['payroll_processing', 'expense_tracking'],
+                'restricted_data' => ['net_salary', 'gross_salary'],
+                'custom_title' => __('Accounting Dashboard'),
+                'theme_color' => 'secondary',
+            ];
+        } elseif ($user->hasRole('Employee')) {
+            $config = [
+                'visible_sections' => ['profile', 'documents', 'payslips', 'attendance'],
+                'priority_widgets' => ['profile_completion', 'recent_payslips', 'document_expiry'],
+                'restricted_data' => ['all_employee_data', 'other_salaries'],
+                'custom_title' => __('Employee Portal'),
+                'theme_color' => 'primary',
+            ];
+        } elseif ($user->hasRole('IT_Admin')) {
+            $config = [
+                'visible_sections' => ['system', 'audit', 'reports'],
+                'priority_widgets' => ['system_health', 'audit_logs', 'user_activities'],
+                'restricted_data' => ['salary_details'],
+                'custom_title' => __('System Administration Dashboard'),
+                'theme_color' => 'dark',
+            ];
+        }
+
+        return $config;
+    }
+
+    /**
+     * Get personalized widgets based on user role and preferences.
+     */
+    public function getPersonalizedWidgets($user): array
+    {
+        $widgets = [];
+        $roleConfig = $this->getRoleBasedDashboardConfig($user);
+
+        foreach ($roleConfig['priority_widgets'] as $widgetType) {
+            $widgets[] = $this->generateWidget($widgetType, $user);
+        }
+
+        return $widgets;
+    }
+
+    /**
+     * Generate a specific widget based on type.
+     */
+    private function generateWidget($type, $user): array
+    {
+        switch ($type) {
+            case 'employee_stats':
+                return [
+                    'type' => 'employee_stats',
+                    'title' => __('Employee Overview'),
+                    'icon' => 'fas fa-users',
+                    'color' => 'primary',
+                    'data' => $this->getEmployeeStatsWidget($user),
+                    'size' => 'col-lg-6',
+                ];
+
+            case 'contract_expiry':
+                return [
+                    'type' => 'contract_expiry',
+                    'title' => __('Contract Expiry Alerts'),
+                    'icon' => 'fas fa-exclamation-triangle',
+                    'color' => 'warning',
+                    'data' => $this->getContractExpiryWidget($user),
+                    'size' => 'col-lg-6',
+                ];
+
+            case 'payroll_summary':
+                return [
+                    'type' => 'payroll_summary',
+                    'title' => __('Payroll Summary'),
+                    'icon' => 'fas fa-file-invoice-dollar',
+                    'color' => 'success',
+                    'data' => $this->getPayrollSummaryWidget($user),
+                    'size' => 'col-lg-8',
+                ];
+
+            case 'document_expiry':
+                return [
+                    'type' => 'document_expiry',
+                    'title' => __('Document Expiry Alerts'),
+                    'icon' => 'fas fa-folder-open',
+                    'color' => 'info',
+                    'data' => $this->getDocumentExpiryWidget($user),
+                    'size' => 'col-lg-4',
+                ];
+
+            case 'profile_completion':
+                return [
+                    'type' => 'profile_completion',
+                    'title' => __('Profile Completion'),
+                    'icon' => 'fas fa-user-check',
+                    'color' => 'info',
+                    'data' => $this->getProfileCompletionWidget($user),
+                    'size' => 'col-lg-4',
+                ];
+
+            case 'system_health':
+                return [
+                    'type' => 'system_health',
+                    'title' => __('System Health'),
+                    'icon' => 'fas fa-heartbeat',
+                    'color' => 'success',
+                    'data' => $this->getSystemHealthWidget($user),
+                    'size' => 'col-lg-6',
+                ];
+
+            case 'audit_logs':
+                return [
+                    'type' => 'audit_logs',
+                    'title' => __('Recent Audit Logs'),
+                    'icon' => 'fas fa-history',
+                    'color' => 'secondary',
+                    'data' => $this->getAuditLogsWidget($user),
+                    'size' => 'col-lg-6',
+                ];
+
+            default:
+                return [
+                    'type' => 'default',
+                    'title' => __('Information'),
+                    'icon' => 'fas fa-info-circle',
+                    'color' => 'light',
+                    'data' => ['message' => __('Widget not configured')],
+                    'size' => 'col-lg-4',
+                ];
+        }
+    }
+
+    /**
+     * Get quick actions based on user role.
+     */
+    public function getQuickActionsForRole($user): array
+    {
+        if ($user->hasRole('HR_Admin_Manager')) {
+            return [
+                ['title' => __('Add Employee'), 'url' => route('employees.create'), 'icon' => 'fas fa-user-plus', 'color' => 'primary'],
+                ['title' => __('New Contract'), 'url' => route('contracts.create'), 'icon' => 'fas fa-file-plus', 'color' => 'success'],
+                ['title' => __('Upload Document'), 'url' => route('documents.create'), 'icon' => 'fas fa-upload', 'color' => 'info'],
+                ['title' => __('Generate Report'), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-bar', 'color' => 'warning'],
+            ];
+        } elseif ($user->hasRole('Accounting_Manager')) {
+            return [
+                ['title' => __('Payroll Summary'), 'url' => route('reports.payroll.summary'), 'icon' => 'fas fa-calculator', 'color' => 'success'],
+                ['title' => __('Salary Components'), 'url' => route('salary-components.index'), 'icon' => 'fas fa-cogs', 'color' => 'primary'],
+                ['title' => __('Financial Reports'), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-line', 'color' => 'warning'],
+            ];
+        } elseif ($user->hasRole('HR_Coordinator')) {
+            return [
+                ['title' => __('Employee List'), 'url' => route('employees.index'), 'icon' => 'fas fa-users', 'color' => 'primary'],
+                ['title' => __('Document Management'), 'url' => route('documents.index'), 'icon' => 'fas fa-folder', 'color' => 'info'],
+                ['title' => __('Contract Renewals'), 'url' => route('contracts.index') . '?filter=expiring', 'icon' => 'fas fa-clock', 'color' => 'warning'],
+            ];
+        } elseif ($user->hasRole('Employee')) {
+            return [
+                ['title' => __('My Profile'), 'url' => route('employee-portal.profile'), 'icon' => 'fas fa-user', 'color' => 'primary'],
+                ['title' => __('My Documents'), 'url' => route('employee-portal.documents'), 'icon' => 'fas fa-folder', 'color' => 'info'],
+                ['title' => __('My Payslips'), 'url' => route('employee-portal.payslips'), 'icon' => 'fas fa-file-invoice', 'color' => 'success'],
+                ['title' => __('Request Letter'), 'url' => route('employee-portal.request-letter'), 'icon' => 'fas fa-envelope', 'color' => 'warning'],
+            ];
+        } elseif ($user->hasRole('IT_Admin')) {
+            return [
+                ['title' => __('Audit Trail'), 'url' => route('audit-trail.index'), 'icon' => 'fas fa-history', 'color' => 'secondary'],
+                ['title' => __('System Reports'), 'url' => route('reports.index'), 'icon' => 'fas fa-server', 'color' => 'dark'],
+                ['title' => __('Weekly Digest'), 'url' => route('weekly-digest.index'), 'icon' => 'fas fa-envelope-open', 'color' => 'info'],
+            ];
+        }
+
+        return [];
     }
 
     /**
@@ -547,6 +765,158 @@ class DashboardService
         }
 
         return $chart;
+    }
+
+    /**
+     * Widget-specific data generation methods.
+     */
+    private function getEmployeeStatsWidget($user): array
+    {
+        $stats = $this->getEmployeeStatistics($user);
+        return [
+            'total' => $stats['total_employees'],
+            'active' => $stats['active_employees'],
+            'new_this_month' => $stats['new_hires_this_month'],
+            'on_leave' => $stats['on_leave_employees'] ?? 0,
+            'departments' => $stats['by_department'] ?? [],
+        ];
+    }
+
+    private function getContractExpiryWidget($user): array
+    {
+        if (!$user->can('viewAny', Contract::class)) {
+            return ['access_denied' => true];
+        }
+
+        $contractAnalytics = $this->getContractAnalytics($user);
+        return [
+            'urgent' => $contractAnalytics['expiry_alerts']['urgent']->take(5),
+            'critical' => $contractAnalytics['expiry_alerts']['critical']->take(3),
+            'soon' => $contractAnalytics['expiry_alerts']['soon']->count(),
+        ];
+    }
+
+    private function getPayrollSummaryWidget($user): array
+    {
+        $insights = $this->getPayrollInsights($user);
+
+        if (isset($insights['access_restricted'])) {
+            return ['access_denied' => true];
+        }
+
+        $canViewNetGross = $user->hasAnyRole(['HR_Admin_Manager', 'Accounting_Manager']);
+        $data = [
+            'total_runs' => $insights['total_payroll_runs'],
+            'pending' => $insights['pending_approval'],
+            'employees_with_structures' => $insights['employees_with_salary_structures'],
+        ];
+
+        if ($canViewNetGross && isset($insights['financial_summary'])) {
+            $data['last_gross'] = $insights['financial_summary']['last_payroll_total_gross'];
+            $data['last_net'] = $insights['financial_summary']['last_payroll_total_net'];
+        }
+
+        return $data;
+    }
+
+    private function getDocumentExpiryWidget($user): array
+    {
+        $expiringDocs = Document::where('expires_at', '<=', now()->addDays(30))
+            ->where('expires_at', '>=', now())
+            ->with('employee')
+            ->orderBy('expires_at')
+            ->take(10)
+            ->get();
+
+        $expiredDocs = Document::where('expires_at', '<', now())
+            ->count();
+
+        return [
+            'expiring_soon' => $expiringDocs,
+            'expired_count' => $expiredDocs,
+        ];
+    }
+
+    private function getProfileCompletionWidget($user): array
+    {
+        if (!$user->employee) {
+            return ['no_profile' => true];
+        }
+
+        $employee = $user->employee;
+        $fields = ['phone', 'personal_email', 'address', 'emergency_contact_name', 'emergency_contact_phone'];
+        $completed = 0;
+        $missing = [];
+
+        foreach ($fields as $field) {
+            if (empty($employee->$field)) {
+                $missing[] = ucfirst(str_replace('_', ' ', $field));
+            } else {
+                $completed++;
+            }
+        }
+
+        $percentage = round(($completed / count($fields)) * 100);
+
+        return [
+            'percentage' => $percentage,
+            'completed' => $completed,
+            'total' => count($fields),
+            'missing_fields' => $missing,
+        ];
+    }
+
+    private function getSystemHealthWidget($user): array
+    {
+        if (!$user->hasRole('IT_Admin')) {
+            return ['access_denied' => true];
+        }
+
+        // Basic system health indicators
+        $cacheWorking = Cache::has('test_key') || Cache::put('test_key', true, 1);
+        $dbWorking = true;
+
+        try {
+            DB::connection()->getPdo();
+        } catch (\Exception $e) {
+            $dbWorking = false;
+        }
+
+        $diskSpace = disk_free_space('.') / disk_total_space('.') * 100;
+
+        return [
+            'database' => $dbWorking,
+            'cache' => $cacheWorking,
+            'disk_free_percent' => round($diskSpace, 2),
+            'active_users' => \App\Models\User::where('updated_at', '>=', now()->subMinutes(30))->count(),
+            'total_activities_today' => activity()->whereDate('created_at', today())->count(),
+        ];
+    }
+
+    private function getAuditLogsWidget($user): array
+    {
+        if (!$user->can('viewAny', \Spatie\Activitylog\Models\Activity::class)) {
+            return ['access_denied' => true];
+        }
+
+        $recentActivities = activity()
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(function ($activity) {
+                return [
+                    'description' => $activity->description,
+                    'causer' => $activity->causer?->name ?? 'System',
+                    'created_at' => $activity->created_at->diffForHumans(),
+                    'subject_type' => class_basename($activity->subject_type ?? ''),
+                ];
+            });
+
+        return [
+            'recent_activities' => $recentActivities,
+            'total_today' => activity()->whereDate('created_at', today())->count(),
+            'total_this_week' => activity()->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+        ];
     }
 
     /**
