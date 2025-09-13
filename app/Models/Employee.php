@@ -163,6 +163,35 @@ class Employee extends Model
     }
 
     /**
+     * Get all salary structures for this employee.
+     */
+    public function salaryStructures()
+    {
+        return $this->hasMany(SalaryStructure::class);
+    }
+
+    /**
+     * Get the current active salary structure for this employee.
+     */
+    public function currentSalaryStructure()
+    {
+        return $this->hasOne(SalaryStructure::class)
+            ->current()
+            ->with('components')
+            ->latest('effective_from');
+    }
+
+    /**
+     * Get the most recent salary structure (active or not).
+     */
+    public function latestSalaryStructure()
+    {
+        return $this->hasOne(SalaryStructure::class)
+            ->with('components')
+            ->latest('effective_from');
+    }
+
+    /**
      * Check if employee is active.
      */
     public function isActive(): bool
@@ -482,6 +511,83 @@ class Employee extends Model
             'photo_mime_type' => $mimeType,
             'photo_uploaded_at' => now(),
         ]);
+    }
+
+    /**
+     * Check if employee has an active salary structure.
+     */
+    public function hasActiveSalaryStructure(): bool
+    {
+        return $this->currentSalaryStructure !== null;
+    }
+
+    /**
+     * Get current gross salary amount.
+     */
+    public function getCurrentGrossSalary(): ?float
+    {
+        $structure = $this->currentSalaryStructure;
+        return $structure ? $structure->calculateGrossSalary() : null;
+    }
+
+    /**
+     * Get current net salary amount.
+     */
+    public function getCurrentNetSalary(): ?float
+    {
+        $structure = $this->currentSalaryStructure;
+        return $structure ? $structure->calculateNetSalary() : null;
+    }
+
+    /**
+     * Get basic salary component value from current structure.
+     */
+    public function getBasicSalary(): ?float
+    {
+        $structure = $this->currentSalaryStructure;
+        if (!$structure) {
+            return null;
+        }
+
+        $basicComponent = $structure->components()
+            ->where('code', 'BASIC_SALARY')
+            ->first();
+
+        if (!$basicComponent) {
+            return null;
+        }
+
+        return $structure->calculateComponentValue($basicComponent);
+    }
+
+    /**
+     * Create a new salary structure for this employee.
+     */
+    public function createSalaryStructure(array $data): SalaryStructure
+    {
+        // End current structure if exists
+        $currentStructure = $this->currentSalaryStructure;
+        if ($currentStructure) {
+            $currentStructure->update([
+                'effective_to' => $data['effective_from']->subDay()
+            ]);
+        }
+
+        return $this->salaryStructures()->create($data);
+    }
+
+    /**
+     * Check if user can view this employee's salary information.
+     */
+    public function canViewSalaryInformation(User $user = null): bool
+    {
+        $user = $user ?? auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        return $this->canViewSalaryBy($user);
     }
 
     /**

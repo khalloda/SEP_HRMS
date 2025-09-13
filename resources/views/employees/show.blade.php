@@ -382,16 +382,26 @@
                         </a>
                     @endcan
                     
-                    <!-- Add more action buttons as needed -->
-                    <button type="button" class="btn btn-outline-secondary" disabled>
+                    @can('view', $employee)
+                        <a href="{{ route('employees.salary-structures.index', $employee) }}" class="btn btn-outline-success">
+                            <i class="fas fa-money-bill"></i> {{ __('hrms.salary_structure.manage') }}
+                            @if($employee->hasActiveSalaryStructure())
+                                <small class="d-block text-success">{{ __('hrms.salary_structure.active') }}</small>
+                            @else
+                                <small class="d-block text-muted">{{ __('hrms.salary_structure.none_active') }}</small>
+                            @endif
+                        </a>
+                    @endcan
+
+                    <a href="{{ route('contracts.index', ['employee_id' => $employee->id]) }}" class="btn btn-outline-primary">
                         <i class="fas fa-file-contract"></i> {{ __('View Contracts') }}
-                        <small class="text-muted d-block">Coming Soon</small>
-                    </button>
-                    
-                    <button type="button" class="btn btn-outline-secondary" disabled>
+                        <small class="d-block text-muted">{{ $employee->contracts()->count() }} {{ __('contracts') }}</small>
+                    </a>
+
+                    <a href="{{ route('documents.index', ['employee_id' => $employee->id]) }}" class="btn btn-outline-info">
                         <i class="fas fa-file-alt"></i> {{ __('View Documents') }}
-                        <small class="text-muted d-block">Coming Soon</small>
-                    </button>
+                        <small class="d-block text-muted">{{ $employee->documents()->count() }} {{ __('documents') }}</small>
+                    </a>
                 </div>
             </div>
         </div>

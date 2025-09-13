@@ -91,6 +91,28 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('salary-components', \App\Http\Controllers\SalaryComponentController::class);
     Route::post('salary-components/seed-predefined', [\App\Http\Controllers\SalaryComponentController::class, 'seedPredefined'])
         ->name('salary-components.seed-predefined');
+
+    // Salary structure management routes (nested under employees)
+    Route::prefix('employees/{employee}')->group(function () {
+        Route::get('salary-structures', [\App\Http\Controllers\SalaryStructureController::class, 'index'])
+            ->name('employees.salary-structures.index');
+        Route::get('salary-structures/create', [\App\Http\Controllers\SalaryStructureController::class, 'create'])
+            ->name('employees.salary-structures.create');
+        Route::post('salary-structures', [\App\Http\Controllers\SalaryStructureController::class, 'store'])
+            ->name('employees.salary-structures.store');
+        Route::get('salary-structures/{salaryStructure}', [\App\Http\Controllers\SalaryStructureController::class, 'show'])
+            ->name('employees.salary-structures.show');
+        Route::get('salary-structures/{salaryStructure}/edit', [\App\Http\Controllers\SalaryStructureController::class, 'edit'])
+            ->name('employees.salary-structures.edit');
+        Route::put('salary-structures/{salaryStructure}', [\App\Http\Controllers\SalaryStructureController::class, 'update'])
+            ->name('employees.salary-structures.update');
+        Route::post('salary-structures/{salaryStructure}/clone', [\App\Http\Controllers\SalaryStructureController::class, 'clone'])
+            ->name('employees.salary-structures.clone');
+        Route::post('salary-structures/{salaryStructure}/terminate', [\App\Http\Controllers\SalaryStructureController::class, 'terminate'])
+            ->name('employees.salary-structures.terminate');
+        Route::get('salary-structures/{salaryStructure}/calculate', [\App\Http\Controllers\SalaryStructureController::class, 'calculate'])
+            ->name('employees.salary-structures.calculate');
+    });
 });
 
 // Language switching (available to all users)
