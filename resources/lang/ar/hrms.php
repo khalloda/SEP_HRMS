@@ -352,6 +352,20 @@ return [
             'expired' => 'منتهي',
             'future' => 'مستقبلي',
         ],
+        'calc_mode' => [
+            'fixed' => 'مبلغ ثابت',
+            'formula' => 'قائم على معادلة',
+            'variable' => 'مبلغ متغير',
+        ],
+    ],
+
+    // مكونات الراتب
+    'salary_component' => [
+        'calc_mode' => [
+            'fixed' => 'مبلغ ثابت',
+            'formula' => 'قائم على معادلة',
+            'variable' => 'مبلغ متغير',
+        ],
     ],
 
     // الرواتب
@@ -416,5 +430,44 @@ return [
             'cancelled' => 'ملغي',
         ],
     ],
+
+    // قسائم الراتب
+    'payslip' => [
+        'title' => 'قسيمة راتب',
+        'payslips' => 'قسائم الراتب',
+        'view_payslip' => 'عرض قسيمة الراتب',
+        'download_pdf' => 'تحميل PDF',
+        'generate_pdf' => 'إنشاء PDF',
+        'send_email' => 'إرسال بالإيميل',
+        'net_pay_amount' => 'مبلغ الراتب الصافي',
+        'pay_period' => 'فترة الراتب',
+        'pay_date' => 'تاريخ الدفع',
+        'employee_payslips' => 'قسائم راتب الموظف',
+        'component_name' => 'اسم المكون',
+        'calculation_mode' => 'طريقة الحساب',
+        'generated_on' => 'تم الإنشاء في',
+        'system_generated' => 'وثيقة منشأة آليًا',
+        'confidential_notice' => 'هذه الوثيقة سرية ومخصصة فقط للموظف المذكور.',
+        'pdf_generated_successfully' => 'تم إنشاء ملف PDF بنجاح',
+        'pdf_generation_failed' => 'فشل في إنشاء ملف PDF',
+        'bulk_pdf_generated' => 'تم إنشاء ملفات PDF: :success من :total',
+        'sent_successfully' => 'تم إرسال قسيمة الراتب بنجاح',
+        'send_failed' => 'فشل في إرسال قسيمة الراتب',
+        'bulk_email_sent' => 'تم إرسال قسائم الراتب: :sent من :total',
+        'employee_no_email' => 'الموظف ليس لديه عنوان بريد إلكتروني',
+        'status' => [
+            'draft' => 'مسودة',
+            'calculated' => 'محسوب',
+            'generated' => 'منشأ',
+            'sent' => 'مرسل',
+            'viewed' => 'تم الاطلاع',
+        ],
+    ],
+
+    // PDF والمستندات
+    'confidential' => 'سري',
+    'confidential_hr_use_only' => 'سري - لاستخدام الموارد البشرية فقط',
+    'page' => 'صفحة',
+    'of' => 'من',
 
 ];

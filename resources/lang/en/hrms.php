@@ -376,6 +376,20 @@ return [
             'expired' => 'Expired',
             'future' => 'Future',
         ],
+        'calc_mode' => [
+            'fixed' => 'Fixed Amount',
+            'formula' => 'Formula Based',
+            'variable' => 'Variable Amount',
+        ],
+    ],
+
+    // Salary Components
+    'salary_component' => [
+        'calc_mode' => [
+            'fixed' => 'Fixed Amount',
+            'formula' => 'Formula Based',
+            'variable' => 'Variable Amount',
+        ],
     ],
 
     // Payroll
@@ -440,5 +454,44 @@ return [
             'cancelled' => 'Cancelled',
         ],
     ],
+
+    // Payslips
+    'payslip' => [
+        'title' => 'Payslip',
+        'payslips' => 'Payslips',
+        'view_payslip' => 'View Payslip',
+        'download_pdf' => 'Download PDF',
+        'generate_pdf' => 'Generate PDF',
+        'send_email' => 'Send via Email',
+        'net_pay_amount' => 'Net Pay Amount',
+        'pay_period' => 'Pay Period',
+        'pay_date' => 'Pay Date',
+        'employee_payslips' => 'Employee Payslips',
+        'component_name' => 'Component Name',
+        'calculation_mode' => 'Calculation Mode',
+        'generated_on' => 'Generated on',
+        'system_generated' => 'System Generated Document',
+        'confidential_notice' => 'This document is confidential and intended solely for the named employee.',
+        'pdf_generated_successfully' => 'PDF generated successfully',
+        'pdf_generation_failed' => 'Failed to generate PDF',
+        'bulk_pdf_generated' => 'Generated PDFs: :success of :total',
+        'sent_successfully' => 'Payslip sent successfully',
+        'send_failed' => 'Failed to send payslip',
+        'bulk_email_sent' => 'Payslips sent: :sent of :total',
+        'employee_no_email' => 'Employee does not have an email address',
+        'status' => [
+            'draft' => 'Draft',
+            'calculated' => 'Calculated',
+            'generated' => 'Generated',
+            'sent' => 'Sent',
+            'viewed' => 'Viewed',
+        ],
+    ],
+
+    // PDF and Documents
+    'confidential' => 'CONFIDENTIAL',
+    'confidential_hr_use_only' => 'CONFIDENTIAL - HR USE ONLY',
+    'page' => 'Page',
+    'of' => 'of',
 
 ];

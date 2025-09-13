@@ -159,4 +159,39 @@ class PayrollPolicy
     {
         return $payslip->canViewNetGrossBy($user);
     }
+
+    /**
+     * Determine whether the user can send payslips via email.
+     */
+    public function sendEmail(User $user, Payslip $payslip): bool
+    {
+        return $user->hasAnyRole([
+            'HR_Admin_Manager',
+            'Accounting_Manager',
+            'HR_Coordinator'
+        ]);
+    }
+
+    /**
+     * Determine whether the user can export payslip data.
+     */
+    public function exportPayslips(User $user): bool
+    {
+        return $user->hasAnyRole([
+            'HR_Admin_Manager',
+            'Accounting_Manager'
+        ]);
+    }
+
+    /**
+     * Determine whether the user can view payslip statistics.
+     */
+    public function statisticsPayslips(User $user): bool
+    {
+        return $user->hasAnyRole([
+            'HR_Admin_Manager',
+            'Accounting_Manager',
+            'HR_Coordinator'
+        ]);
+    }
 }

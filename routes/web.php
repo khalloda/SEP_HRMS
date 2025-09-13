@@ -136,6 +136,25 @@ Route::middleware(['auth'])->group(function () {
         ->name('payroll.export');
     Route::get('payroll-statistics', [\App\Http\Controllers\PayrollController::class, 'statistics'])
         ->name('payroll.statistics');
+
+    // Individual payslip management
+    Route::resource('payslips', \App\Http\Controllers\PayslipController::class)->only(['index', 'show']);
+    Route::get('employees/{employee}/payslips', [\App\Http\Controllers\PayslipController::class, 'index'])
+        ->name('employees.payslips.index');
+    Route::get('payslips/{payslip}/pdf', [\App\Http\Controllers\PayslipController::class, 'downloadPdf'])
+        ->name('payslips.download-pdf');
+    Route::post('payslips/{payslip}/generate-pdf', [\App\Http\Controllers\PayslipController::class, 'generatePdf'])
+        ->name('payslips.generate-pdf');
+    Route::post('payroll/{payrollRun}/generate-bulk-pdf', [\App\Http\Controllers\PayslipController::class, 'generateBulkPdf'])
+        ->name('payroll.generate-bulk-pdf');
+    Route::post('payslips/{payslip}/send-email', [\App\Http\Controllers\PayslipController::class, 'sendEmail'])
+        ->name('payslips.send-email');
+    Route::post('payroll/{payrollRun}/send-bulk-email', [\App\Http\Controllers\PayslipController::class, 'sendBulkEmail'])
+        ->name('payroll.send-bulk-email');
+    Route::get('payslips-export', [\App\Http\Controllers\PayslipController::class, 'export'])
+        ->name('payslips.export');
+    Route::get('payslip-statistics', [\App\Http\Controllers\PayslipController::class, 'statistics'])
+        ->name('payslips.statistics');
 });
 
 // Language switching (available to all users)
