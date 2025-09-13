@@ -9,7 +9,8 @@
       "WebFetch(domain:flareapp.io)",
       "Bash(mysql:*)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

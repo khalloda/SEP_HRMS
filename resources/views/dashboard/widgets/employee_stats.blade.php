@@ -34,11 +34,11 @@
         <hr class="my-3">
         <h6 class="mb-2">{{ __('By Department') }}</h6>
         <div class="row">
-            @foreach($data['departments']->take(4) as $dept => $count)
+            @foreach($data['departments']->take(4) as $department)
             <div class="col-6 mb-2">
                 <div class="d-flex justify-content-between">
-                    <small>{{ Str::limit($dept, 15) }}</small>
-                    <span class="badge bg-secondary">{{ $count }}</span>
+                    <small>{{ Str::limit($department['name'], 15) }}</small>
+                    <span class="badge bg-secondary">{{ $department['total'] }}</span>
                 </div>
             </div>
             @endforeach
