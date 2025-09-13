@@ -86,9 +86,9 @@ class EmployeePortalController extends Controller
     }
 
     /**
-     * Employee documents portal.
+     * Employee documents portal with enhanced filtering and search.
      */
-    public function documents()
+    public function documents(Request $request)
     {
         $user = Auth::user();
         $employee = $user->employee;
@@ -97,17 +97,57 @@ class EmployeePortalController extends Controller
             return redirect()->route('profile')->with('warning', __('Employee profile not found.'));
         }
 
-        $documents = Document::where('employee_id', $employee->id)
-            ->where(function ($query) use ($user) {
-                $query->where('visibility', 'shared')
-                      ->orWhere('visibility', 'private');
+        // Build base query
+        $query = Document::where('employee_id', $employee->id)
+            ->where(function ($q) use ($user) {
+                $q->where('visibility', 'shared')
+                  ->orWhere('visibility', 'private');
             })
-            ->with(['tags', 'versions'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->with(['tags', 'versions', 'createdBy']);
 
+        // Apply filters
+        if ($request->has('type') && $request->type != '') {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->has('status') && $request->status != '') {
+            switch ($request->status) {
+                case 'expired':
+                    $query->where('expires_at', '<', now());
+                    break;
+                case 'expiring_soon':
+                    $query->whereBetween('expires_at', [now(), now()->addDays(30)]);
+                    break;
+                case 'valid':
+                    $query->where(function ($q) {
+                        $q->whereNull('expires_at')
+                          ->orWhere('expires_at', '>', now()->addDays(30));
+                    });
+                    break;
+            }
+        }
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('original_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('tags', function ($tagQuery) use ($search) {
+                      $tagQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Sort options
+        $sortBy = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
+        $query->orderBy($sortBy, $sortDirection);
+
+        $documents = $query->paginate(15);
+
+        // Enhanced statistics
         $documentStats = [
-            'total' => $documents->total(),
+            'total' => Document::where('employee_id', $employee->id)->count(),
             'by_type' => Document::where('employee_id', $employee->id)
                 ->selectRaw('type, COUNT(*) as count')
                 ->groupBy('type')
@@ -116,9 +156,130 @@ class EmployeePortalController extends Controller
             'expiring_soon' => Document::where('employee_id', $employee->id)
                 ->expiringSoon(30)
                 ->count(),
+            'expired' => Document::where('employee_id', $employee->id)
+                ->where('expires_at', '<', now())
+                ->count(),
+            'this_month' => Document::where('employee_id', $employee->id)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
         ];
 
-        return view('employee-portal.documents', compact('documents', 'documentStats'));
+        // Get HR Letters for this employee
+        $hrLetters = \App\Models\GeneratedLetter::where('employee_id', $employee->id)
+            ->whereIn('status', ['approved', 'sent'])
+            ->with(['letterTemplate', 'generatedBy'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        // Document types for filter dropdown
+        $documentTypes = Document::TYPES;
+
+        return view('employee-portal.documents', compact(
+            'documents',
+            'documentStats',
+            'hrLetters',
+            'documentTypes'
+        ));
+    }
+
+    /**
+     * Bulk download selected documents.
+     */
+    public function bulkDownloadDocuments(Request $request)
+    {
+        $user = Auth::user();
+        $employee = $user->employee;
+
+        if (!$employee) {
+            return redirect()->back()->with('error', __('Employee profile not found.'));
+        }
+
+        $request->validate([
+            'document_ids' => 'required|array|min:1',
+            'document_ids.*' => 'exists:documents,id'
+        ]);
+
+        $documents = Document::where('employee_id', $employee->id)
+            ->whereIn('id', $request->document_ids)
+            ->where(function ($query) {
+                $query->where('visibility', 'shared')
+                      ->orWhere('visibility', 'private');
+            })
+            ->get();
+
+        if ($documents->isEmpty()) {
+            return redirect()->back()->with('error', __('No valid documents found for download.'));
+        }
+
+        // Create a ZIP file with selected documents
+        $zipFileName = 'documents_' . $employee->code . '_' . now()->format('Y_m_d_H_i_s') . '.zip';
+        $zipPath = storage_path('app/temp/' . $zipFileName);
+
+        // Ensure temp directory exists
+        if (!file_exists(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE) !== TRUE) {
+            return redirect()->back()->with('error', __('Could not create download archive.'));
+        }
+
+        foreach ($documents as $document) {
+            $filePath = storage_path('app/' . $document->file_path);
+            if (file_exists($filePath)) {
+                $zip->addFile($filePath, $document->original_name);
+            }
+        }
+
+        $zip->close();
+
+        // Log the bulk download activity
+        activity('bulk_document_download')
+            ->performedOn($employee)
+            ->causedBy($user)
+            ->withProperties([
+                'document_count' => $documents->count(),
+                'document_names' => $documents->pluck('original_name')->toArray(),
+            ])
+            ->log('Bulk document download');
+
+        return response()->download($zipPath)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Request document update from HR.
+     */
+    public function requestDocumentUpdate(Request $request)
+    {
+        $user = Auth::user();
+        $employee = $user->employee;
+
+        if (!$employee) {
+            return redirect()->back()->with('error', __('Employee profile not found.'));
+        }
+
+        $request->validate([
+            'document_type' => 'required|string',
+            'reason' => 'required|string|max:1000',
+            'notes' => 'nullable|string|max:2000',
+        ]);
+
+        // Log the document update request
+        activity('document_update_request')
+            ->performedOn($employee)
+            ->causedBy($user)
+            ->withProperties([
+                'document_type' => $request->document_type,
+                'reason' => $request->reason,
+                'notes' => $request->notes,
+                'requested_at' => now(),
+            ])
+            ->log('Document update requested');
+
+        return redirect()->back()->with('success', __('Document update request submitted successfully. HR will contact you within 2-3 business days.'));
     }
 
     /**

@@ -202,6 +202,10 @@ Route::middleware(['auth'])->group(function () {
             ->name('profile.update');
         Route::get('documents', [\App\Http\Controllers\EmployeePortalController::class, 'documents'])
             ->name('documents');
+        Route::post('documents/bulk-download', [\App\Http\Controllers\EmployeePortalController::class, 'bulkDownloadDocuments'])
+            ->name('documents.bulk-download');
+        Route::post('documents/request-update', [\App\Http\Controllers\EmployeePortalController::class, 'requestDocumentUpdate'])
+            ->name('documents.request-update');
         Route::get('payslips', [\App\Http\Controllers\EmployeePortalController::class, 'payslips'])
             ->name('payslips');
         Route::get('attendance', [\App\Http\Controllers\EmployeePortalController::class, 'attendance'])
