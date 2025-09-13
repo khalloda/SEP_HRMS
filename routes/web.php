@@ -5,6 +5,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\LetterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -237,6 +238,49 @@ Route::middleware(['auth'])->group(function () {
         // Document Reports
         Route::get('document-inventory', [\App\Http\Controllers\ReportsController::class, 'documentInventory'])
             ->name('document.inventory');
+    });
+
+    // HR Letter Generator System
+    Route::prefix('letters')->name('letters.')->group(function () {
+        // Letter Templates Management
+        Route::prefix('templates')->name('templates.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\LetterController::class, 'index'])
+                ->name('index');
+            Route::get('create', [\App\Http\Controllers\LetterController::class, 'createTemplate'])
+                ->name('create');
+            Route::post('/', [\App\Http\Controllers\LetterController::class, 'storeTemplate'])
+                ->name('store');
+            Route::get('{template}', [\App\Http\Controllers\LetterController::class, 'showTemplate'])
+                ->name('show');
+            Route::get('{template}/edit', [\App\Http\Controllers\LetterController::class, 'editTemplate'])
+                ->name('edit');
+            Route::put('{template}', [\App\Http\Controllers\LetterController::class, 'updateTemplate'])
+                ->name('update');
+            Route::delete('{template}', [\App\Http\Controllers\LetterController::class, 'destroyTemplate'])
+                ->name('destroy');
+            Route::post('seed', [\App\Http\Controllers\LetterController::class, 'seedTemplates'])
+                ->name('seed');
+        });
+
+        // Letter Generation
+        Route::get('generate', [\App\Http\Controllers\LetterController::class, 'generateForm'])
+            ->name('generate');
+        Route::post('preview', [\App\Http\Controllers\LetterController::class, 'preview'])
+            ->name('preview');
+        Route::post('generate', [\App\Http\Controllers\LetterController::class, 'generate'])
+            ->name('store');
+
+        // Generated Letters Management
+        Route::get('/', [\App\Http\Controllers\LetterController::class, 'generatedLetters'])
+            ->name('index');
+        Route::get('{letter}', [\App\Http\Controllers\LetterController::class, 'show'])
+            ->name('show');
+        Route::post('{letter}/approve', [\App\Http\Controllers\LetterController::class, 'approve'])
+            ->name('approve');
+        Route::post('{letter}/reject', [\App\Http\Controllers\LetterController::class, 'reject'])
+            ->name('reject');
+        Route::get('{letter}/download-pdf', [\App\Http\Controllers\LetterController::class, 'downloadPdf'])
+            ->name('download-pdf');
     });
 });
 

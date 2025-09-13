@@ -190,6 +190,29 @@
                             </a>
                         </li>
 
+                        <!-- HR Letters -->
+                        @auth
+                            @if(Auth::user()->hasAnyRole(['HR_Admin_Manager', 'HR_Coordinator']))
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-white" href="#" id="lettersDropdown" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-file-alt"></i> {{ __('HR Letters') }}
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="{{ route('letters.index') }}">
+                                            <i class="fas fa-list"></i> {{ __('Generated Letters') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="{{ route('letters.generate') }}">
+                                            <i class="fas fa-plus"></i> {{ __('Generate Letter') }}
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="{{ route('letters.templates.index') }}">
+                                            <i class="fas fa-file-alt"></i> {{ __('Manage Templates') }}
+                                        </a></li>
+                                    </ul>
+                                </li>
+                            @endif
+                        @endauth
+
                         <!-- Reports & Analytics -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
