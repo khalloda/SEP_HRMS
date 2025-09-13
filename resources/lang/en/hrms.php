@@ -317,4 +317,26 @@ return [
     'english' => 'English',
     'arabic' => 'العربية',
 
+    // Notifications
+    'notifications' => [
+        'types' => [
+            'urgent' => 'Urgent (≤7 days)',
+            'critical' => 'Critical (≤15 days)',
+            'soon' => 'Soon (≤30 days)',
+        ],
+        'statuses' => [
+            'sent' => 'Sent',
+            'failed' => 'Failed',
+            'pending' => 'Pending',
+        ],
+        'contract_expiry_alert' => 'Contract Expiry Alert',
+        'recent_notifications' => 'Recent Notifications',
+        'failed_notifications' => 'Failed Notifications',
+        'no_notifications' => 'No notifications',
+        'view_all' => 'View All',
+        'dismiss' => 'Dismiss',
+        'refresh_alerts' => 'Refresh Alerts',
+        'expiry_alerts' => 'Contract Expiry Alerts',
+    ],
+
 ];

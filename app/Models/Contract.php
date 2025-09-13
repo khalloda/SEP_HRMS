@@ -72,6 +72,14 @@ class Contract extends Model
     }
 
     /**
+     * Get contract notifications.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(ContractExpiryNotification::class);
+    }
+
+    /**
      * Check if contract is active.
      */
     public function isActive(): bool

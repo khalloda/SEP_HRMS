@@ -26,10 +26,9 @@
                         <a href="{{ route('employees.index') }}" class="btn btn-light btn-lg">
                             <i class="fas fa-users"></i> {{ __('hrms.employees') }}
                         </a>
-                        <button class="btn btn-outline-light btn-lg" disabled>
+                        <a href="{{ route('contracts.index') }}" class="btn btn-outline-light btn-lg">
                             <i class="fas fa-file-contract"></i> {{ __('hrms.contracts') }}
-                            <small class="d-block">{{ __('Coming Soon') }}</small>
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -80,12 +79,119 @@
                     <div class="display-6 text-warning mb-2">
                         <i class="fas fa-file-contract"></i>
                     </div>
-                    <h3 class="card-title text-warning">0</h3>
+                    <h3 class="card-title text-warning" id="expiring-contracts">{{ $expiryAlerts['urgent']->count() + $expiryAlerts['critical']->count() }}</h3>
                     <p class="card-text text-muted">{{ __('Expiring Contracts') }}</p>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Contract Expiry Alerts -->
+    @if (!empty($expiryAlerts) && ($expiryAlerts['urgent']->count() > 0 || $expiryAlerts['critical']->count() > 0 || $expiryAlerts['soon']->count() > 0))
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> {{ __('hrms.notifications.expiry_alerts') }}
+                    </h5>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="refreshAlerts()">
+                        <i class="fas fa-sync-alt"></i> {{ __('hrms.notifications.refresh_alerts') }}
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if ($expiryAlerts['urgent']->count() > 0)
+                        <div class="alert alert-danger border-start border-5 border-danger">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-exclamation-circle"></i> 
+                                {{ __('hrms.expiring_urgently') }} ({{ $expiryAlerts['urgent']->count() }})
+                            </h6>
+                            <div class="row">
+                                @foreach ($expiryAlerts['urgent'] as $contract)
+                                    <div class="col-md-6 col-lg-4 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <strong>{{ $contract->employee->display_name }}</strong><br>
+                                                <small class="text-muted">{{ $contract->employee->code }} • {{ $contract->type_name }}</small><br>
+                                                <small class="text-danger">{{ $contract->days_until_expiry }} days remaining</small>
+                                            </div>
+                                            <a href="{{ route('contracts.show', $contract) }}" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($expiryAlerts['critical']->count() > 0)
+                        <div class="alert alert-warning border-start border-5 border-warning">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                {{ __('hrms.expiring_critically') }} ({{ $expiryAlerts['critical']->count() }})
+                            </h6>
+                            <div class="row">
+                                @foreach ($expiryAlerts['critical'] as $contract)
+                                    <div class="col-md-6 col-lg-4 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <strong>{{ $contract->employee->display_name }}</strong><br>
+                                                <small class="text-muted">{{ $contract->employee->code }} • {{ $contract->type_name }}</small><br>
+                                                <small class="text-warning">{{ $contract->days_until_expiry }} days remaining</small>
+                                            </div>
+                                            <a href="{{ route('contracts.show', $contract) }}" class="btn btn-outline-warning btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($expiryAlerts['soon']->count() > 0)
+                        <div class="alert alert-info border-start border-5 border-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle"></i> 
+                                {{ __('hrms.expiring_soon') }} ({{ $expiryAlerts['soon']->count() }})
+                            </h6>
+                            <div class="row">
+                                @foreach ($expiryAlerts['soon']->take(6) as $contract)
+                                    <div class="col-md-6 col-lg-4 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-grow-1">
+                                                <strong>{{ $contract->employee->display_name }}</strong><br>
+                                                <small class="text-muted">{{ $contract->employee->code }} • {{ $contract->type_name }}</small><br>
+                                                <small class="text-info">{{ $contract->days_until_expiry }} days remaining</small>
+                                            </div>
+                                            <a href="{{ route('contracts.show', $contract) }}" class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            @if ($expiryAlerts['soon']->count() > 6)
+                                <div class="text-center mt-3">
+                                    <a href="{{ route('contracts.index', ['expiry_filter' => 'soon']) }}" class="btn btn-outline-info">
+                                        {{ __('hrms.notifications.view_all') }} ({{ $expiryAlerts['soon']->count() - 6 }} more)
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
+                    <div class="text-center">
+                        <a href="{{ route('contracts.index') }}" class="btn btn-brand-primary">
+                            <i class="fas fa-file-contract"></i> {{ __('Manage All Contracts') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Quick Actions -->
     <div class="row mb-4">
@@ -104,10 +210,9 @@
                         <a href="{{ route('employees.index') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-list"></i> {{ __('View All Employees') }}
                         </a>
-                        <button class="btn btn-outline-secondary" disabled>
+                        <a href="{{ route('contracts.create') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-file-contract"></i> {{ __('New Contract') }}
-                            <small class="text-muted d-block">{{ __('Coming Soon') }}</small>
-                        </button>
+                        </a>
                         <button class="btn btn-outline-secondary" disabled>
                             <i class="fas fa-file-upload"></i> {{ __('Upload Documents') }}
                             <small class="text-muted d-block">{{ __('Coming Soon') }}</small>
@@ -187,7 +292,7 @@
     <script>
         // Load employee statistics
         document.addEventListener('DOMContentLoaded', function() {
-            // Simulate loading employee stats (you can make AJAX call to employees.statistics route later)
+            // Load employee stats
             fetch('{{ route("employees.statistics") }}')
                 .then(response => response.json())
                 .then(data => {
@@ -198,10 +303,40 @@
                 .catch(error => {
                     console.log('Statistics not available yet:', error);
                     // Set default values
-                    document.getElementById('total-employees').textContent = '0';
-                    document.getElementById('active-employees').textContent = '0';
+                    document.getElementById('total-employees').textContent = '{{ $stats["total_employees"] ?? 0 }}';
+                    document.getElementById('active-employees').textContent = '{{ $stats["active_employees"] ?? 0 }}';
                     document.getElementById('new-hires').textContent = '0';
                 });
         });
+
+        // Refresh contract expiry alerts
+        function refreshAlerts() {
+            const button = event.target.closest('button');
+            const icon = button.querySelector('i');
+            
+            // Add spinning animation
+            icon.classList.add('fa-spin');
+            button.disabled = true;
+            
+            fetch('{{ route("dashboard.expiry-alerts") }}')
+                .then(response => response.json())
+                .then(data => {
+                    // Update the expiring contracts count
+                    const total = data.counts.urgent + data.counts.critical;
+                    document.getElementById('expiring-contracts').textContent = total;
+                    
+                    // Reload the page to show updated alerts
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error refreshing alerts:', error);
+                    alert('Failed to refresh alerts. Please try again.');
+                })
+                .finally(() => {
+                    // Remove spinning animation
+                    icon.classList.remove('fa-spin');
+                    button.disabled = false;
+                });
+        }
     </script>
 @endpush
