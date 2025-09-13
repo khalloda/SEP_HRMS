@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use App\Services\AuditTrailService;
 
 class SalaryStructure extends Model
 {
@@ -31,6 +32,45 @@ class SalaryStructure extends Model
         'effective_from',
         'effective_to',
     ];
+
+    /**
+     * Boot the model.
+     */
+    protected static function booted()
+    {
+        static::created(function ($structure) {
+            // Log salary structure creation
+            app(AuditTrailService::class)->logSalaryStructureChange(
+                $structure,
+                $structure->getAttributes(),
+                'created'
+            );
+        });
+
+        static::updated(function ($structure) {
+            // Log salary structure updates
+            if ($structure->wasChanged()) {
+                $changes = [];
+                foreach ($structure->getChanges() as $key => $value) {
+                    $changes[$key] = [
+                        'old' => $structure->getOriginal($key),
+                        'new' => $value
+                    ];
+                }
+
+                app(AuditTrailService::class)->logSalaryStructureChange($structure, $changes, 'updated');
+            }
+        });
+
+        static::deleting(function ($structure) {
+            // Log salary structure deletion
+            app(AuditTrailService::class)->logSalaryStructureChange(
+                $structure,
+                ['structure_id' => $structure->id, 'employee_id' => $structure->employee_id],
+                'deleted'
+            );
+        });
+    }
 
     /**
      * Get the employee that owns this salary structure.

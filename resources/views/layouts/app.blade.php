@@ -17,6 +17,9 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <!-- Styles -->
     <style>
         :root {
@@ -121,26 +124,99 @@
 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
+                        <!-- Dashboard -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ route('dashboard') }}">
+                                <i class="fas fa-tachometer-alt"></i> {{ __('Dashboard') }}
+                            </a>
+                        </li>
+
+                        <!-- Employees -->
                         <li class="nav-item">
                             <a class="nav-link text-white" href="{{ route('employees.index') }}">
-                                {{ __('hrms.employees') }}
+                                <i class="fas fa-users"></i> {{ __('hrms.employees') }}
                             </a>
                         </li>
+
+                        <!-- Contracts -->
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="{{ route('documents.index') }}">
-                                {{ __('hrms.documents') }}
+                            <a class="nav-link text-white" href="{{ route('contracts.index') }}">
+                                <i class="fas fa-file-contract"></i> {{ __('hrms.contracts') }}
                             </a>
                         </li>
+
+                        <!-- Attendance -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="attendanceDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-clock"></i> {{ __('hrms.attendance.title') }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="alert('Attendance views coming soon!')">
+                                    <i class="fas fa-list"></i> {{ __('hrms.attendance.records') }}
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="alert('Daily summaries view coming soon!')">
+                                    <i class="fas fa-calendar-day"></i> {{ __('hrms.attendance.summaries') }}
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="alert('Reports view coming soon!')">
+                                    <i class="fas fa-chart-bar"></i> {{ __('hrms.attendance.reports') }}
+                                </a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Payroll -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" href="#" id="payrollDropdown" role="button" data-bs-toggle="dropdown">
-                                {{ __('hrms.payroll.title') }}
+                                <i class="fas fa-money-bill-wave"></i> {{ __('hrms.payroll.title') }}
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('salary-components.index') }}">
                                     <i class="fas fa-list"></i> {{ __('Salary Components') }}
                                 </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="alert('Payroll runs view coming soon!')">
+                                    <i class="fas fa-play-circle"></i> {{ __('Payroll Runs') }}
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="alert('Payslips view coming soon!')">
+                                    <i class="fas fa-file-invoice-dollar"></i> {{ __('Payslips') }}
+                                </a></li>
                             </ul>
                         </li>
+
+                        <!-- Documents -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ route('documents.index') }}">
+                                <i class="fas fa-folder-open"></i> {{ __('hrms.documents') }}
+                            </a>
+                        </li>
+
+                        <!-- Administration (HR Admin and IT Admin only) -->
+                        @auth
+                            @if(Auth::user()->hasAnyRole(['HR_Admin_Manager', 'IT_Admin']))
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-white" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-cogs"></i> {{ __('Administration') }}
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        @can('viewAny', \Spatie\Activitylog\Models\Activity::class)
+                                            <li><a class="dropdown-item" href="{{ route('audit-trail.index') }}">
+                                                <i class="fas fa-history"></i> {{ __('Audit Trail') }}
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="{{ route('weekly-digest.index') }}">
+                                                <i class="fas fa-envelope-open-text"></i> {{ __('Weekly Digest') }}
+                                            </a></li>
+                                        @endcan
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="#" onclick="alert('User management coming soon!')">
+                                            <i class="fas fa-users-cog"></i> {{ __('User Management') }}
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="alert('System settings coming soon!')">
+                                            <i class="fas fa-sliders-h"></i> {{ __('System Settings') }}
+                                        </a></li>
+                                    </ul>
+                                </li>
+                            @endif
+                        @endauth
                     </ul>
 
                     <ul class="navbar-nav ms-auto">

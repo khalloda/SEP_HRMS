@@ -165,6 +165,31 @@ Route::middleware(['auth'])->group(function () {
         ->name('payslips.export');
     Route::get('payslip-statistics', [\App\Http\Controllers\PayslipController::class, 'statistics'])
         ->name('payslips.statistics');
+    // Audit trail management routes (HR Admin and IT Admin only)
+    Route::middleware(['can:viewAny,Spatie\Activitylog\Models\Activity'])->group(function () {
+        Route::get('audit-trail', [\App\Http\Controllers\AuditTrailController::class, 'index'])
+            ->name('audit-trail.index');
+        Route::get('audit-trail/export', [\App\Http\Controllers\AuditTrailController::class, 'export'])
+            ->name('audit-trail.export');
+        Route::get('audit-trail/statistics', [\App\Http\Controllers\AuditTrailController::class, 'statistics'])
+            ->name('audit-trail.statistics');
+        Route::get('audit-trail/{subjectType}/{subjectId}', [\App\Http\Controllers\AuditTrailController::class, 'show'])
+            ->name('audit-trail.show');
+    });
+
+    // Weekly digest management routes (HR Admin and IT Admin only)
+    Route::middleware(['can:viewAny,Spatie\Activitylog\Models\Activity'])->group(function () {
+        Route::get('weekly-digest', [\App\Http\Controllers\WeeklyDigestController::class, 'index'])
+            ->name('weekly-digest.index');
+        Route::get('weekly-digest/preview', [\App\Http\Controllers\WeeklyDigestController::class, 'preview'])
+            ->name('weekly-digest.preview');
+        Route::post('weekly-digest/send', [\App\Http\Controllers\WeeklyDigestController::class, 'send'])
+            ->name('weekly-digest.send');
+        Route::post('weekly-digest/test', [\App\Http\Controllers\WeeklyDigestController::class, 'test'])
+            ->name('weekly-digest.test');
+        Route::get('weekly-digest/statistics', [\App\Http\Controllers\WeeklyDigestController::class, 'statistics'])
+            ->name('weekly-digest.statistics');
+    });
 });
 
 // Language switching (available to all users)

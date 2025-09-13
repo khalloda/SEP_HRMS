@@ -8,6 +8,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
+use App\Services\AuditTrailService;
 
 class Contract extends Model
 {
@@ -202,7 +203,7 @@ class Contract extends Model
      */
     public function getTypeNameAttribute()
     {
-        return __('hrms.contract_types.' . $this->type, self::TYPES[$this->type] ?? $this->type);
+        return __('hrms.contract_types.' . $this->type) ?: (self::TYPES[$this->type] ?? $this->type);
     }
 
     /**
@@ -210,7 +211,7 @@ class Contract extends Model
      */
     public function getStatusNameAttribute()
     {
-        return __('hrms.contract_status.' . $this->status, self::STATUSES[$this->status] ?? $this->status);
+        return __('hrms.contract_status.' . $this->status) ?: (self::STATUSES[$this->status] ?? $this->status);
     }
 
     /**
@@ -400,7 +401,7 @@ class Contract extends Model
             return false;
         }
 
-        return static::create([
+        $renewedContract = static::create([
             'employee_id' => $this->employee_id,
             'type' => $data['type'] ?? $this->type,
             'start_date' => $data['start_date'] ?? $this->end_date->addDay(),
@@ -408,19 +409,44 @@ class Contract extends Model
             'terms_json' => $data['terms_json'] ?? $this->terms_json,
             'status' => 'active',
         ]);
+
+        if ($renewedContract) {
+            // Mark current contract as renewed
+            $this->update(['status' => 'renewed']);
+
+            // Log renewal for both contracts
+            app(AuditTrailService::class)->logContractChange($this, [
+                'renewed_contract_id' => $renewedContract->id,
+                'renewal_reason' => $data['renewal_reason'] ?? 'Contract renewal',
+                'previous_end_date' => $this->end_date,
+                'new_end_date' => $renewedContract->end_date,
+            ], 'renewed');
+        }
+
+        return $renewedContract;
     }
 
     /**
      * Terminate the contract.
      */
-    public function terminate($reason = null)
+    public function terminate($reason = null, $terminationDate = null)
     {
-        $this->update(['status' => 'terminated']);
+        $originalEndDate = $this->end_date;
 
-        activity('contract')
-            ->performedOn($this)
-            ->withProperties(['reason' => $reason])
-            ->log('Contract terminated');
+        $updateData = ['status' => 'terminated'];
+        if ($terminationDate) {
+            $updateData['end_date'] = $terminationDate;
+        }
+
+        $this->update($updateData);
+
+        // Enhanced audit trail logging
+        app(AuditTrailService::class)->logContractChange($this, [
+            'termination_reason' => $reason ?? 'Manual termination',
+            'termination_date' => $terminationDate ?? now()->toDateString(),
+            'original_end_date' => $originalEndDate,
+            'terminated_by' => auth()->user()?->name ?? 'System',
+        ], 'terminated');
 
         return true;
     }
@@ -476,13 +502,44 @@ class Contract extends Model
             }
         });
 
+        static::created(function ($contract) {
+            // Log contract creation
+            app(AuditTrailService::class)->logContractChange(
+                $contract,
+                $contract->getAttributes(),
+                'created'
+            );
+        });
+
         static::updating(function ($contract) {
             // Auto-expire if end_date is reached
-            if ($contract->isDirty('end_date') && 
-                $contract->end_date && 
+            if ($contract->isDirty('end_date') &&
+                $contract->end_date &&
                 $contract->end_date < now()->toDateString() &&
                 $contract->status === 'active') {
                 $contract->status = 'expired';
+            }
+        });
+
+        static::updated(function ($contract) {
+            // Log contract updates
+            if ($contract->wasChanged()) {
+                $changes = [];
+                foreach ($contract->getChanges() as $key => $value) {
+                    $changes[$key] = [
+                        'old' => $contract->getOriginal($key),
+                        'new' => $value
+                    ];
+                }
+
+                $action = 'updated';
+                if ($contract->wasChanged('status') && $contract->status === 'expired') {
+                    $action = 'expired';
+                } elseif ($contract->wasChanged('status') && $contract->status === 'terminated') {
+                    $action = 'terminated';
+                }
+
+                app(AuditTrailService::class)->logContractChange($contract, $changes, $action);
             }
         });
     }

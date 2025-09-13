@@ -64,7 +64,7 @@ class ContractExpiryNotification extends Model
      */
     public function getTypeNameAttribute()
     {
-        return __('hrms.notifications.types.' . $this->notification_type, self::TYPES[$this->notification_type] ?? $this->notification_type);
+        return __('hrms.notifications.types.' . $this->notification_type) ?: (self::TYPES[$this->notification_type] ?? $this->notification_type);
     }
 
     /**
@@ -72,7 +72,7 @@ class ContractExpiryNotification extends Model
      */
     public function getStatusNameAttribute()
     {
-        return __('hrms.notifications.statuses.' . $this->status, self::STATUSES[$this->status] ?? $this->status);
+        return __('hrms.notifications.statuses.' . $this->status) ?: (self::STATUSES[$this->status] ?? $this->status);
     }
 
     /**

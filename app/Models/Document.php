@@ -54,6 +54,14 @@ class Document extends Model
             'icon' => 'fas fa-certificate',
             'category' => 'professional'
         ],
+        'bar_registration' => [
+            'name_en' => 'Bar Association Registration',
+            'name_ar' => 'تسجيل نقابة المحامين',
+            'icon' => 'fas fa-stamp',
+            'category' => 'professional',
+            'requires_expiry' => true,
+            'auto_reminder' => true
+        ],
         'contract_pdf' => [
             'name_en' => 'Employment Contract',
             'name_ar' => 'عقد العمل',
@@ -315,14 +323,151 @@ class Document extends Model
     }
 
     /**
+     * Create a new version of the document.
+     */
+    public function createVersion($filePath, $checksum): DocumentVersion
+    {
+        $nextVersionNo = $this->versions()->max('version_no') + 1;
+
+        $version = $this->versions()->create([
+            'version_no' => $nextVersionNo,
+            'path' => $filePath,
+            'checksum' => $checksum,
+        ]);
+
+        // Update current version
+        $this->update(['version_current' => $nextVersionNo]);
+
+        // Log version creation
+        activity('document')
+            ->performedOn($this)
+            ->withProperties([
+                'version_no' => $nextVersionNo,
+                'previous_version' => $nextVersionNo - 1
+            ])
+            ->log("Document version {$nextVersionNo} created");
+
+        return $version;
+    }
+
+    /**
+     * Get the current version.
+     */
+    public function getCurrentVersion(): ?DocumentVersion
+    {
+        return $this->versions()->where('version_no', $this->version_current)->first();
+    }
+
+    /**
+     * Check if document type requires expiry date.
+     */
+    public function requiresExpiryDate(): bool
+    {
+        return isset(self::TYPES[$this->type]['requires_expiry']) &&
+               self::TYPES[$this->type]['requires_expiry'] === true;
+    }
+
+    /**
+     * Check if document type has auto reminders.
+     */
+    public function hasAutoReminder(): bool
+    {
+        return isset(self::TYPES[$this->type]['auto_reminder']) &&
+               self::TYPES[$this->type]['auto_reminder'] === true;
+    }
+
+    /**
+     * Get documents requiring attention (expired or expiring).
+     */
+    public static function getDocumentsRequiringAttention()
+    {
+        return [
+            'expired' => static::expired()->with(['employee', 'contract.employee'])->get(),
+            'expiring_soon' => static::expiringSoon(30)->with(['employee', 'contract.employee'])->get(),
+            'expiring_critically' => static::expiringSoon(7)->with(['employee', 'contract.employee'])->get(),
+        ];
+    }
+
+    /**
+     * Get document statistics by type and category.
+     */
+    public static function getDocumentStats()
+    {
+        $stats = [
+            'total_documents' => static::count(),
+            'by_category' => [],
+            'by_type' => [],
+            'expiry_status' => [
+                'no_expiry' => static::whereNull('expires_at')->count(),
+                'expired' => static::expired()->count(),
+                'expiring_soon' => static::expiringSoon(30)->count(),
+                'expiring_critically' => static::expiringSoon(7)->count(),
+            ],
+        ];
+
+        // Group by category
+        foreach (static::TYPES as $type => $config) {
+            $category = $config['category'];
+            $count = static::byType($type)->count();
+
+            if (!isset($stats['by_category'][$category])) {
+                $stats['by_category'][$category] = 0;
+            }
+            $stats['by_category'][$category] += $count;
+            $stats['by_type'][$type] = $count;
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Check if document needs watermarking.
+     */
+    public function needsWatermark($user = null): bool
+    {
+        $user = $user ?? auth()->user();
+
+        if (!$user) {
+            return true; // Default to watermarked for security
+        }
+
+        // HR and IT admins don't need watermarked documents
+        if ($user->hasAnyRole(['HR_Admin_Manager', 'IT_Admin'])) {
+            return false;
+        }
+
+        // All other users get watermarked documents for sensitive types
+        $sensitiveTypes = ['id_card', 'bar_license', 'bar_registration', 'payslip_pdf', 'contract_pdf'];
+        return in_array($this->type, $sensitiveTypes);
+    }
+
+    /**
+     * Get watermark text for this document.
+     */
+    public function getWatermarkText($user = null): string
+    {
+        $user = $user ?? auth()->user();
+
+        if (!$user) {
+            return 'CONFIDENTIAL - RESTRICTED ACCESS';
+        }
+
+        $role = $user->roles->first()?->name ?? 'Unknown';
+        $timestamp = now()->format('Y-m-d H:i:s');
+
+        return "CONFIDENTIAL - {$role} - {$timestamp}";
+    }
+
+    /**
      * Get activity log options.
      */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['type', 'original_name', 'visibility', 'expires_at'])
+            ->logOnly(['type', 'original_name', 'visibility', 'expires_at', 'version_current'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Document {$eventName}");
+            ->setDescriptionForEvent(fn(string $eventName) => "Document {$eventName}")
+            ->useLogName('document');
     }
 }

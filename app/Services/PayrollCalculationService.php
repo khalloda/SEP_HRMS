@@ -8,6 +8,7 @@ use App\Models\PayslipLine;
 use App\Models\Employee;
 use App\Models\SalaryStructure;
 use App\Models\SalaryComponent;
+use App\Models\AttendanceSummary;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -146,6 +147,9 @@ class PayrollCalculationService
         $salaryStructure->load(['structureComponents.component']);
         $calculatedValues = [];
 
+        // Get attendance data for this payroll period
+        $attendanceData = $this->getAttendanceDataForPayroll($payslip);
+
         // Process components in priority order
         $components = $salaryStructure->structureComponents()
             ->with('component')
@@ -159,7 +163,8 @@ class PayrollCalculationService
             $calculatedAmount = $this->calculateComponentValue(
                 $structureComponent,
                 $calculatedValues,
-                $payslip
+                $payslip,
+                $attendanceData
             );
 
             // Store calculated value for reference by other components
@@ -188,7 +193,8 @@ class PayrollCalculationService
     protected function calculateComponentValue(
         $structureComponent,
         array $calculatedValues,
-        Payslip $payslip
+        Payslip $payslip,
+        array $attendanceData = []
     ): float {
         $component = $structureComponent->component;
 
@@ -200,7 +206,8 @@ class PayrollCalculationService
                 return $this->evaluateFormula(
                     $structureComponent->formula_expr,
                     $calculatedValues,
-                    $payslip
+                    $payslip,
+                    $attendanceData
                 );
 
             case 'variable_net_based':
@@ -215,7 +222,7 @@ class PayrollCalculationService
     /**
      * Evaluate a formula expression safely.
      */
-    protected function evaluateFormula(string $formula, array $calculatedValues, Payslip $payslip): float
+    protected function evaluateFormula(string $formula, array $calculatedValues, Payslip $payslip, array $attendanceData = []): float
     {
         if (empty($formula)) {
             return 0;
@@ -223,7 +230,7 @@ class PayrollCalculationService
 
         try {
             // Replace component codes with their calculated values
-            $processedFormula = $this->replaceFormulaVariables($formula, $calculatedValues);
+            $processedFormula = $this->replaceFormulaVariables($formula, $calculatedValues, $attendanceData);
 
             // Basic arithmetic evaluation (secure)
             return $this->safeEvaluate($processedFormula);
@@ -241,11 +248,27 @@ class PayrollCalculationService
     /**
      * Replace formula variables with actual values.
      */
-    protected function replaceFormulaVariables(string $formula, array $calculatedValues): string
+    protected function replaceFormulaVariables(string $formula, array $calculatedValues, array $attendanceData = []): string
     {
         // Replace component codes with their values
         foreach ($calculatedValues as $code => $value) {
             $formula = str_replace($code, $value, $formula);
+        }
+
+        // Replace attendance variables
+        $attendanceReplacements = [
+            'WORK_DAYS' => $attendanceData['work_days'] ?? 0,
+            'PRESENT_DAYS' => $attendanceData['present_days'] ?? 0,
+            'ABSENT_DAYS' => $attendanceData['absent_days'] ?? 0,
+            'LATE_DAYS' => $attendanceData['late_days'] ?? 0,
+            'OVERTIME_HOURS' => $attendanceData['overtime_hours'] ?? 0,
+            'TOTAL_WORK_HOURS' => $attendanceData['total_work_hours'] ?? 0,
+            'LATE_MINUTES' => $attendanceData['total_late_minutes'] ?? 0,
+            'ATTENDANCE_RATE' => $attendanceData['attendance_rate'] ?? 100,
+        ];
+
+        foreach ($attendanceReplacements as $variable => $value) {
+            $formula = str_replace($variable, $value, $formula);
         }
 
         // Replace common formula variables
@@ -442,5 +465,69 @@ class PayrollCalculationService
             });
 
         return $summary;
+    }
+
+    /**
+     * Get attendance data for payroll calculations.
+     */
+    protected function getAttendanceDataForPayroll(Payslip $payslip): array
+    {
+        // Get attendance summaries for the payroll period
+        $attendanceSummaries = AttendanceSummary::forEmployee($payslip->employee_id)
+            ->dateRange($payslip->pay_period_start, $payslip->pay_period_end)
+            ->get();
+
+        if ($attendanceSummaries->isEmpty()) {
+            // Return default values if no attendance data
+            return [
+                'work_days' => 0,
+                'present_days' => 0,
+                'absent_days' => 0,
+                'partial_days' => 0,
+                'late_days' => 0,
+                'overtime_days' => 0,
+                'total_work_hours' => 0,
+                'total_overtime_hours' => 0,
+                'total_late_minutes' => 0,
+                'total_break_minutes' => 0,
+                'attendance_rate' => 0,
+                'anomaly_count' => 0,
+            ];
+        }
+
+        // Calculate attendance statistics
+        $totalDays = $attendanceSummaries->count();
+        $presentDays = $attendanceSummaries->where('status', 'present')->count();
+        $absentDays = $attendanceSummaries->where('status', 'absent')->count();
+        $partialDays = $attendanceSummaries->where('status', 'partial')->count();
+        $lateDays = $attendanceSummaries->where('late_minutes', '>', 0)->count();
+        $overtimeDays = $attendanceSummaries->where('overtime_minutes', '>', 0)->count();
+
+        $totalWorkMinutes = $attendanceSummaries->sum('total_work_minutes');
+        $totalOvertimeMinutes = $attendanceSummaries->sum('overtime_minutes');
+        $totalLateMinutes = $attendanceSummaries->sum('late_minutes');
+        $totalBreakMinutes = $attendanceSummaries->sum('break_minutes');
+
+        $attendanceRate = $totalDays > 0 ?
+            round((($presentDays + $partialDays) / $totalDays) * 100, 2) : 0;
+
+        $anomalyCount = $attendanceSummaries->filter(function ($summary) {
+            return !empty($summary->anomalies);
+        })->count();
+
+        return [
+            'work_days' => $totalDays,
+            'present_days' => $presentDays,
+            'absent_days' => $absentDays,
+            'partial_days' => $partialDays,
+            'late_days' => $lateDays,
+            'overtime_days' => $overtimeDays,
+            'total_work_hours' => round($totalWorkMinutes / 60, 2),
+            'total_overtime_hours' => round($totalOvertimeMinutes / 60, 2),
+            'total_late_minutes' => $totalLateMinutes,
+            'total_break_minutes' => $totalBreakMinutes,
+            'attendance_rate' => $attendanceRate,
+            'anomaly_count' => $anomalyCount,
+        ];
     }
 }

@@ -28,4 +28,11 @@ Route::prefix('attendance')->name('api.attendance.')->group(function () {
     // Protected endpoints requiring API key
     Route::get('/stats', [AttendanceController::class, 'getAttendanceStats'])->name('stats');
     Route::get('/employees', [AttendanceController::class, 'getEmployeeList'])->name('employees');
+
+    // Management endpoints (require authentication)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/batch-calculate', [AttendanceController::class, 'batchCalculateSummaries'])->name('batch-calculate');
+        Route::get('/report', [AttendanceController::class, 'getAttendanceReport'])->name('report');
+        Route::post('/adjust', [AttendanceController::class, 'adjustAttendance'])->name('adjust');
+    });
 });

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\AuditTrailService;
 
 class Employee extends Model
 {
@@ -617,6 +618,21 @@ class Employee extends Model
         static::creating(function ($employee) {
             if (empty($employee->code)) {
                 $employee->code = static::generateNextCode();
+            }
+        });
+
+        static::updated(function ($employee) {
+            // Log critical employee changes
+            if ($employee->wasChanged()) {
+                $changes = [];
+                foreach ($employee->getChanges() as $key => $value) {
+                    $changes[$key] = [
+                        'old' => $employee->getOriginal($key),
+                        'new' => $value
+                    ];
+                }
+
+                app(AuditTrailService::class)->logEmployeeCriticalChange($employee, $changes, 'updated');
             }
         });
     }
