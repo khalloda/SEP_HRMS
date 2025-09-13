@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title', $analytics['role_config']['custom_title'] ?? __('hrms.dashboard.title'))
+@section('title', isset($analytics['role_config']['custom_title']) ? $analytics['role_config']['custom_title'] : __('hrms.dashboard.title'))
 
 @section('header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h1 class="h3 mb-0 brand-dark-green">
-                {{ $analytics['role_config']['custom_title'] ?? __('hrms.dashboard.title') }}
+                {{ isset($analytics['role_config']['custom_title']) ? $analytics['role_config']['custom_title'] : __('hrms.dashboard.title') }}
             </h1>
             <p class="text-muted mb-0">
                 {{ __('Welcome back, :name', ['name' => Auth::user()->name]) }} -
-                <span class="badge bg-{{ $analytics['role_config']['theme_color'] }}">
+                <span class="badge bg-{{ isset($analytics['role_config']['theme_color']) ? $analytics['role_config']['theme_color'] : 'primary' }}">
                     {{ Auth::user()->getRoleNames()->first() ?? __('User') }}
                 </span>
             </p>
@@ -26,7 +26,7 @@
 
 @section('content')
 <!-- Quick Actions Section -->
-@if(count($analytics['quick_actions']) > 0)
+@if(isset($analytics['quick_actions']) && count($analytics['quick_actions']) > 0)
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
@@ -52,7 +52,8 @@
 
 <!-- Personalized Widgets -->
 <div class="row">
-    @foreach($analytics['personalized_widgets'] as $widget)
+    @if(isset($analytics['personalized_widgets']))
+        @foreach($analytics['personalized_widgets'] as $widget)
     <div class="{{ $widget['size'] }} mb-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-{{ $widget['color'] }} text-white">
@@ -65,11 +66,22 @@
             </div>
         </div>
     </div>
-    @endforeach
+        @endforeach
+    @else
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                {{ __('Dashboard customization is loading...') }}
+                <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-primary ms-2">
+                    {{ __('Refresh') }}
+                </a>
+            </div>
+        </div>
+    @endif
 </div>
 
 <!-- Additional Context-Aware Sections -->
-@if(in_array('charts', $analytics['role_config']['visible_sections'] ?? []))
+@if(isset($analytics['role_config']['visible_sections']) && in_array('charts', $analytics['role_config']['visible_sections']))
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">

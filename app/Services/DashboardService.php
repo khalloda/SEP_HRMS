@@ -23,21 +23,18 @@ class DashboardService
         $cacheKey = "dashboard_analytics_" . $user->id . "_" . now()->format('Y-m-d-H');
 
         return Cache::remember($cacheKey, 3600, function () use ($user) {
-            $baseAnalytics = [
+            return [
                 'employee_stats' => $this->getEmployeeStatistics($user),
                 'contract_analytics' => $this->getContractAnalytics($user),
                 'payroll_insights' => $this->getPayrollInsights($user),
                 'recent_activities' => $this->getRecentActivities($user),
                 'alerts' => $this->getCriticalAlerts($user),
                 'charts_data' => $this->getChartsData($user),
+                // Role-specific customizations
+                'role_config' => $this->getRoleBasedDashboardConfig($user),
+                'personalized_widgets' => $this->getPersonalizedWidgets($user),
+                'quick_actions' => $this->getQuickActionsForRole($user),
             ];
-
-            // Add role-specific customizations
-            $baseAnalytics['role_config'] = $this->getRoleBasedDashboardConfig($user);
-            $baseAnalytics['personalized_widgets'] = $this->getPersonalizedWidgets($user);
-            $baseAnalytics['quick_actions'] = $this->getQuickActionsForRole($user);
-
-            return $baseAnalytics;
         });
     }
 
