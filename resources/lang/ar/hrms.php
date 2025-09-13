@@ -12,7 +12,6 @@ return [
     */
 
     // Common
-    'dashboard' => 'لوحة القيادة',
     'search' => 'بحث',
     'filter' => 'تصفية',
     'clear' => 'مسح',
@@ -34,7 +33,6 @@ return [
     'departments' => 'الأقسام',
     'positions' => 'المناصب',
     'contracts' => 'العقود',
-    'payroll' => 'الرواتب',
     'attendance' => 'الحضور',
     'documents' => 'المستندات',
     'reports' => 'التقارير',
@@ -268,6 +266,7 @@ return [
 
     // Employee specific translations
     'employee' => [
+        'title' => 'موظف',
         'created_successfully' => 'تم إنشاء الموظف بنجاح',
         'updated_successfully' => 'تم تحديث الموظف بنجاح',
         'deleted_successfully' => 'تم حذف الموظف بنجاح',
@@ -462,6 +461,54 @@ return [
             'sent' => 'مرسل',
             'viewed' => 'تم الاطلاع',
         ],
+    ],
+
+    // لوحة التحكم
+    'dashboard' => [
+        'title' => 'لوحة التحكم',
+        'welcome_message' => 'مرحباً بك في لوحة تحكم نظام الموارد البشرية',
+        'employee_analytics' => 'إحصائيات الموظفين',
+        'payroll_insights' => 'رؤى كشوف المرتبات',
+        'critical_alerts' => 'التنبيهات الهامة',
+        'contract_expiry_alerts' => 'تنبيهات انتهاء العقود',
+        'employees_by_department' => 'الموظفون حسب القسم',
+        'hiring_trends' => 'اتجاهات التوظيف',
+        'recent_activities' => 'الأنشطة الحديثة',
+        'no_recent_activities' => 'لا توجد أنشطة حديثة.',
+        'error_loading_activities' => 'خطأ في تحميل الأنشطة.',
+        'total_employees' => 'إجمالي الموظفين',
+        'active_employees' => 'الموظفون النشطون',
+        'new_hires_this_month' => 'التعيينات الجديدة هذا الشهر',
+        'employees_without_contracts' => 'بدون عقود',
+        'employees_without_salary_structures' => 'بدون هياكل رواتب',
+        'runs_this_year' => 'دورات هذا العام',
+        'pending_approval' => 'في انتظار الموافقة',
+        'ytd_net_payroll' => 'إجمالي الرواتب الصافية حتى تاريخه',
+        'payroll_access_restricted' => 'الوصول إلى كشوف المرتبات مقيد لدورك.',
+        'urgent_contract_expiries' => 'انتهاءات العقود العاجلة',
+        'payroll_approvals_needed' => 'موافقات كشوف المرتبات المطلوبة',
+        'system_notifications' => 'إشعارات النظام',
+        'new_hires' => 'تعيينات جديدة',
+        'terminations' => 'إنهاءات الخدمة',
+        'refresh' => 'تحديث',
+        'view_all' => 'عرض الكل',
+        'no_alerts' => 'لا توجد تنبيهات في الوقت الحالي.',
+        'no_critical_alerts' => 'لا توجد تنبيهات حرجة في الوقت الحالي.',
+        'contracts_expiring' => 'عقود تنتهي',
+        'days_left' => 'أيام متبقية',
+        'new_this_month' => 'جديد هذا الشهر',
+        'no_salary_structure' => 'بدون هيكل راتب',
+        'no_contract' => 'بدون عقد',
+        'urgent_contract_expiry' => 'انتهاء عقد عاجل',
+        'contracts_expiring_in_days' => ':count عقود تنتهي خلال :days أيام',
+        'payroll_pending_approval' => 'كشف مرتبات في انتظار الموافقة',
+        'payrolls_awaiting_approval' => ':count كشوف مرتبات في انتظار الموافقة',
+        'missing_salary_structures' => 'هياكل رواتب مفقودة',
+        'employees_without_salary_structure' => ':count موظفين بدون هياكل رواتب',
+        'documents_expiring' => 'مستندات تنتهي',
+        'documents_expiring_soon' => ':count مستندات تنتهي قريباً',
+        'employees_paid' => 'الموظفون المدفوعون',
+        'total_net_pay' => 'إجمالي الراتب الصافي',
     ],
 
     // PDF والمستندات

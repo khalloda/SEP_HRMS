@@ -31,4 +31,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'zkteco' => [
+        'api_key' => env('ZKTECO_API_KEY', 'sep-hrms-api-key-2024'),
+        'hmac_secret' => env('ZKTECO_HMAC_SECRET', 'sep-hrms-secure-hmac-secret-key-2024'),
+        'enabled' => env('ZKTECO_ENABLED', true),
+    ],
+
 ];

@@ -112,7 +112,7 @@
         <nav class="navbar navbar-expand-lg navbar-brand-custom shadow-sm">
             <div class="container">
                 <a class="navbar-brand fw-bold text-white" href="{{ url('/') }}">
-                    {{ __('hrms.dashboard') }} - {{ config('app.name', 'Sarie Eldin & Partners') }}
+                    {{ __('hrms.dashboard.title') }} - {{ config('app.name', 'Sarie Eldin & Partners') }}
                 </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -133,7 +133,7 @@
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" href="#" id="payrollDropdown" role="button" data-bs-toggle="dropdown">
-                                {{ __('hrms.payroll') }}
+                                {{ __('hrms.payroll.title') }}
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('salary-components.index') }}">

@@ -34,7 +34,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('hrms.employee') }}</label>
+                            <label class="form-label fw-bold">{{ __('hrms.employee.title') }}</label>
                             <div class="d-flex align-items-center">
                                 <img src="{{ $contract->employee->photo_url }}" 
                                      alt="{{ $contract->employee->display_name }}" 
@@ -56,7 +56,7 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">{{ __('hrms.status') }}</label>
+                            <label class="form-label fw-bold">{{ __('hrms.status.status') }}</label>
                             <div>
                                 @switch($contract->status)
                                     @case('active')

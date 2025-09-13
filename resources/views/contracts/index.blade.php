@@ -137,7 +137,7 @@
 
                 <!-- Status Filter -->
                 <div class="col-md-2">
-                    <label for="status" class="form-label">{{ __('hrms.status') }}</label>
+                    <label for="status" class="form-label">{{ __('hrms.status.status') }}</label>
                     <select name="status" id="status" class="form-select">
                         <option value="">{{ __('hrms.all_statuses') }}</option>
                         @foreach($contractStatuses as $statusOption)
@@ -150,7 +150,7 @@
 
                 <!-- Employee Filter -->
                 <div class="col-md-2">
-                    <label for="employee_id" class="form-label">{{ __('hrms.employee') }}</label>
+                    <label for="employee_id" class="form-label">{{ __('hrms.employee.title') }}</label>
                     <select name="employee_id" id="employee_id" class="form-select">
                         <option value="">{{ __('hrms.all_employees') }}</option>
                         @foreach($employees as $employee)
@@ -225,11 +225,11 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-header-custom">
                             <tr>
-                                <th>{{ __('hrms.employee') }}</th>
+                                <th>{{ __('hrms.employee.title') }}</th>
                                 <th>{{ __('hrms.contract_type') }}</th>
                                 <th>{{ __('hrms.start_date') }}</th>
                                 <th>{{ __('hrms.end_date') }}</th>
-                                <th>{{ __('hrms.status') }}</th>
+                                <th>{{ __('hrms.status.status') }}</th>
                                 <th>{{ __('hrms.expiry_status') }}</th>
                                 <th class="text-center">{{ __('hrms.actions') }}</th>
                             </tr>

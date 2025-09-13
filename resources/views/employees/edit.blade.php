@@ -161,7 +161,7 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="status" class="form-label">{{ __('hrms.status') }} <span class="text-danger">*</span></label>
+                                    <label for="status" class="form-label">{{ __('hrms.status.status') }} <span class="text-danger">*</span></label>
                                     <select class="form-select @error('status') is-invalid @enderror" 
                                             id="status" 
                                             name="status" 

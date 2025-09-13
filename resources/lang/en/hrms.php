@@ -12,7 +12,6 @@ return [
     */
 
     // Common
-    'dashboard' => 'Dashboard',
     'search' => 'Search',
     'filter' => 'Filter',
     'clear' => 'Clear',
@@ -34,7 +33,6 @@ return [
     'departments' => 'Departments',
     'positions' => 'Positions',
     'contracts' => 'Contracts',
-    'payroll' => 'Payroll',
     'attendance' => 'Attendance',
     'documents' => 'Documents',
     'reports' => 'Reports',
@@ -127,6 +125,7 @@ return [
     
     // Employee specific translations
     'employee' => [
+        'title' => 'Employee',
         'created_successfully' => 'Employee created successfully',
         'updated_successfully' => 'Employee updated successfully',
         'deleted_successfully' => 'Employee deleted successfully',
@@ -486,6 +485,54 @@ return [
             'sent' => 'Sent',
             'viewed' => 'Viewed',
         ],
+    ],
+
+    // Dashboard
+    'dashboard' => [
+        'title' => 'Dashboard',
+        'welcome_message' => 'Welcome to HRMS Dashboard',
+        'employee_analytics' => 'Employee Analytics',
+        'payroll_insights' => 'Payroll Insights',
+        'critical_alerts' => 'Critical Alerts',
+        'contract_expiry_alerts' => 'Contract Expiry Alerts',
+        'employees_by_department' => 'Employees by Department',
+        'hiring_trends' => 'Hiring Trends',
+        'recent_activities' => 'Recent Activities',
+        'no_recent_activities' => 'No recent activities found.',
+        'error_loading_activities' => 'Error loading activities.',
+        'total_employees' => 'Total Employees',
+        'active_employees' => 'Active Employees',
+        'new_hires_this_month' => 'New Hires This Month',
+        'employees_without_contracts' => 'Without Contracts',
+        'employees_without_salary_structures' => 'Without Salary Structures',
+        'runs_this_year' => 'Runs This Year',
+        'pending_approval' => 'Pending Approval',
+        'ytd_net_payroll' => 'YTD Net Payroll',
+        'payroll_access_restricted' => 'Payroll access restricted for your role.',
+        'urgent_contract_expiries' => 'Urgent Contract Expiries',
+        'payroll_approvals_needed' => 'Payroll Approvals Needed',
+        'system_notifications' => 'System Notifications',
+        'new_hires' => 'New Hires',
+        'terminations' => 'Terminations',
+        'refresh' => 'Refresh',
+        'view_all' => 'View All',
+        'no_alerts' => 'No alerts at this time.',
+        'no_critical_alerts' => 'No critical alerts at this time.',
+        'contracts_expiring' => 'contracts expiring',
+        'days_left' => 'days left',
+        'new_this_month' => 'New This Month',
+        'no_salary_structure' => 'No Salary Structure',
+        'no_contract' => 'No Contract',
+        'urgent_contract_expiry' => 'Urgent Contract Expiry',
+        'contracts_expiring_in_days' => ':count contracts expiring in :days days',
+        'payroll_pending_approval' => 'Payroll Pending Approval',
+        'payrolls_awaiting_approval' => ':count payroll runs awaiting approval',
+        'missing_salary_structures' => 'Missing Salary Structures',
+        'employees_without_salary_structure' => ':count employees without salary structures',
+        'documents_expiring' => 'Documents Expiring',
+        'documents_expiring_soon' => ':count documents expiring soon',
+        'employees_paid' => 'Employees Paid',
+        'total_net_pay' => 'Total Net Pay',
     ],
 
     // PDF and Documents

@@ -1,0 +1,560 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Employee;
+use App\Models\Contract;
+use App\Models\PayrollRun;
+use App\Models\Payslip;
+use App\Models\Department;
+use App\Models\Position;
+use App\Models\Document;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+
+class DashboardService
+{
+    /**
+     * Get comprehensive dashboard analytics for the current user.
+     */
+    public function getDashboardAnalytics($user): array
+    {
+        $cacheKey = "dashboard_analytics_" . $user->id . "_" . now()->format('Y-m-d-H');
+
+        return Cache::remember($cacheKey, 3600, function () use ($user) {
+            return [
+                'employee_stats' => $this->getEmployeeStatistics($user),
+                'contract_analytics' => $this->getContractAnalytics($user),
+                'payroll_insights' => $this->getPayrollInsights($user),
+                'recent_activities' => $this->getRecentActivities($user),
+                'alerts' => $this->getCriticalAlerts($user),
+                'charts_data' => $this->getChartsData($user),
+            ];
+        });
+    }
+
+    /**
+     * Get employee statistics and trends.
+     */
+    public function getEmployeeStatistics($user): array
+    {
+        $currentYear = now()->year;
+        $currentMonth = now()->month;
+
+        $stats = [
+            'total_employees' => Employee::count(),
+            'active_employees' => Employee::active()->count(),
+            'inactive_employees' => Employee::byStatus('inactive')->count(),
+            'terminated_employees' => Employee::byStatus('terminated')->count(),
+            'on_leave_employees' => Employee::byStatus('on_leave')->count(),
+            'new_hires_this_month' => Employee::whereMonth('hire_date', $currentMonth)
+                ->whereYear('hire_date', $currentYear)
+                ->count(),
+            'new_hires_this_year' => Employee::whereYear('hire_date', $currentYear)->count(),
+            'employees_without_contracts' => Employee::active()
+                ->whereDoesntHave('activeContract')
+                ->count(),
+            'employees_without_salary_structures' => Employee::active()
+                ->whereDoesntHave('currentSalaryStructure')
+                ->count(),
+        ];
+
+        // Department breakdown
+        $stats['by_department'] = Employee::active()
+            ->select('departments.name_en', 'departments.name_ar', DB::raw('count(*) as total'))
+            ->join('departments', 'employees.department_id', '=', 'departments.id')
+            ->groupBy('departments.id', 'departments.name_en', 'departments.name_ar')
+            ->orderBy('total', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => app()->getLocale() === 'ar' ? $item->name_ar : $item->name_en,
+                    'total' => $item->total,
+                    'percentage' => round(($item->total / Employee::active()->count()) * 100, 1)
+                ];
+            });
+
+        // Position breakdown
+        $stats['by_position'] = Employee::active()
+            ->select('positions.name_en', 'positions.name_ar', DB::raw('count(*) as total'))
+            ->join('positions', 'employees.position_id', '=', 'positions.id')
+            ->groupBy('positions.id', 'positions.name_en', 'positions.name_ar')
+            ->orderBy('total', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => app()->getLocale() === 'ar' ? $item->name_ar : $item->name_en,
+                    'total' => $item->total,
+                    'percentage' => round(($item->total / Employee::active()->count()) * 100, 1)
+                ];
+            });
+
+        // Monthly hiring trends (last 12 months)
+        $stats['hiring_trends'] = collect(range(0, 11))->map(function ($monthsAgo) {
+            $date = now()->subMonths($monthsAgo);
+            return [
+                'month' => $date->format('M Y'),
+                'count' => Employee::whereMonth('hire_date', $date->month)
+                    ->whereYear('hire_date', $date->year)
+                    ->count()
+            ];
+        })->reverse()->values();
+
+        return $stats;
+    }
+
+    /**
+     * Get contract analytics and expiry alerts.
+     */
+    public function getContractAnalytics($user): array
+    {
+        $currentDate = now();
+
+        $analytics = [
+            'total_contracts' => Contract::count(),
+            'active_contracts' => Contract::where('status', 'active')->count(),
+            'expired_contracts' => Contract::where('status', 'expired')->count(),
+            'terminated_contracts' => Contract::where('status', 'terminated')->count(),
+            'contracts_expiring_soon' => Contract::active()
+                ->where('end_date', '<=', $currentDate->copy()->addDays(30))
+                ->count(),
+            'contracts_expiring_this_month' => Contract::active()
+                ->whereMonth('end_date', $currentDate->month)
+                ->whereYear('end_date', $currentDate->year)
+                ->count(),
+        ];
+
+        // Contract type breakdown
+        $analytics['by_type'] = Contract::active()
+            ->select('type', DB::raw('count(*) as total'))
+            ->groupBy('type')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'type' => __('hrms.contract_types.' . $item->type),
+                    'total' => $item->total,
+                    'percentage' => round(($item->total / Contract::active()->count()) * 100, 1)
+                ];
+            });
+
+        // Expiry alerts (categorized)
+        $analytics['expiry_alerts'] = [
+            'urgent' => Contract::active()
+                ->where('end_date', '<=', $currentDate->copy()->addDays(7))
+                ->with(['employee'])
+                ->orderBy('end_date')
+                ->get(),
+            'critical' => Contract::active()
+                ->where('end_date', '>', $currentDate->copy()->addDays(7))
+                ->where('end_date', '<=', $currentDate->copy()->addDays(15))
+                ->with(['employee'])
+                ->orderBy('end_date')
+                ->get(),
+            'soon' => Contract::active()
+                ->where('end_date', '>', $currentDate->copy()->addDays(15))
+                ->where('end_date', '<=', $currentDate->copy()->addDays(30))
+                ->with(['employee'])
+                ->orderBy('end_date')
+                ->get(),
+        ];
+
+        // Contract renewal trends (last 6 months)
+        $analytics['renewal_trends'] = collect(range(0, 5))->map(function ($monthsAgo) {
+            $date = now()->subMonths($monthsAgo);
+            return [
+                'month' => $date->format('M Y'),
+                'new_contracts' => Contract::whereMonth('start_date', $date->month)
+                    ->whereYear('start_date', $date->year)
+                    ->count(),
+                'expired_contracts' => Contract::whereMonth('end_date', $date->month)
+                    ->whereYear('end_date', $date->year)
+                    ->count()
+            ];
+        })->reverse()->values();
+
+        return $analytics;
+    }
+
+    /**
+     * Get payroll insights and trends.
+     */
+    public function getPayrollInsights($user): array
+    {
+        // Check user permissions for payroll data
+        if (!$user->hasAnyRole(['HR_Admin_Manager', 'Accounting_Manager', 'HR_Coordinator'])) {
+            return ['access_restricted' => true];
+        }
+
+        $currentYear = now()->year;
+        $canViewNetGross = $user->hasAnyRole(['HR_Admin_Manager', 'Accounting_Manager']);
+
+        $insights = [
+            'total_payroll_runs' => PayrollRun::count(),
+            'draft_runs' => PayrollRun::draft()->count(),
+            'pending_approval' => PayrollRun::pendingApproval()->count(),
+            'posted_runs_this_year' => PayrollRun::posted()
+                ->whereYear('pay_date', $currentYear)
+                ->count(),
+            'total_payslips_this_year' => Payslip::whereYear('pay_date', $currentYear)->count(),
+            'employees_with_salary_structures' => Employee::active()
+                ->whereHas('currentSalaryStructure')
+                ->count(),
+        ];
+
+        if ($canViewNetGross) {
+            // Financial insights (only for authorized users)
+            $lastPayrollRun = PayrollRun::posted()->latest('pay_date')->first();
+
+            $insights['financial_summary'] = [
+                'last_payroll_total_gross' => $lastPayrollRun?->total_gross ?? 0,
+                'last_payroll_total_net' => $lastPayrollRun?->total_net ?? 0,
+                'last_payroll_total_deductions' => $lastPayrollRun?->total_deductions ?? 0,
+                'year_to_date_gross' => PayrollRun::posted()
+                    ->whereYear('pay_date', $currentYear)
+                    ->sum('total_gross'),
+                'year_to_date_net' => PayrollRun::posted()
+                    ->whereYear('pay_date', $currentYear)
+                    ->sum('total_net'),
+                'average_monthly_payroll' => PayrollRun::posted()
+                    ->whereYear('pay_date', $currentYear)
+                    ->avg('total_net'),
+            ];
+
+            // Monthly payroll trends
+            $insights['payroll_trends'] = collect(range(0, 11))->map(function ($monthsAgo) {
+                $date = now()->subMonths($monthsAgo);
+                $monthlyRuns = PayrollRun::posted()
+                    ->whereMonth('pay_date', $date->month)
+                    ->whereYear('pay_date', $date->year);
+
+                return [
+                    'month' => $date->format('M Y'),
+                    'runs_count' => $monthlyRuns->count(),
+                    'total_gross' => $monthlyRuns->sum('total_gross'),
+                    'total_net' => $monthlyRuns->sum('total_net'),
+                    'employees_paid' => $monthlyRuns->sum('total_employees'),
+                ];
+            })->reverse()->values();
+        }
+
+        // Payroll status distribution
+        $insights['status_distribution'] = [
+            'draft' => PayrollRun::draft()->count(),
+            'calculated' => PayrollRun::where('status', 'calculated')->count(),
+            'locked' => PayrollRun::where('status', 'locked')->count(),
+            'pending_approval' => PayrollRun::pendingApproval()->count(),
+            'approved' => PayrollRun::where('status', 'approved')->count(),
+            'posted' => PayrollRun::posted()->count(),
+        ];
+
+        // Recent payroll activity
+        $insights['recent_payrolls'] = PayrollRun::with(['creator'])
+            ->latest('created_at')
+            ->limit(5)
+            ->get()
+            ->map(function ($run) use ($canViewNetGross) {
+                return [
+                    'id' => $run->id,
+                    'title' => $run->title,
+                    'status' => $run->status,
+                    'status_display' => $run->status_display,
+                    'pay_period' => $run->pay_period,
+                    'total_employees' => $run->total_employees,
+                    'total_net' => $canViewNetGross ? $run->total_net : null,
+                    'created_by' => $run->creator?->name,
+                    'created_at' => $run->created_at,
+                ];
+            });
+
+        return $insights;
+    }
+
+    /**
+     * Get recent activities across the system.
+     */
+    public function getRecentActivities($user): array
+    {
+        $activities = \Spatie\Activitylog\Models\Activity::with(['causer', 'subject'])
+            ->whereIn('log_name', ['employee', 'contract', 'payroll_run', 'payslip', 'salary_structure'])
+            ->latest()
+            ->limit(20)
+            ->get()
+            ->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'description' => $activity->description,
+                    'log_name' => $activity->log_name,
+                    'subject_type' => $activity->subject_type,
+                    'subject_id' => $activity->subject_id,
+                    'causer_name' => $activity->causer?->name ?? 'System',
+                    'created_at' => $activity->created_at,
+                    'time_ago' => $activity->created_at->diffForHumans(),
+                ];
+            });
+
+        return $activities->toArray();
+    }
+
+    /**
+     * Get critical alerts that need attention.
+     */
+    public function getCriticalAlerts($user): array
+    {
+        $alerts = [];
+        $currentDate = now();
+
+        // Contract expiry alerts
+        $urgentContracts = Contract::active()
+            ->where('end_date', '<=', $currentDate->copy()->addDays(7))
+            ->count();
+
+        if ($urgentContracts > 0) {
+            $alerts[] = [
+                'type' => 'contract_expiry',
+                'severity' => 'urgent',
+                'title' => __('hrms.dashboard.urgent_contract_expiry'),
+                'message' => __('hrms.dashboard.contracts_expiring_in_days', ['count' => $urgentContracts, 'days' => 7]),
+                'count' => $urgentContracts,
+                'link' => route('contracts.index', ['expiring' => 'urgent']),
+                'icon' => 'fas fa-exclamation-triangle',
+                'color' => 'danger'
+            ];
+        }
+
+        // Payroll alerts
+        if ($user->hasAnyRole(['HR_Admin_Manager', 'Accounting_Manager'])) {
+            $pendingPayrolls = PayrollRun::pendingApproval()->count();
+            if ($pendingPayrolls > 0) {
+                $alerts[] = [
+                    'type' => 'payroll_approval',
+                    'severity' => 'warning',
+                    'title' => __('hrms.dashboard.payroll_pending_approval'),
+                    'message' => __('hrms.dashboard.payrolls_awaiting_approval', ['count' => $pendingPayrolls]),
+                    'count' => $pendingPayrolls,
+                    'link' => route('payroll.index', ['status' => 'pending_approval']),
+                    'icon' => 'fas fa-clock',
+                    'color' => 'warning'
+                ];
+            }
+        }
+
+        // Employee without salary structures
+        $employeesWithoutSalary = Employee::active()
+            ->whereDoesntHave('currentSalaryStructure')
+            ->count();
+
+        if ($employeesWithoutSalary > 0) {
+            $alerts[] = [
+                'type' => 'missing_salary_structure',
+                'severity' => 'info',
+                'title' => __('hrms.dashboard.missing_salary_structures'),
+                'message' => __('hrms.dashboard.employees_without_salary_structure', ['count' => $employeesWithoutSalary]),
+                'count' => $employeesWithoutSalary,
+                'link' => route('employees.index', ['without_salary_structure' => 1]),
+                'icon' => 'fas fa-money-bill-alt',
+                'color' => 'info'
+            ];
+        }
+
+        // Document expiry alerts (if implemented)
+        $expiringDocuments = Document::where('expires_at', '<=', $currentDate->copy()->addDays(30))
+            ->where('expires_at', '>', $currentDate)
+            ->count();
+
+        if ($expiringDocuments > 0) {
+            $alerts[] = [
+                'type' => 'document_expiry',
+                'severity' => 'warning',
+                'title' => __('hrms.dashboard.documents_expiring'),
+                'message' => __('hrms.dashboard.documents_expiring_soon', ['count' => $expiringDocuments]),
+                'count' => $expiringDocuments,
+                'link' => route('documents.index', ['expiring' => 1]),
+                'icon' => 'fas fa-file-alt',
+                'color' => 'warning'
+            ];
+        }
+
+        return $alerts;
+    }
+
+    /**
+     * Get data for dashboard charts.
+     */
+    public function getChartsData($user): array
+    {
+        $canViewPayrollData = $user->hasAnyRole(['HR_Admin_Manager', 'Accounting_Manager', 'HR_Coordinator']);
+
+        $charts = [
+            'employee_status_pie' => $this->getEmployeeStatusPieChart(),
+            'department_breakdown' => $this->getDepartmentBreakdownChart(),
+            'hiring_trends' => $this->getHiringTrendsChart(),
+            'contract_expiry_timeline' => $this->getContractExpiryTimelineChart(),
+        ];
+
+        if ($canViewPayrollData) {
+            $charts['payroll_trends'] = $this->getPayrollTrendsChart($user);
+        }
+
+        return $charts;
+    }
+
+    /**
+     * Get employee status pie chart data.
+     */
+    protected function getEmployeeStatusPieChart(): array
+    {
+        return [
+            'labels' => [
+                __('hrms.status.active'),
+                __('hrms.status.inactive'),
+                __('hrms.status.terminated'),
+                __('hrms.status.on_leave')
+            ],
+            'data' => [
+                Employee::active()->count(),
+                Employee::byStatus('inactive')->count(),
+                Employee::byStatus('terminated')->count(),
+                Employee::byStatus('on_leave')->count(),
+            ],
+            'colors' => ['#28a745', '#6c757d', '#dc3545', '#ffc107']
+        ];
+    }
+
+    /**
+     * Get department breakdown chart data.
+     */
+    protected function getDepartmentBreakdownChart(): array
+    {
+        $departments = Employee::active()
+            ->select('departments.name_en', 'departments.name_ar', DB::raw('count(*) as total'))
+            ->join('departments', 'employees.department_id', '=', 'departments.id')
+            ->groupBy('departments.id', 'departments.name_en', 'departments.name_ar')
+            ->orderBy('total', 'desc')
+            ->limit(10)
+            ->get();
+
+        return [
+            'labels' => $departments->map(function ($dept) {
+                return app()->getLocale() === 'ar' ? $dept->name_ar : $dept->name_en;
+            })->toArray(),
+            'data' => $departments->pluck('total')->toArray(),
+        ];
+    }
+
+    /**
+     * Get hiring trends chart data.
+     */
+    protected function getHiringTrendsChart(): array
+    {
+        $trends = collect(range(0, 11))->map(function ($monthsAgo) {
+            $date = now()->subMonths($monthsAgo);
+            return [
+                'month' => $date->format('M Y'),
+                'hires' => Employee::whereMonth('hire_date', $date->month)
+                    ->whereYear('hire_date', $date->year)
+                    ->count(),
+                'terminations' => Employee::whereMonth('updated_at', $date->month)
+                    ->whereYear('updated_at', $date->year)
+                    ->where('status', 'terminated')
+                    ->count()
+            ];
+        })->reverse()->values();
+
+        return [
+            'labels' => $trends->pluck('month')->toArray(),
+            'datasets' => [
+                [
+                    'label' => __('hrms.dashboard.new_hires'),
+                    'data' => $trends->pluck('hires')->toArray(),
+                    'color' => '#28a745'
+                ],
+                [
+                    'label' => __('hrms.dashboard.terminations'),
+                    'data' => $trends->pluck('terminations')->toArray(),
+                    'color' => '#dc3545'
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Get contract expiry timeline chart data.
+     */
+    protected function getContractExpiryTimelineChart(): array
+    {
+        $timeline = collect(range(0, 11))->map(function ($monthsAhead) {
+            $date = now()->addMonths($monthsAhead);
+            return [
+                'month' => $date->format('M Y'),
+                'expiring' => Contract::active()
+                    ->whereMonth('end_date', $date->month)
+                    ->whereYear('end_date', $date->year)
+                    ->count()
+            ];
+        });
+
+        return [
+            'labels' => $timeline->pluck('month')->toArray(),
+            'data' => $timeline->pluck('expiring')->toArray(),
+        ];
+    }
+
+    /**
+     * Get payroll trends chart data.
+     */
+    protected function getPayrollTrendsChart($user): array
+    {
+        $canViewNetGross = $user->hasAnyRole(['HR_Admin_Manager', 'Accounting_Manager']);
+
+        $trends = collect(range(0, 11))->map(function ($monthsAgo) use ($canViewNetGross) {
+            $date = now()->subMonths($monthsAgo);
+            $monthlyRuns = PayrollRun::posted()
+                ->whereMonth('pay_date', $date->month)
+                ->whereYear('pay_date', $date->year);
+
+            $data = [
+                'month' => $date->format('M Y'),
+                'employees_paid' => $monthlyRuns->sum('total_employees'),
+                'runs_count' => $monthlyRuns->count(),
+            ];
+
+            if ($canViewNetGross) {
+                $data['total_net'] = $monthlyRuns->sum('total_net');
+                $data['total_gross'] = $monthlyRuns->sum('total_gross');
+            }
+
+            return $data;
+        })->reverse()->values();
+
+        $chart = [
+            'labels' => $trends->pluck('month')->toArray(),
+            'datasets' => [
+                [
+                    'label' => __('hrms.dashboard.employees_paid'),
+                    'data' => $trends->pluck('employees_paid')->toArray(),
+                    'color' => '#007bff'
+                ]
+            ]
+        ];
+
+        if ($canViewNetGross) {
+            $chart['datasets'][] = [
+                'label' => __('hrms.dashboard.total_net_pay'),
+                'data' => $trends->pluck('total_net')->toArray(),
+                'color' => '#28a745'
+            ];
+        }
+
+        return $chart;
+    }
+
+    /**
+     * Clear dashboard cache for a user.
+     */
+    public function clearUserCache($userId): void
+    {
+        $pattern = "dashboard_analytics_{$userId}_*";
+        Cache::flush(); // In production, you'd want more targeted cache clearing
+    }
+}

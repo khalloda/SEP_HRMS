@@ -28,7 +28,7 @@
                         <!-- Employee Selection -->
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <label for="employee_id" class="form-label required">{{ __('hrms.employee') }}</label>
+                                <label for="employee_id" class="form-label required">{{ __('hrms.employee.title') }}</label>
                                 <select name="employee_id" id="employee_id" class="form-select @error('employee_id') is-invalid @enderror" required>
                                     <option value="">{{ __('hrms.select_employee') }}</option>
                                     @foreach($employees as $employee)
@@ -65,7 +65,7 @@
 
                             <!-- Status -->
                             <div class="col-md-6">
-                                <label for="status" class="form-label required">{{ __('hrms.status') }}</label>
+                                <label for="status" class="form-label required">{{ __('hrms.status.status') }}</label>
                                 <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
                                     <option value="active" {{ old('status', 'active') == 'active' ? 'selected' : '' }}>
                                         {{ __('hrms.contract_status.active') }}

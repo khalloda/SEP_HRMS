@@ -22,6 +22,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/expiry-alerts', [DashboardController::class, 'getExpiryAlerts'])->name('dashboard.expiry-alerts');
     Route::post('/dashboard/dismiss-notification/{notification}', [DashboardController::class, 'dismissNotification'])->name('dashboard.dismiss-notification');
+
+    // Enhanced Dashboard Analytics API
+    Route::get('/dashboard/analytics', [DashboardController::class, 'getAnalytics'])->name('dashboard.analytics');
+    Route::get('/dashboard/employee-stats', [DashboardController::class, 'getEmployeeStats'])->name('dashboard.employee-stats');
+    Route::get('/dashboard/payroll-insights', [DashboardController::class, 'getPayrollInsights'])->name('dashboard.payroll-insights');
+    Route::get('/dashboard/contract-analytics', [DashboardController::class, 'getContractAnalytics'])->name('dashboard.contract-analytics');
+    Route::get('/dashboard/critical-alerts', [DashboardController::class, 'getCriticalAlerts'])->name('dashboard.critical-alerts');
+    Route::get('/dashboard/charts-data', [DashboardController::class, 'getChartsData'])->name('dashboard.charts-data');
+    Route::get('/dashboard/recent-activities', [DashboardController::class, 'getRecentActivities'])->name('dashboard.recent-activities');
+    Route::post('/dashboard/clear-cache', [DashboardController::class, 'clearCache'])->name('dashboard.clear-cache');
 });
 
 // Authentication Routes
