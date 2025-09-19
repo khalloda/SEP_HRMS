@@ -172,7 +172,7 @@ class LetterController extends Controller
 
         $employees = Employee::active()
             ->with(['department', 'position'])
-            ->orderBy('display_name')
+            ->orderByRaw("COALESCE(NULLIF(arabic_name,''), CONCAT(first_name,' ',last_name)) ASC")
             ->get();
 
         $templates = LetterTemplate::active()
@@ -266,7 +266,8 @@ class LetterController extends Controller
                     $q->where('reference_number', 'like', "%{$search}%")
                       ->orWhere('subject', 'like', "%{$search}%")
                       ->orWhereHas('employee', function ($eq) use ($search) {
-                          $eq->where('display_name', 'like', "%{$search}%")
+                          $eq->where('arabic_name', 'like', "%{$search}%")
+                             ->orWhereRaw("CONCAT(first_name,' ',last_name) LIKE ?", ["%{$search}%"])
                              ->orWhere('code', 'like', "%{$search}%");
                       });
                 });
@@ -274,7 +275,9 @@ class LetterController extends Controller
             ->latest()
             ->paginate(20);
 
-        $employees = Employee::active()->orderBy('display_name')->get();
+        $employees = Employee::active()
+            ->orderByRaw("COALESCE(NULLIF(arabic_name,''), CONCAT(first_name,' ',last_name)) ASC")
+            ->get();
         $statuses = GeneratedLetter::STATUSES;
 
         return view('letters.generated.index', compact('letters', 'employees', 'statuses'));

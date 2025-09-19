@@ -13,7 +13,10 @@ class LeavePolicyController extends Controller
     {
         $this->authorizeByPermission('attendance.view');
         $policies = DB::table('leave_policies')->orderBy('name')->get();
-        return view('leave.policies.index', compact('policies'));
+        // Current user's balances summary for display
+        $balances = app(\App\Http\Controllers\LeaveRequestController::class)
+            ->callAction('computeBalancesForUser', [auth()->id(), (int)date('Y')]);
+        return view('leave.policies.index', compact('policies','balances'));
     }
 
     public function create()
@@ -78,4 +81,3 @@ class LeavePolicyController extends Controller
         abort_unless(auth()->user()?->can($perm), 403);
     }
 }
-

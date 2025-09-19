@@ -125,13 +125,13 @@
             <div class="card-body">
                 <p class="small mb-2">{{ __('Available Variables:') }}</p>
                 <ul class="small text-muted mb-0">
-                    <li>{{employee_name}} - {{ __('Employee full name') }}</li>
-                    <li>{{employee_code}} - {{ __('Employee code') }}</li>
-                    <li>{{position}} - {{ __('Position title') }}</li>
-                    <li>{{department}} - {{ __('Department name') }}</li>
-                    <li>{{hire_date}} - {{ __('Date of hire') }}</li>
-                    <li>{{current_date}} - {{ __('Current date') }}</li>
-                    <li>{{company_name}} - {{ __('Company name') }}</li>
+                    <li>@{{ employee_name }} - {{ __('Employee full name') }}</li>
+                    <li>@{{ employee_code }} - {{ __('Employee code') }}</li>
+                    <li>@{{ position }} - {{ __('Position title') }}</li>
+                    <li>@{{ department }} - {{ __('Department name') }}</li>
+                    <li>@{{ hire_date }} - {{ __('Date of hire') }}</li>
+                    <li>@{{ current_date }} - {{ __('Current date') }}</li>
+                    <li>@{{ company_name }} - {{ __('Company name') }}</li>
                 </ul>
             </div>
         </div>

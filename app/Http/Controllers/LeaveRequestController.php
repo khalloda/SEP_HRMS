@@ -19,7 +19,10 @@ class LeaveRequestController extends Controller
             ->limit(200)
             ->get();
         $policies = DB::table('leave_policies')->orderBy('name')->get();
-        return view('leave.requests.index', compact('requests','policies'));
+
+        // Compute simple balances for current user for all policies (year-to-date)
+        $balances = $this->computeBalancesForUser(auth()->id(), (int)date('Y'));
+        return view('leave.requests.index', compact('requests','policies','balances'));
     }
 
     public function store(Request $request)
@@ -88,5 +91,32 @@ class LeaveRequestController extends Controller
     {
         abort_unless(auth()->user()?->can($perm), 403);
     }
-}
 
+    private function computeBalancesForUser(int $userId, int $year): array
+    {
+        $policies = DB::table('leave_policies')->get();
+        $start = \Carbon\Carbon::create($year,1,1);
+        $end   = \Carbon\Carbon::create($year,12,31);
+        $dayOfYear = now()->isSameYear($start) ? now()->dayOfYear : 365;
+        $daysInYear = $start->isLeapYear() ? 366 : 365;
+        $accFactor = max(1, min($dayOfYear, $daysInYear)) / $daysInYear;
+
+        $balances = [];
+        foreach ($policies as $p) {
+            $accrued = (float)$p->days_per_year * $accFactor;
+            $taken = (float)DB::table('leave_requests')
+                ->where('user_id',$userId)
+                ->where('policy_id',$p->id)
+                ->where('status','approved')
+                ->whereBetween('from_date', [$start->toDateString(), $end->toDateString()])
+                ->sum('days');
+            $balances[$p->id] = [
+                'policy'=>$p->name,
+                'accrued'=>round($accrued,2),
+                'taken'=>round($taken,2),
+                'closing'=>round($accrued - $taken,2)
+            ];
+        }
+        return $balances;
+    }
+}

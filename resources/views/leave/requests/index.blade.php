@@ -37,6 +37,31 @@
           </form>
         </div>
       </div>
+      @if(!empty($balances))
+      <div class="card shadow-sm mt-3">
+        <div class="card-header card-header-custom">Your Balances (YTD)</div>
+        <div class="table-responsive">
+          <table class="table table-striped mb-0">
+            <thead class="table-header-custom"><tr>
+              <th class="text-white">Policy</th>
+              <th class="text-white">Accrued</th>
+              <th class="text-white">Taken</th>
+              <th class="text-white">Closing</th>
+            </tr></thead>
+            <tbody>
+              @foreach($balances as $b)
+              <tr>
+                <td>{{ $b['policy'] }}</td>
+                <td>{{ $b['accrued'] }}</td>
+                <td>{{ $b['taken'] }}</td>
+                <td><strong>{{ $b['closing'] }}</strong></td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+      @endif
       <div class="card shadow-sm mt-3">
         <div class="card-header card-header-custom">Calendar</div>
         <div class="card-body">
@@ -105,4 +130,3 @@
     </script>
   @endpush
 @endsection
-

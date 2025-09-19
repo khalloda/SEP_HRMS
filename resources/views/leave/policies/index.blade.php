@@ -38,6 +38,9 @@
                   <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
                 </form>
                 @endcan
+                @if(!empty($balances[$p->id]))
+                  <span class="badge bg-light text-dark ms-2">You: {{ $balances[$p->id]['closing'] }} days</span>
+                @endif
               </td>
             </tr>
           @empty
@@ -48,4 +51,3 @@
     </div>
   </div>
 @endsection
-

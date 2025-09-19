@@ -147,18 +147,18 @@
 
                         <!-- Attendance -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white" href="{{ route('reports.attendance.summary') }}" id="attendanceDropdown" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="{{ route('leave.requests.index') }}" id="attendanceDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-clock"></i> {{ __('hrms.attendance.title') }}
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="alert('Attendance views coming soon!')">
+                                <li><a class="dropdown-item" href="{{ route('leave.requests.index') }}">
                                     <i class="fas fa-list"></i> {{ __('hrms.attendance.records') }}
                                 </a></li>
-                                <li><a class="dropdown-item" href="#" onclick="alert('Daily summaries view coming soon!')">
+                                <li><a class="dropdown-item" href="{{ route('reports.attendance.summary') }}">
                                     <i class="fas fa-calendar-day"></i> {{ __('hrms.attendance.summaries') }}
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#" onclick="alert('Reports view coming soon!')">
+                                <li><a class="dropdown-item" href="{{ route('reports.index') }}">
                                     <i class="fas fa-chart-bar"></i> {{ __('hrms.attendance.reports') }}
                                 </a></li>
                             </ul>
