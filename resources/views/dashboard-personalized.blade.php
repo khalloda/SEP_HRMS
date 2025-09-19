@@ -108,11 +108,11 @@
                 </a>
             </div>
             <div class="card-body p-0">
-                @if($analytics['recent_activities']['recent_logs']->count() > 0)
+                @if(isset($analytics['recent_activities']) && count($analytics['recent_activities']) > 0)
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <tbody>
-                                @foreach($analytics['recent_activities']['recent_logs']->take(8) as $activity)
+                                @foreach(array_slice($analytics['recent_activities'], 0, 8) as $activity)
                                 <tr>
                                     <td class="border-0">
                                         <div class="d-flex align-items-center">
@@ -122,10 +122,10 @@
                                                 </div>
                                             </div>
                                             <div class="flex-grow-1">
-                                                <div class="fw-bold">{{ $activity->description }}</div>
+                                                <div class="fw-bold">{{ $activity['description'] }}</div>
                                                 <small class="text-muted">
-                                                    {{ $activity->causer?->name ?? 'System' }} •
-                                                    {{ $activity->created_at->diffForHumans() }}
+                                                    {{ $activity['causer_name'] }} •
+                                                    {{ $activity['time_ago'] }}
                                                 </small>
                                             </div>
                                         </div>

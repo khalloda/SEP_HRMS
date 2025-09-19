@@ -15,6 +15,30 @@
                 <a href="{{ route('contracts.edit', $contract) }}" class="btn btn-warning">
                     <i class="fas fa-edit"></i> {{ __('hrms.edit') }}
                 </a>
+                @can('contracts.manage')
+                    @if($contract->status === 'draft')
+                        <form method="POST" action="{{ route('contracts.submit-review', $contract) }}" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fas fa-paper-plane"></i> Submit for Review
+                            </button>
+                        </form>
+                    @elseif($contract->status === 'review' || $contract->status === 'pending')
+                        <form method="POST" action="{{ route('contracts.approve', $contract) }}" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                        </form>
+                    @elseif($contract->status === 'approved')
+                        <form method="POST" action="{{ route('contracts.sign', $contract) }}" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-brand-primary">
+                                <i class="fas fa-signature"></i> Sign
+                            </button>
+                        </form>
+                    @endif
+                @endcan
             @endcan
         </div>
     </div>

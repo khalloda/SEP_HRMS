@@ -44,13 +44,20 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "@php -r \"if (getenv('AUTO_DB_BOOTSTRAP')==='1'){ passthru('php artisan app:bootstrap --rbac --no-interaction'); }\""
+        ],
+        "post-install-cmd": [
+            "@php -r \"if (getenv('AUTO_DB_BOOTSTRAP')==='1'){ passthru('php artisan app:bootstrap --rbac --no-interaction'); }\""
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
+        ],
+        "deploy": [
+            "@php artisan app:bootstrap --rbac --no-interaction"
         ]
     },
     "extra": {

@@ -20,6 +20,9 @@ class Kernel extends ConsoleKernel
         
         // You can add more scheduled tasks here
         // $schedule->command('inspire')->hourly();
+
+        // Run scheduled saved reports daily at 7:00 AM
+        $schedule->command('reports:run-scheduled')->dailyAt('07:00');
     }
 
     /**

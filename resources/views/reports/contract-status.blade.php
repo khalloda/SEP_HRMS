@@ -8,7 +8,20 @@
             <h2 class="h3 brand-dark-green mb-1">{{ __('Contract Status Report') }}</h2>
             <p class="text-muted mb-0">{{ __('Contract tracking with expiry alerts and status analysis') }}</p>
         </div>
-        <div>
+        <div class="d-flex align-items-center gap-2">
+            <form method="POST" action="{{ route('reports.saved.store') }}" class="d-inline">
+              @csrf
+              <input type="hidden" name="name" value="Contract Status">
+              <input type="hidden" name="report_key" value="reports.contract.status">
+              <input type="hidden" name="params" value='@json(request()->query())'>
+              <input type="hidden" name="format" value="xlsx">
+              <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-bookmark"></i> {{ __('Save Report') }}
+              </button>
+            </form>
+            <a class="btn btn-outline-secondary" href="{{ route('reports.saved.index') }}">
+                <i class="fas fa-list"></i> {{ __('Saved Reports') }}
+            </a>
             <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> {{ __('Back to Reports') }}
             </a>

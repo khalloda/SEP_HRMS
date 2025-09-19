@@ -148,23 +148,28 @@ class ReportsController extends Controller
                 ->groupBy('department_id')
                 ->get()
                 ->mapWithKeys(function ($item) {
-                    return [$item->department->name_en => $item->count];
+                    return [$item->department ? $item->department->name_en : 'Unknown' => $item->count];
                 }),
             'by_position' => Employee::with('position')
                 ->select('position_id', DB::raw('count(*) as count'))
                 ->groupBy('position_id')
                 ->get()
                 ->mapWithKeys(function ($item) {
-                    return [$item->position->name_en => $item->count];
+                    return [$item->position ? $item->position->name_en : 'Unknown' => $item->count];
                 }),
-            'by_employment_status' => Employee::select('employment_status', DB::raw('count(*) as count'))
-                ->groupBy('employment_status')
-                ->pluck('count', 'employment_status'),
-            'by_gender' => Employee::select('gender', DB::raw('count(*) as count'))
-                ->groupBy('gender')
-                ->pluck('count', 'gender'),
-            'by_age_group' => $this->getAgeGroupStats(),
+            'by_status' => Employee::select('status', DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->pluck('count', 'status'),
+            'by_employment_type' => Employee::with('employmentType')
+                ->select('employment_type_id', DB::raw('count(*) as count'))
+                ->groupBy('employment_type_id')
+                ->get()
+                ->mapWithKeys(function ($item) {
+                    return [$item->employmentType ? $item->employmentType->name : 'Unknown' => $item->count];
+                }),
+            'by_tenure_group' => $this->getTenureGroupStats(),
             'by_hire_year' => Employee::select(DB::raw('YEAR(hire_date) as year'), DB::raw('count(*) as count'))
+                ->whereNotNull('hire_date')
                 ->groupBy(DB::raw('YEAR(hire_date)'))
                 ->orderBy('year')
                 ->pluck('count', 'year'),
@@ -319,6 +324,420 @@ class ReportsController extends Controller
     }
 
     /**
+     * Department analysis report.
+     */
+    public function departmentAnalysis(Request $request)
+    {
+        $filters = $request->validate([
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $departments = Department::withCount(['employees'])
+            ->with(['employees.position'])
+            ->orderBy('name_en')
+            ->get();
+
+        $analysis = $departments->map(function ($department) {
+            $employees = $department->employees;
+            $activeContracts = Contract::whereHas('employee', function ($query) use ($department) {
+                $query->where('department_id', $department->id);
+            })->where('status', 'active')->count();
+
+            return [
+                'department' => $department,
+                'total_employees' => $employees->count(),
+                'by_position' => $employees->groupBy('position.name_en')->map->count(),
+                'avg_tenure' => $employees->avg(function ($emp) {
+                    return $emp->hire_date ? $emp->hire_date->diffInMonths(now()) : 0;
+                }),
+                'active_contracts' => $activeContracts,
+            ];
+        });
+
+        if ($request->filled('export_format')) {
+            return $this->exportDepartmentAnalysis($analysis, $filters['export_format']);
+        }
+
+        return view('reports.department-analysis', compact('analysis', 'filters'));
+    }
+
+    /**
+     * Position analysis report.
+     */
+    public function positionAnalysis(Request $request)
+    {
+        $filters = $request->validate([
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $positions = Position::withCount(['employees'])
+            ->with(['employees.department'])
+            ->orderBy('name_en')
+            ->get();
+
+        $analysis = $positions->map(function ($position) {
+            $employees = $position->employees;
+            return [
+                'position' => $position,
+                'total_employees' => $employees->count(),
+                'by_department' => $employees->groupBy('department.name_en')->map->count(),
+                'avg_tenure' => $employees->avg(function ($emp) {
+                    return $emp->hire_date ? $emp->hire_date->diffInMonths(now()) : 0;
+                }),
+                'eligible_overtime' => $position->overtime_eligible ? $employees->count() : 0,
+            ];
+        });
+
+        if ($request->filled('export_format')) {
+            return $this->exportPositionAnalysis($analysis, $filters['export_format']);
+        }
+
+        return view('reports.position-analysis', compact('analysis', 'filters'));
+    }
+
+    /**
+     * Contract expiry report.
+     */
+    public function contractExpiry(Request $request)
+    {
+        $filters = $request->validate([
+            'days_ahead' => 'nullable|integer|min:1|max:365',
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $daysAhead = $filters['days_ahead'] ?? 90;
+        $cutoffDate = now()->addDays($daysAhead);
+
+        $contracts = Contract::with(['employee.department', 'employee.position'])
+            ->where('status', 'active')
+            ->where('end_date', '<=', $cutoffDate)
+            ->where('end_date', '>=', now())
+            ->orderBy('end_date')
+            ->get();
+
+        $groupedContracts = $contracts->groupBy(function ($contract) {
+            $daysUntilExpiry = now()->diffInDays($contract->end_date, false);
+            if ($daysUntilExpiry <= 7) return 'urgent';
+            if ($daysUntilExpiry <= 30) return 'soon';
+            return 'future';
+        });
+
+        if ($request->filled('export_format')) {
+            return $this->exportContractExpiry($contracts, $groupedContracts, $filters['export_format']);
+        }
+
+        return view('reports.contract-expiry', compact('contracts', 'groupedContracts', 'filters', 'daysAhead'));
+    }
+
+    /**
+     * Contract analysis report.
+     */
+    public function contractAnalysis(Request $request)
+    {
+        $filters = $request->validate([
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $analysis = [
+            'by_type' => Contract::select('type', DB::raw('count(*) as count'))
+                ->groupBy('type')
+                ->pluck('count', 'type'),
+            'by_status' => Contract::select('status', DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->pluck('count', 'status'),
+            'by_department' => Contract::with('employee.department')
+                ->get()
+                ->groupBy('employee.department.name_en')
+                ->map->count(),
+            'renewal_trend' => Contract::where('status', 'active')
+                ->where('end_date', '>=', now())
+                ->where('end_date', '<=', now()->addYear())
+                ->get()
+                ->groupBy(function ($contract) {
+                    return $contract->end_date->format('Y-m');
+                })
+                ->map->count(),
+        ];
+
+        if ($request->filled('export_format')) {
+            return $this->exportContractAnalysis($analysis, $filters['export_format']);
+        }
+
+        return view('reports.contract-analysis', compact('analysis', 'filters'));
+    }
+
+    /**
+     * Salary analysis report.
+     */
+    public function salaryAnalysis(Request $request)
+    {
+        $filters = $request->validate([
+            'department_id' => 'nullable|exists:departments,id',
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $user = Auth::user();
+        if (!$user->can('view-net-salary')) {
+            abort(403, 'Unauthorized to view salary analysis');
+        }
+
+        $payslips = Payslip::with(['employee.department', 'employee.position'])
+            ->whereMonth('pay_period_start', now()->month)
+            ->whereYear('pay_period_start', now()->year)
+            ->when($filters['department_id'] ?? null, function ($query, $departmentId) {
+                $query->whereHas('employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+            })
+            ->get();
+
+        $analysis = [
+            'by_department' => $payslips->groupBy('employee.department.name_en')
+                ->map(function ($group) {
+                    return [
+                        'count' => $group->count(),
+                        'avg_gross' => $group->avg('gross_salary'),
+                        'avg_net' => $group->avg('net_salary'),
+                        'total_gross' => $group->sum('gross_salary'),
+                        'total_net' => $group->sum('net_salary'),
+                    ];
+                }),
+            'by_position' => $payslips->groupBy('employee.position.name_en')
+                ->map(function ($group) {
+                    return [
+                        'count' => $group->count(),
+                        'avg_gross' => $group->avg('gross_salary'),
+                        'avg_net' => $group->avg('net_salary'),
+                    ];
+                }),
+        ];
+
+        if ($request->filled('export_format')) {
+            return $this->exportSalaryAnalysis($analysis, $filters['export_format']);
+        }
+
+        $departments = Department::orderBy('name_en')->get();
+
+        return view('reports.salary-analysis', compact('analysis', 'filters', 'departments'));
+    }
+
+    /**
+     * Payslip generation report.
+     */
+    public function payslipReport(Request $request)
+    {
+        $filters = $request->validate([
+            'month' => 'nullable|date_format:Y-m',
+            'status' => 'nullable|in:generated,sent,downloaded',
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $month = $filters['month'] ?? now()->format('Y-m');
+        $monthStart = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
+        $payslips = Payslip::with(['employee.department', 'employee.position'])
+            ->whereBetween('pay_period_start', [$monthStart, $monthEnd])
+            ->when($filters['status'] ?? null, function ($query, $status) {
+                if ($status === 'sent') {
+                    $query->whereNotNull('email_sent_at');
+                } elseif ($status === 'downloaded') {
+                    $query->whereNotNull('downloaded_at');
+                } else {
+                    $query->whereNotNull('generated_at');
+                }
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $summary = [
+            'total' => $payslips->count(),
+            'generated' => $payslips->whereNotNull('generated_at')->count(),
+            'sent' => $payslips->whereNotNull('email_sent_at')->count(),
+            'downloaded' => $payslips->whereNotNull('downloaded_at')->count(),
+        ];
+
+        if ($request->filled('export_format')) {
+            return $this->exportPayslipReport($payslips, $summary, $filters['export_format'], $month);
+        }
+
+        return view('reports.payslip-report', compact('payslips', 'summary', 'filters', 'month'));
+    }
+
+    /**
+     * Overtime report.
+     */
+    public function overtimeReport(Request $request)
+    {
+        $filters = $request->validate([
+            'month' => 'nullable|date_format:Y-m',
+            'department_id' => 'nullable|exists:departments,id',
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $month = $filters['month'] ?? now()->format('Y-m');
+        $monthStart = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
+        $overtimeData = AttendanceSummary::with(['employee.department', 'employee.position'])
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->where('overtime_hours', '>', 0)
+            ->when($filters['department_id'] ?? null, function ($query, $departmentId) {
+                $query->whereHas('employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+            })
+            ->get()
+            ->groupBy('employee_id')
+            ->map(function ($records) {
+                $employee = $records->first()->employee;
+                return [
+                    'employee' => $employee,
+                    'total_overtime' => $records->sum('overtime_hours'),
+                    'overtime_days' => $records->where('overtime_hours', '>', 0)->count(),
+                    'avg_daily_overtime' => $records->avg('overtime_hours'),
+                ];
+            })
+            ->sortByDesc('total_overtime');
+
+        $summary = [
+            'total_employees' => $overtimeData->count(),
+            'total_overtime_hours' => $overtimeData->sum('total_overtime'),
+            'avg_overtime_per_employee' => $overtimeData->count() > 0 ? $overtimeData->avg('total_overtime') : 0,
+        ];
+
+        if ($request->filled('export_format')) {
+            return $this->exportOvertimeReport($overtimeData, $summary, $filters['export_format'], $month);
+        }
+
+        $departments = Department::orderBy('name_en')->get();
+
+        return view('reports.overtime-report', compact('overtimeData', 'summary', 'filters', 'departments', 'month'));
+    }
+
+    /**
+     * Attendance trends report.
+     */
+    public function attendanceTrends(Request $request)
+    {
+        $filters = $request->validate([
+            'months' => 'nullable|integer|min:1|max:12',
+            'department_id' => 'nullable|exists:departments,id',
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $months = $filters['months'] ?? 6;
+        $startDate = now()->subMonths($months)->startOfMonth();
+        $endDate = now()->endOfMonth();
+
+        $attendance = AttendanceSummary::with(['employee.department'])
+            ->whereBetween('date', [$startDate, $endDate])
+            ->when($filters['department_id'] ?? null, function ($query, $departmentId) {
+                $query->whereHas('employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+            })
+            ->get();
+
+        $trends = $attendance->groupBy(function ($record) {
+            return $record->date->format('Y-m');
+        })->map(function ($monthRecords) {
+            return [
+                'total_employees' => $monthRecords->groupBy('employee_id')->count(),
+                'present_days' => $monthRecords->where('status', 'present')->count(),
+                'absent_days' => $monthRecords->where('status', 'absent')->count(),
+                'late_instances' => $monthRecords->where('late_minutes', '>', 0)->count(),
+                'total_hours' => $monthRecords->sum('work_hours'),
+                'overtime_hours' => $monthRecords->sum('overtime_hours'),
+                'attendance_rate' => $monthRecords->count() > 0
+                    ? ($monthRecords->where('status', 'present')->count() / $monthRecords->count()) * 100
+                    : 0,
+            ];
+        });
+
+        if ($request->filled('export_format')) {
+            return $this->exportAttendanceTrends($trends, $filters['export_format'], $months);
+        }
+
+        $departments = Department::orderBy('name_en')->get();
+
+        return view('reports.attendance-trends', compact('trends', 'filters', 'departments', 'months'));
+    }
+
+    /**
+     * Document expiry report.
+     */
+    public function documentExpiry(Request $request)
+    {
+        $filters = $request->validate([
+            'days_ahead' => 'nullable|integer|min:1|max:365',
+            'document_type' => 'nullable|string',
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $daysAhead = $filters['days_ahead'] ?? 90;
+        $cutoffDate = now()->addDays($daysAhead);
+
+        $documents = Document::with(['employee.department', 'tags'])
+            ->where('expires_at', '<=', $cutoffDate)
+            ->where('expires_at', '>=', now())
+            ->when($filters['document_type'] ?? null, function ($query, $type) {
+                $query->where('type', $type);
+            })
+            ->orderBy('expires_at')
+            ->get();
+
+        $groupedDocuments = $documents->groupBy(function ($document) {
+            $daysUntilExpiry = now()->diffInDays($document->expires_at, false);
+            if ($daysUntilExpiry <= 7) return 'urgent';
+            if ($daysUntilExpiry <= 30) return 'soon';
+            return 'future';
+        });
+
+        if ($request->filled('export_format')) {
+            return $this->exportDocumentExpiry($documents, $groupedDocuments, $filters['export_format']);
+        }
+
+        $documentTypes = Document::TYPES ?? [];
+
+        return view('reports.document-expiry', compact('documents', 'groupedDocuments', 'filters', 'documentTypes', 'daysAhead'));
+    }
+
+    /**
+     * Compliance report.
+     */
+    public function complianceReport(Request $request)
+    {
+        $filters = $request->validate([
+            'export_format' => 'nullable|in:excel,pdf'
+        ]);
+
+        $compliance = [
+            'required_documents' => $this->getRequiredDocumentsCompliance(),
+            'expired_documents' => Document::where('expires_at', '<', now())->count(),
+            'expiring_documents' => Document::where('expires_at', '>=', now())
+                ->where('expires_at', '<=', now()->addDays(30))
+                ->count(),
+            'missing_documents' => $this->getMissingDocumentsCount(),
+            'contract_compliance' => [
+                'expired_contracts' => Contract::where('status', 'active')
+                    ->where('end_date', '<', now())
+                    ->count(),
+                'expiring_contracts' => Contract::where('status', 'active')
+                    ->where('end_date', '>=', now())
+                    ->where('end_date', '<=', now()->addDays(30))
+                    ->count(),
+            ],
+        ];
+
+        if ($request->filled('export_format')) {
+            return $this->exportComplianceReport($compliance, $filters['export_format']);
+        }
+
+        return view('reports.compliance-report', compact('compliance', 'filters'));
+    }
+
+    /**
      * Document inventory report.
      */
     public function documentInventory(Request $request)
@@ -370,35 +789,35 @@ class ReportsController extends Controller
     }
 
     /**
-     * Get age group statistics.
+     * Get tenure group statistics based on hire date.
      */
-    private function getAgeGroupStats()
+    private function getTenureGroupStats()
     {
-        $employees = Employee::whereNotNull('birth_date')->get();
-        $ageGroups = [
-            '20-29' => 0,
-            '30-39' => 0,
-            '40-49' => 0,
-            '50-59' => 0,
-            '60+' => 0,
+        $employees = Employee::whereNotNull('hire_date')->get();
+        $tenureGroups = [
+            '0-1 years' => 0,
+            '1-3 years' => 0,
+            '3-5 years' => 0,
+            '5-10 years' => 0,
+            '10+ years' => 0,
         ];
 
         foreach ($employees as $employee) {
-            $age = $employee->birth_date->age;
-            if ($age < 30) {
-                $ageGroups['20-29']++;
-            } elseif ($age < 40) {
-                $ageGroups['30-39']++;
-            } elseif ($age < 50) {
-                $ageGroups['40-49']++;
-            } elseif ($age < 60) {
-                $ageGroups['50-59']++;
+            $tenureYears = $employee->hire_date->diffInYears(now());
+            if ($tenureYears < 1) {
+                $tenureGroups['0-1 years']++;
+            } elseif ($tenureYears < 3) {
+                $tenureGroups['1-3 years']++;
+            } elseif ($tenureYears < 5) {
+                $tenureGroups['3-5 years']++;
+            } elseif ($tenureYears < 10) {
+                $tenureGroups['5-10 years']++;
             } else {
-                $ageGroups['60+']++;
+                $tenureGroups['10+ years']++;
             }
         }
 
-        return $ageGroups;
+        return $tenureGroups;
     }
 
     /**
@@ -445,8 +864,12 @@ class ReportsController extends Controller
             // Create Excel with multiple sheets for each demographic breakdown
             return response()->json(['message' => 'Excel export for demographics will be implemented']);
         } else {
-            $pdf = PDF::loadView('reports.exports.demographics-pdf', compact('demographics'));
-            return $pdf->download($filename . '.pdf');
+            $html = view('reports.exports.demographics-pdf', compact('demographics'))->render();
+            $mpdf = new Mpdf();
+            $mpdf->WriteHTML($html);
+            return response($mpdf->Output($filename . '.pdf', 'S'))
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '.pdf"');
         }
     }
 
@@ -475,8 +898,12 @@ class ReportsController extends Controller
                 public function collection() { return $this->data; }
             }, $filename . '.xlsx');
         } else {
-            $pdf = PDF::loadView('reports.exports.contract-status-pdf', compact('data', 'summary'));
-            return $pdf->download($filename . '.pdf');
+            $html = view('reports.exports.contract-status-pdf', compact('data', 'summary'))->render();
+            $mpdf = new Mpdf();
+            $mpdf->WriteHTML($html);
+            return response($mpdf->Output($filename . '.pdf', 'S'))
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '.pdf"');
         }
     }
 
@@ -505,8 +932,12 @@ class ReportsController extends Controller
                 public function collection() { return $this->data; }
             }, $filename . '.xlsx');
         } else {
-            $pdf = PDF::loadView('reports.exports.payroll-summary-pdf', compact('data', 'summary', 'month'));
-            return $pdf->download($filename . '.pdf');
+            $html = view('reports.exports.payroll-summary-pdf', compact('data', 'summary', 'month'))->render();
+            $mpdf = new Mpdf();
+            $mpdf->WriteHTML($html);
+            return response($mpdf->Output($filename . '.pdf', 'S'))
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '.pdf"');
         }
     }
 
@@ -536,8 +967,12 @@ class ReportsController extends Controller
                 public function collection() { return $this->data; }
             }, $filename . '.xlsx');
         } else {
-            $pdf = PDF::loadView('reports.exports.attendance-summary-pdf', compact('data', 'summary', 'month'));
-            return $pdf->download($filename . '.pdf');
+            $html = view('reports.exports.attendance-summary-pdf', compact('data', 'summary', 'month'))->render();
+            $mpdf = new Mpdf();
+            $mpdf->WriteHTML($html);
+            return response($mpdf->Output($filename . '.pdf', 'S'))
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '.pdf"');
         }
     }
 
@@ -567,8 +1002,119 @@ class ReportsController extends Controller
                 public function collection() { return $this->data; }
             }, $filename . '.xlsx');
         } else {
-            $pdf = PDF::loadView('reports.exports.document-inventory-pdf', compact('data', 'summary'));
-            return $pdf->download($filename . '.pdf');
+            $html = view('reports.exports.document-inventory-pdf', compact('data', 'summary'))->render();
+            $mpdf = new Mpdf();
+            $mpdf->WriteHTML($html);
+            return response($mpdf->Output($filename . '.pdf', 'S'))
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '.pdf"');
         }
+    }
+
+    /**
+     * Get required documents compliance data.
+     */
+    private function getRequiredDocumentsCompliance()
+    {
+        $employees = Employee::with('documents')->get();
+        $requiredTypes = ['national_id', 'contract', 'bar_registration'];
+
+        $compliance = [];
+        foreach ($requiredTypes as $type) {
+            $employeesWithType = $employees->filter(function ($employee) use ($type) {
+                return $employee->documents->where('type', $type)->isNotEmpty();
+            })->count();
+
+            $compliance[$type] = [
+                'total_employees' => $employees->count(),
+                'compliant_employees' => $employeesWithType,
+                'compliance_rate' => $employees->count() > 0 ? ($employeesWithType / $employees->count()) * 100 : 0,
+            ];
+        }
+
+        return $compliance;
+    }
+
+    /**
+     * Get missing documents count.
+     */
+    private function getMissingDocumentsCount()
+    {
+        $employees = Employee::with('documents')->get();
+        $requiredTypes = ['national_id', 'contract'];
+
+        $missingCount = 0;
+        foreach ($employees as $employee) {
+            foreach ($requiredTypes as $type) {
+                if ($employee->documents->where('type', $type)->isEmpty()) {
+                    $missingCount++;
+                }
+            }
+        }
+
+        return $missingCount;
+    }
+
+    /**
+     * Export methods placeholder - implement as needed.
+     */
+    private function exportDepartmentAnalysis($analysis, $format)
+    {
+        // Implementation for department analysis export
+        return response()->json(['message' => 'Department analysis export will be implemented']);
+    }
+
+    private function exportPositionAnalysis($analysis, $format)
+    {
+        // Implementation for position analysis export
+        return response()->json(['message' => 'Position analysis export will be implemented']);
+    }
+
+    private function exportContractExpiry($contracts, $groupedContracts, $format)
+    {
+        // Implementation for contract expiry export
+        return response()->json(['message' => 'Contract expiry export will be implemented']);
+    }
+
+    private function exportContractAnalysis($analysis, $format)
+    {
+        // Implementation for contract analysis export
+        return response()->json(['message' => 'Contract analysis export will be implemented']);
+    }
+
+    private function exportSalaryAnalysis($analysis, $format)
+    {
+        // Implementation for salary analysis export
+        return response()->json(['message' => 'Salary analysis export will be implemented']);
+    }
+
+    private function exportPayslipReport($payslips, $summary, $format, $month)
+    {
+        // Implementation for payslip report export
+        return response()->json(['message' => 'Payslip report export will be implemented']);
+    }
+
+    private function exportOvertimeReport($overtimeData, $summary, $format, $month)
+    {
+        // Implementation for overtime report export
+        return response()->json(['message' => 'Overtime report export will be implemented']);
+    }
+
+    private function exportAttendanceTrends($trends, $format, $months)
+    {
+        // Implementation for attendance trends export
+        return response()->json(['message' => 'Attendance trends export will be implemented']);
+    }
+
+    private function exportDocumentExpiry($documents, $groupedDocuments, $format)
+    {
+        // Implementation for document expiry export
+        return response()->json(['message' => 'Document expiry export will be implemented']);
+    }
+
+    private function exportComplianceReport($compliance, $format)
+    {
+        // Implementation for compliance report export
+        return response()->json(['message' => 'Compliance report export will be implemented']);
     }
 }

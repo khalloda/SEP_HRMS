@@ -76,10 +76,25 @@
             </div>
         </form>
 
-        <!-- Export Options -->
+        <!-- Save & Export Options -->
         <hr class="my-3">
-        <div class="row">
-            <div class="col-12">
+        <div class="row align-items-center g-2">
+            <div class="col-12 col-lg-6 d-flex gap-2">
+                <form method="POST" action="{{ route('reports.saved.store') }}" class="d-inline">
+                  @csrf
+                  <input type="hidden" name="name" value="Employee List">
+                  <input type="hidden" name="report_key" value="reports.employee.list">
+                  <input type="hidden" name="params" value='@json(request()->query())'>
+                  <input type="hidden" name="format" value="xlsx">
+                  <button class="btn btn-outline-primary" type="submit">
+                    <i class="fas fa-bookmark"></i> {{ __('Save Report') }}
+                  </button>
+                </form>
+                <a class="btn btn-outline-secondary" href="{{ route('reports.saved.index') }}">
+                  <i class="fas fa-list"></i> {{ __('Saved Reports') }}
+                </a>
+            </div>
+            <div class="col-12 col-lg-6">
                 <h6 class="mb-2">{{ __('Export Options') }}</h6>
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-outline-success" onclick="exportReport('excel')">

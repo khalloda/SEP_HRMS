@@ -427,4 +427,50 @@ class ContractController extends Controller
         return redirect()->route('contracts.index')
             ->with('success', __("Successfully performed {$operation} on {$affectedCount} contracts."));
     }
+
+    // Lifecycle: draft -> review -> approve -> sign
+    public function submitForReview(Contract $contract)
+    {
+        Gate::authorize('update', $contract);
+        if ($contract->status !== 'draft') {
+            return back()->with('error', __('Only draft contracts can be submitted for review.'));
+        }
+        $contract->update(['status' => 'review']);
+        activity('contract')->performedOn($contract)->log('Submitted for review');
+        \DB::table('contract_workflow_logs')->insert([
+            'contract_id'=>$contract->id,
+            'from_status'=>'draft','to_status'=>'review','by_user_id'=>auth()->id(),'created_at'=>now(),'updated_at'=>now()
+        ]);
+        return back()->with('success', __('Contract submitted for review.'));
+    }
+
+    public function approve(Contract $contract)
+    {
+        Gate::authorize('update', $contract);
+        if (!in_array($contract->status, ['review','pending'])) {
+            return back()->with('error', __('Only contracts under review can be approved.'));
+        }
+        $contract->update(['status' => 'approved', 'approved_at'=>now(), 'approved_by'=>auth()->id()]);
+        activity('contract')->performedOn($contract)->log('Approved');
+        \DB::table('contract_workflow_logs')->insert([
+            'contract_id'=>$contract->id,
+            'from_status'=>'review','to_status'=>'approved','by_user_id'=>auth()->id(),'created_at'=>now(),'updated_at'=>now()
+        ]);
+        return back()->with('success', __('Contract approved.'));
+    }
+
+    public function sign(Contract $contract)
+    {
+        Gate::authorize('update', $contract);
+        if ($contract->status !== 'approved') {
+            return back()->with('error', __('Only approved contracts can be signed.'));
+        }
+        $contract->update(['status' => 'active', 'signed_at'=>now(), 'signed_by'=>auth()->id()]);
+        activity('contract')->performedOn($contract)->log('Signed');
+        \DB::table('contract_workflow_logs')->insert([
+            'contract_id'=>$contract->id,
+            'from_status'=>'approved','to_status'=>'active','by_user_id'=>auth()->id(),'created_at'=>now(),'updated_at'=>now()
+        ]);
+        return back()->with('success', __('Contract signed and activated.'));
+    }
 }
