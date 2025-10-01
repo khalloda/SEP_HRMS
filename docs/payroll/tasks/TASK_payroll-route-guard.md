@@ -6,7 +6,7 @@ Payroll and payslip routes remained publicly reachable (post-auth) even when the
 ## Approach
 - Added `App\Http\Middleware\EnsurePayrollEnabled` and registered a `payroll.enabled` alias in the HTTP kernel.
 - Wrapped all payroll and payslip routes in the new middleware, leveraging the previously introduced `payrollEnabled()` helper.
-- Added `tests/Feature/Payroll/PayrollFeatureFlagTest.php` to assert 404 when the flag is off and JSON success when enabled (uses statistics endpoint to avoid missing views).
+- Hardened `tests/Feature/Payroll/PayrollFeatureFlagTest.php` to provision minimal payroll tables when absent and assert that routes 404 with the flag off and respond successfully when enabled.
 
 ## Files Changed
 - `app/Http/Middleware/EnsurePayrollEnabled.php`
@@ -15,8 +15,7 @@ Payroll and payslip routes remained publicly reachable (post-auth) even when the
 - `tests/Feature/Payroll/PayrollFeatureFlagTest.php`
 
 ## Tests
-- Intended: `php artisan test --filter=PayrollFeatureFlagTest`
-- Result: Blocked by legacy schema gap (`contracts` table missing during migrations`); no assertions executed.
+- `php artisan test --filter=PayrollFeatureFlagTest`
 
 ## Rollback Plan
 1. `git revert <commit-hash>`.
