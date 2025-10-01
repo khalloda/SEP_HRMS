@@ -5,6 +5,16 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
+if (! function_exists('payrollEnabled')) {
+    /**
+     * Determine if the enhanced payroll module is enabled.
+     */
+    function payrollEnabled(): bool
+    {
+        return (bool) config('payroll.enabled', false);
+    }
+}
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -13,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         Schema::defaultStringLength(191); // ensure compatibility when services register early
+
+        $this->app->singleton('payroll.enabled', static fn (): bool => payrollEnabled());
     }
 
     /**
