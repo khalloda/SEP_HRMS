@@ -1,4 +1,4 @@
-﻿# Reports Export Foundation
+# Reports Export Foundation
 
 This document outlines the initial infrastructure for the new reports export pipeline.
 
@@ -17,3 +17,6 @@ This document outlines the initial infrastructure for the new reports export pip
 - Integrate additional reports incrementally, reusing the service and adapter structure.
 - Add more granular telemetry and UI polish as subsequent PRs migrate legacy exports.
 - Extend Playwright suites once the UI toggles are wired to the feature flag.
+
+
+\n\n## Paused\n\n- Attendance Summary migration is pending because the attendance aggregation feature is not complete; the report still uses the legacy synchronous export.

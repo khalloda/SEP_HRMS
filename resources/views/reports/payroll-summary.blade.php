@@ -82,6 +82,14 @@
     <div class="card-header bg-light">
         <h5 class="mb-0"><i class="fas fa-filter"></i> {{ __('Filters & Export') }}</h5>
     </div>
+    @if(config('reports.use_new_exports'))
+        <form id="payroll-summary-export-form" method="POST" action="{{ route('reports.exports.store', 'payroll-summary') }}" class="d-none">
+            @csrf
+            <input type="hidden" name="export_format" value="">
+            <input type="hidden" name="month" value="{{ $filters['month'] ?? '' }}">
+            <input type="hidden" name="department_id" value="{{ $filters['department_id'] ?? '' }}">
+        </form>
+    @endif
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-4">
@@ -196,21 +204,21 @@
                         <tr>
                             <td>
                                 <div>
-                                    <strong>{{ $payslip->employee->display_name }}</strong>
-                                    <br><small class="text-muted">{{ $payslip->employee->code }}</small>
+                                    <strong>{{ optional($payslip->employee)->display_name ?? $payslip->employee_name }}</strong>
+                                    <br><small class="text-muted">{{ optional($payslip->employee)->code ?? $payslip->employee_code }}</small>
                                 </div>
                             </td>
                             <td>
-                                <span class="badge bg-outline-primary">{{ $payslip->employee->department->name_en }}</span>
+                                <span class="badge bg-outline-primary">{{ optional(optional($payslip->employee)->department)->name_en ?? $payslip->department_name ?? '-' }}</span>
                             </td>
-                            <td>{{ $payslip->employee->position->name_en }}</td>
+                            <td>{{ optional(optional($payslip->employee)->position)->name_en ?? $payslip->position_name ?? '-' }}</td>
                             @can('view-net-gross-salary')
-                            <td>{{ number_format($payslip->gross_salary, 0) }}</td>
+                            <td>{{ number_format($payslip->gross_salary ?? $payslip->gross_pay ?? 0, 0) }}</td>
                             <td>{{ number_format($payslip->total_deductions, 0) }}</td>
-                            <td><strong>{{ number_format($payslip->net_salary, 0) }}</strong></td>
+                            <td><strong>{{ number_format($payslip->net_salary ?? $payslip->net_pay ?? 0, 0) }}</strong></td>
                             @endcan
                             <td>
-                                {{ $payslip->pay_period_start->format('M j') }} - {{ $payslip->pay_period_end->format('M j, Y') }}
+                                {{ optional($payslip->pay_period_start)->format('M j') ?? '-' }} - {{ optional($payslip->pay_period_end)->format('M j, Y') ?? '-' }}
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
@@ -287,9 +295,19 @@
 @push('scripts')
 <script>
 function exportReport(format) {
+    @if(config('reports.use_new_exports'))
+    const form = document.getElementById('payroll-summary-export-form');
+    if (!form) {
+        return;
+    }
+
+    form.querySelector('input[name=\"export_format\"]').value = format;
+    form.submit();
+    @else
     const currentUrl = new URL(window.location);
     currentUrl.searchParams.set('export_format', format);
     window.location.href = currentUrl.toString();
+    @endif
 }
 </script>
 @endpush

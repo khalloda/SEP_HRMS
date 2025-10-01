@@ -216,7 +216,7 @@ class ReportsController extends Controller
                 ->count(),
         ];
 
-        if ($request->filled('export_format')) {
+        if (! config('reports.use_new_exports') && $request->filled('export_format')) {
             return $this->exportContractStatus($contracts, $summary, $filters['export_format']);
         }
 
@@ -262,7 +262,7 @@ class ReportsController extends Controller
                 }),
         ];
 
-        if ($request->filled('export_format')) {
+        if (! config('reports.use_new_exports') && $request->filled('export_format')) {
             return $this->exportPayrollSummary($payslips, $summary, $filters['export_format'], $month);
         }
 
@@ -1118,3 +1118,4 @@ class ReportsController extends Controller
         return response()->json(['message' => 'Compliance report export will be implemented']);
     }
 }
+

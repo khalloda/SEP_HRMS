@@ -18,6 +18,29 @@ return [
             'queue_threshold' => 1000,
             'formats' => ['excel', 'pdf'],
         ],
+        'contract-status' => [
+            'slug' => 'contract-status',
+            'key' => 'reports.contract.status',
+            'name' => 'Contract Status',
+            'description' => 'Contract tracking with expiry alerts',
+            'permission' => 'reports.view',
+            'adapter' => App\\Reports\\Adapters\\ContractStatusReport::class,
+            'queue_threshold' => 200,
+            'formats' => ['excel', 'pdf'],
+        ],
+        'attendance-summary' => [\n            'slug' => 'attendance-summary',\n            'key' => 'reports.attendance.summary',\n            'name' => 'Attendance Summary',\n            'description' => 'Attendance tracking with time and productivity metrics',\n            'permission' => 'reports.view',\n            'adapter' => App\\Reports\\Adapters\\AttendanceSummaryReport::class,\n            'queue_threshold' => 200,\n            'formats' => ['excel', 'pdf'],\n        ],
+        ],
+        'payroll-summary' => [
+            'slug' => 'payroll-summary',
+            'key' => 'reports.payroll.summary',
+            'name' => 'Payroll Summary',
+            'description' => 'Salary analysis and payroll summaries',
+            'permission' => 'reports.view',
+            'adapter' => App\Reports\Adapters\PayrollSummaryReport::class,
+            'queue_threshold' => 200,
+            'formats' => ['excel', 'pdf'],
+        ],
     ],
 ];
+
 

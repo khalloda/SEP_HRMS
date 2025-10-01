@@ -86,6 +86,14 @@
     <div class="card-header bg-light">
         <h5 class="mb-0"><i class="fas fa-filter"></i> {{ __('Filters & Export') }}</h5>
     </div>
+    @if(config('reports.use_new_exports'))
+        <form id="contract-status-export-form" method="POST" action="{{ route('reports.exports.store', 'contract-status') }}" class="d-none">
+            @csrf
+            <input type="hidden" name="export_format" value="">
+            <input type="hidden" name="status" value="{{ $filters['status'] ?? '' }}">
+            <input type="hidden" name="contract_type" value="{{ $filters['contract_type'] ?? '' }}">
+        </form>
+    @endif
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-4">
@@ -317,9 +325,19 @@
 @push('scripts')
 <script>
 function exportReport(format) {
+    @if(config('reports.use_new_exports'))
+    const form = document.getElementById('contract-status-export-form');
+    if (!form) {
+        return;
+    }
+
+    form.querySelector('input[name=\"export_format\"]').value = format;
+    form.submit();
+    @else
     const currentUrl = new URL(window.location);
     currentUrl.searchParams.set('export_format', format);
     window.location.href = currentUrl.toString();
+    @endif
 }
 </script>
 @endpush
