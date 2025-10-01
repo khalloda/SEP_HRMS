@@ -235,7 +235,7 @@ class SalaryComponent extends Model
             [
                 'code' => 'OVERTIME',
                 'name_en' => 'Overtime',
-                'name_ar' => 'العمل الإضافي',
+                'name_ar' => 'ساعات إضافية',
                 'comp_type' => 'earning',
                 'calc_mode' => 'variable_net_based',
                 'taxable' => true,
@@ -244,7 +244,7 @@ class SalaryComponent extends Model
             [
                 'code' => 'BONUS',
                 'name_en' => 'Bonus',
-                'name_ar' => 'المكافأة',
+                'name_ar' => 'مكافأة',
                 'comp_type' => 'earning',
                 'calc_mode' => 'variable_net_based',
                 'taxable' => true,
@@ -280,7 +280,7 @@ class SalaryComponent extends Model
             [
                 'code' => 'LOAN_DEDUCTION',
                 'name_en' => 'Loan Deduction',
-                'name_ar' => 'قسط القرض',
+                'name_ar' => 'خصم القرض',
                 'comp_type' => 'deduction',
                 'calc_mode' => 'fixed',
                 'taxable' => false,
