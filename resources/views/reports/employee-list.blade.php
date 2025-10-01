@@ -104,6 +104,15 @@
                         <i class="fas fa-file-pdf"></i> {{ __('Export to PDF') }}
                     </button>
                 </div>
+                @if(config('reports.use_new_exports'))
+                    <form id="employee-list-export-form" class="d-none" method="POST" action="{{ route('reports.exports.store', 'employee-list') }}">
+                        @csrf
+                        <input type="hidden" name="export_format" value="">
+                        <input type="hidden" name="department_id" value="{{ $filters['department_id'] ?? '' }}">
+                        <input type="hidden" name="position_id" value="{{ $filters['position_id'] ?? '' }}">
+                        <input type="hidden" name="employment_status" value="{{ $filters['employment_status'] ?? '' }}">
+                    </form>
+                @endif
             </div>
         </div>
     </div>
@@ -243,9 +252,19 @@
 @push('scripts')
 <script>
 function exportReport(format) {
-    const currentUrl = new URL(window.location);
+    @if(config('reports.use_new_exports'))
+    const form = document.getElementById('employee-list-export-form');
+    if (!form) {
+        return;
+    }
+
+    form.querySelector('input[name="export_format"]').value = format;
+    form.submit();
+    @else
+    const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('export_format', format);
     window.location.href = currentUrl.toString();
+    @endif
 }
 </script>
 @endpush

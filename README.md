@@ -371,3 +371,4 @@ The HRMS system has successfully completed **Phase 4 - Documents & Compliance**,
 - ✅ **Document Compliance** (Versioning, Audit Trails, Digest Notifications)
 
 The system is ready for production deployment and operational use by Sarie Eldin & Partners Legal Advisors.
+\n## Report Export Pipeline\n\nA new queued export pipeline is available for selected reports. Enable it by setting REPORTS_USE_NEW_EXPORTS=true in your environment. When enabled, the Employee Directory export uses queued jobs with progress tracking at /reports/exports/{correlation} and files persist on the private storage disk.\n\n- REPORTS_FORCE_QUEUE=true forces all supported reports through the queue (useful for testing).\n- Progress and download links are exposed via the status endpoint (GET /reports/exports/{correlation}/status).\n- Queued jobs are dispatched to the queue defined by REPORTS_EXPORT_QUEUE (default eports).\n

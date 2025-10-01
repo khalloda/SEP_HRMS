@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeController;
@@ -6,6 +6,7 @@ use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\LetterController;
+use App\Http\Controllers\ReportExportsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -399,4 +400,13 @@ Route::get('language/{locale}', function ($locale) {
     }
     return redirect()->back();
 })->name('language.switch');
+
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('reports/exports')->name('reports.exports.')->group(function () {
+        Route::post('{report}', [ReportExportsController::class, 'store'])->name('store');
+        Route::get('{correlation}', [ReportExportsController::class, 'show'])->name('show');
+        Route::get('{correlation}/status', [ReportExportsController::class, 'status'])->name('status');
+        Route::get('{correlation}/download', [ReportExportsController::class, 'download'])->name('download');
+    });
+});
 

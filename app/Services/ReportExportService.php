@@ -2,98 +2,236 @@
 
 namespace App\Services;
 
-use App\Exports\ArrayExport;
+use App\Exports\GenericReportExport;
+use App\Jobs\GenerateReportExport;
 use App\Models\Employee;
-use App\Models\Contract;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Mpdf\Mpdf;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportExportService
 {
-    public static function generateAttachment(array $report): ?array
-    {
-        $key = $report['report_key'] ?? '';
-        $format = strtolower($report['format'] ?? 'xlsx');
-        $params = $report['params'] ?? [];
+    public const STATUS_QUEUED = 'queued';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_COMPLETED = 'completed';
+    public const STATUS_FAILED = 'failed';
 
-        switch ($key) {
-            case 'reports.employee.list':
-                $head = ['Name','Department','Position','Status'];
-                $rows = self::employeeListRows($params);
-                $filename = 'employee_list_'.date('Ymd_His').'.'.$format;
-                return self::makeFile($head, $rows, $format, $filename);
-            case 'reports.contract.status':
-                $head = ['Employee','Status','Type','Start','End'];
-                $rows = self::contractStatusRows($params);
-                $filename = 'contract_status_'.date('Ymd_His').'.'.$format;
-                return self::makeFile($head, $rows, $format, $filename);
-            default:
-                return null; // Unsupported for now
+    public function start(string $slug, array $filters, string $format, Authenticatable $user)
+    {
+        $definition = $this->definition($slug);
+        abort_unless($definition, 404, __('Selected report is not available.'));
+        abort_if(!$user->can($definition['permission']), 403);
+
+        $format = strtolower($format);
+        abort_unless(in_array($format, $definition['formats'], true), 422, __('Unsupported export format.'));
+
+        $correlationId = (string) Str::uuid();
+        $filename = $this->buildFilename($slug, $filters, $format);
+
+        $state = [
+            'correlation_id' => $correlationId,
+            'report_slug' => $slug,
+            'report_name' => $definition['name'],
+            'status' => self::STATUS_QUEUED,
+            'format' => $format,
+            'requested_by' => $user->id,
+            'queued_at' => now()->toIso8601String(),
+            'filename' => $filename,
+            'download_path' => null,
+            'progress' => 0,
+            'total_rows' => null,
+            'processed_rows' => 0,
+        ];
+
+        Cache::put($this->cacheKey($correlationId), $state, $this->ttl());
+
+        Log::withContext(['correlation_id' => $correlationId])
+            ->info('Report export queued.', ['report' => $slug]);
+
+        GenerateReportExport::dispatch($correlationId, $slug, $filters, $format)
+            ->onConnection(Config::get('reports.queue_connection'))
+            ->onQueue(Config::get('reports.queue_name'));
+
+        return $state;
+    }
+
+    public function runQueued(string $correlationId, string $slug, array $filters, string $format): void
+    {
+        $definition = $this->definition($slug);
+        abort_unless($definition, 404);
+
+        $this->updateState($correlationId, function (array $state) use ($slug) {
+            $state['status'] = self::STATUS_PROCESSING;
+            $state['started_at'] = now()->toIso8601String();
+
+            Log::withContext(['correlation_id' => $state['correlation_id']])
+                ->info('Report export processing started.', ['report' => $slug]);
+
+            return $state;
+        });
+
+        try {
+            $payload = $this->fetchRows($slug, $filters);
+            $totalRows = $payload['rows']->count();
+
+            $this->updateState($correlationId, function (array $state) use ($totalRows) {
+                $state['total_rows'] = $totalRows;
+                return $state;
+            });
+
+            $path = $this->storeExport($correlationId, $payload, $format);
+
+            $this->updateState($correlationId, function (array $state) use ($path) {
+                $state['status'] = self::STATUS_COMPLETED;
+                $state['download_path'] = $path;
+                $state['progress'] = 100;
+                $state['processed_rows'] = $state['total_rows'];
+                $state['completed_at'] = now()->toIso8601String();
+                return $state;
+            });
+
+            Log::withContext(['correlation_id' => $correlationId])
+                ->info('Report export completed.');
+        } catch (\Throwable $exception) {
+            $this->markFailed($correlationId, $exception);
+            throw $exception;
         }
     }
 
-    private static function employeeListRows(array $p): array
+    public function download(string $correlationId): BinaryFileResponse|StreamedResponse
     {
-        $q = Employee::with(['department','position'])
-            ->when(($p['department_id'] ?? null), fn($qq,$v)=>$qq->where('department_id',$v))
-            ->when(($p['position_id'] ?? null), fn($qq,$v)=>$qq->where('position_id',$v))
-            ->when(($p['employment_status'] ?? null), fn($qq,$v)=>$qq->where('employment_status',$v))
-            ->orderBy('last_name');
-        return $q->get()->map(function($e){
-            return [
-                ($e->arabic_name ?: ($e->first_name.' '.$e->last_name)),
-                $e->department->name_en ?? '',
-                $e->position->name_en ?? '',
-                ucfirst($e->employment_status ?? $e->status)
-            ];
-        })->toArray();
+        $state = $this->getStatus($correlationId);
+        abort_unless(($state['status'] ?? null) === self::STATUS_COMPLETED, 404);
+
+        $path = $state['download_path'] ?? null;
+        abort_unless($path && Storage::disk('private')->exists($path), 404);
+
+        return Storage::disk('private')->download($path, $state['filename'] ?? basename($path));
     }
 
-    private static function contractStatusRows(array $p): array
+    public function markFailed(string $correlationId, \Throwable $exception): void
     {
-        $q = Contract::with('employee')
-            ->when(($p['status'] ?? null), fn($qq,$v)=>$qq->where('status',$v))
-            ->when(($p['contract_type'] ?? null), fn($qq,$v)=>$qq->where('type',$v))
-            ->latest('start_date');
-        return $q->get()->map(function($c){
-            return [
-                $c->employee?->full_name,
-                ucfirst($c->status),
-                ucfirst($c->type),
-                optional($c->start_date)->format('Y-m-d'),
-                optional($c->end_date)->format('Y-m-d')
-            ];
-        })->toArray();
+        $this->updateState($correlationId, function (array $state) use ($exception) {
+            $state['status'] = self::STATUS_FAILED;
+            $state['message'] = $exception->getMessage();
+            $state['failed_at'] = now()->toIso8601String();
+            return $state;
+        });
+
+        Log::withContext(['correlation_id' => $correlationId])
+            ->error('Report export failed.', ['exception' => $exception]);
     }
 
-    private static function makeFile(array $head, array $rows, string $format, string $filename): array
+    public function getStatus(string $correlationId): ?array
     {
-        $tmpDir = storage_path('app/tmp');
-        if (!is_dir($tmpDir)) @mkdir($tmpDir, 0775, true);
-        $path = $tmpDir.'/'.Str::random(8).'_'.$filename;
-        if (in_array($format, ['xlsx','csv'])) {
-            $writer = $format === 'csv' ? \Maatwebsite\Excel\Excel::CSV : \Maatwebsite\Excel\Excel::XLSX;
-            $bin = Excel::raw(new ArrayExport($head, $rows), $writer);
-            file_put_contents($path, $bin);
-        } elseif ($format === 'pdf') {
-            $html = '<h3>'.$filename.'</h3><table border="1" cellpadding="6" cellspacing="0"><thead><tr>';
-            foreach ($head as $h) $html .= '<th>'.htmlspecialchars($h).'</th>';
-            $html .= '</tr></thead><tbody>';
-            foreach ($rows as $r) {
-                $html .= '<tr>'; foreach ($r as $cell) { $html .= '<td>'.htmlspecialchars((string)$cell).'</td>'; } $html .= '</tr>';
-            }
-            $html .= '</tbody></table>';
-            $mpdf = new Mpdf(['tempDir' => storage_path('app/tmp')]);
-            $mpdf->WriteHTML($html);
-            $mpdf->Output($path, \Mpdf\Output\Destination::FILE);
+        return Cache::get($this->cacheKey($correlationId));
+    }
+
+    protected function storeExport(string $correlationId, array $payload, string $format): string
+    {
+        $path = 'report-exports/' . $correlationId . '/report.' . $format;
+        Storage::disk('private')->makeDirectory(dirname($path));
+
+        if ($format === 'excel') {
+            $export = new GenericReportExport(function () use ($payload) {
+                foreach ($payload['rows'] as $row) {
+                    yield array_values($row);
+                }
+            }, $payload['headings']);
+
+            Excel::store($export, $path, 'private');
         } else {
-            // default xlsx
-            $bin = Excel::raw(new ArrayExport($head, $rows), \Maatwebsite\Excel\Excel::XLSX);
-            file_put_contents($path, $bin);
+            $mpdf = new Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4',
+                'margin_top' => 15,
+                'margin_left' => 12,
+                'margin_right' => 12,
+                'tempDir' => storage_path('app/tmp'),
+            ]);
+
+            $mpdf->WriteHTML(view('reports.exports.employee-list-pdf', [
+                'data' => $payload['rows'],
+                'generatedAt' => now(),
+            ])->render());
+
+            Storage::disk('private')->put($path, $mpdf->Output('', 'S'));
         }
-        return ['path'=>$path,'filename'=>$filename];
+
+        return $path;
+    }
+
+    protected function fetchRows(string $slug, array $filters): array
+    {
+        if ($slug !== 'employee-list') {
+            throw new \InvalidArgumentException('Unsupported report: ' . $slug);
+        }
+
+        $query = Employee::query()
+            ->with(['department', 'position', 'manager'])
+            ->when($filters['department_id'] ?? null, fn (Builder $builder, $department) => $builder->where('department_id', $department))
+            ->when($filters['position_id'] ?? null, fn (Builder $builder, $position) => $builder->where('position_id', $position));
+
+        $rows = $query
+            ->orderBy('department_id')
+            ->orderBy('last_name')
+            ->get()
+            ->map(function (Employee $employee) {
+                return [
+                    'Employee Code' => $employee->code,
+                    'Full Name' => $employee->display_name,
+                    'Department' => $employee->department->name_en ?? '-',
+                    'Position' => $employee->position->name_en ?? '-',
+                    'Employment Status' => ucfirst($employee->employment_status ?? $employee->status ?? ''),
+                    'Hire Date' => optional($employee->hire_date)->format('Y-m-d') ?? '-',
+                    'Manager' => $employee->manager->display_name ?? __('Unassigned'),
+                    'Work Email' => $employee->email ?? __('N/A'),
+                    'Phone' => $employee->phone ?? __('N/A'),
+                ];
+            });
+
+        return [
+            'headings' => [
+                __('Employee Code'),
+                __('Full Name'),
+                __('Department'),
+                __('Position'),
+                __('Employment Status'),
+                __('Hire Date'),
+                __('Manager'),
+                __('Work Email'),
+                __('Phone'),
+            ],
+            'rows' => $rows,
+        ];
+    }
+
+    protected function buildFilename(string $slug, array $filters, string $format): string
+    {
+        $suffix = now()->format('Ymd_His');
+        return $slug . '_' . $suffix . '.' . $format;
+    }
+
+    protected function cacheKey(string $correlationId): string
+    {
+        return 'report_exports:' . $correlationId;
+    }
+
+    protected function ttl(): int
+    {
+        return (int) Config::get('reports.cache_ttl', 3600);
+    }
+
+    protected function definition(string $slug): ?array
+    {
+        return Config::get('reports.definitions.' . $slug);
     }
 }
 

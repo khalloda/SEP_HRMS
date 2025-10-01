@@ -3,9 +3,13 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "playwright:install": "npx playwright install",
+        "test:e2e": "npx playwright test",
+        "test:e2e:headed": "npx playwright test --headed"
     },
     "devDependencies": {
+        "@playwright/test": "^1.55.1",
         "axios": "^1.6.4",
         "laravel-vite-plugin": "^1.0.0",
         "vite": "^5.0.0"
