@@ -7,11 +7,13 @@ use App\Models\Payslip;
 use App\Models\Employee;
 use App\Services\PayrollCalculationService;
 use App\Exports\ArrayExport;
+use App\Jobs\ProcessPayrollRun;
 use App\Reports\Adapters\PayrollSummaryReport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class PayrollController extends Controller
@@ -252,7 +254,21 @@ class PayrollController extends Controller
                 ->with('validation_issues', $validationIssues);
         }
 
-        $results = $this->calculationService->calculatePayrollRun($payrollRun);
+        $correlationId = $this->resolveCalculationCorrelationId();
+
+        if (config('payroll.queue_enabled')) {
+            ProcessPayrollRun::dispatch($payrollRun->id, $correlationId);
+
+            return redirect()->route('payroll.show', $payrollRun)
+                ->with('success', __('Payroll run queued for processing.'))
+                ->with('calculation_job', [
+                    'correlation_id' => $correlationId,
+                ]);
+        }
+
+        $results = $this->calculationService->calculatePayrollRun($payrollRun, [
+            'correlation_id' => $correlationId,
+        ]);
 
         if ($results['success']) {
             $message = __('hrms.payroll.calculated_successfully', [
@@ -272,6 +288,23 @@ class PayrollController extends Controller
                 ->with('error', __('hrms.payroll.calculation_failed'))
                 ->with('calculation_errors', $results['errors']);
         }
+    }
+
+    protected function resolveCalculationCorrelationId(): string
+    {
+        $request = request();
+
+        if ($request && $request->attributes->has('correlation_id')) {
+            return (string) $request->attributes->get('correlation_id');
+        }
+
+        $correlationId = (string) Str::uuid();
+
+        if ($request) {
+            $request->attributes->set('correlation_id', $correlationId);
+        }
+
+        return $correlationId;
     }
 
     /**
