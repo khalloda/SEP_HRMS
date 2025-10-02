@@ -34,3 +34,4 @@ The payroll run show endpoint rendered an oversized monolithic Blade template, l
 
 - Reused the shared status banners partial on payslip index/show so flash + correlation messaging stays consistent across payroll screens (`resources/views/payslips/index.blade.php`, `resources/views/payslips/show.blade.php`).
 - Added Playwright smoke coverage for the payroll show lifecycle UX; run with `npx playwright test --grep "Payroll Run Show Lifecycles"` (requires dev server). (`tests/Playwright/payroll-show.spec.ts`).
+- Added negative authorization coverage to assert non-managers receive 403 on lock/approve/post routes (`tests/Feature/Payroll/PayrollShowViewTest.php`).

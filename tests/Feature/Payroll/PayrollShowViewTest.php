@@ -440,6 +440,36 @@ class PayrollShowViewTest extends TestCase
             ->assertDontSee("/payroll/{$approvedRun->id}/approve");
     }
 
+    public function test_unauthorized_users_cannot_trigger_lifecycle_actions(): void
+    {
+        config()->set('payroll.enabled', true);
+
+        $user = User::create([
+            'name' => 'Coordinator',
+            'email' => 'coordinator-' . Str::uuid() . '@example.com',
+            'password' => bcrypt('password123'),
+        ]);
+        $user->assignRole('HR_Coordinator');
+
+        $run = PayrollRun::create([
+            'title' => 'Draft Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_DRAFT,
+            'currency' => 'SAR',
+            'total_employees' => 1,
+            'total_gross' => 1000,
+            'total_net' => 800,
+            'total_deductions' => 200,
+            'created_by' => $user->id,
+        ]);
+
+        $this->actingAs($user)->post(route('payroll.lock', $run))->assertForbidden();
+        $this->actingAs($user)->post(route('payroll.approve', $run))->assertForbidden();
+        $this->actingAs($user)->post(route('payroll.post', $run))->assertForbidden();
+    }
+
     public function test_show_page_respects_feature_flag(): void
     {
         config()->set('payroll.enabled', false);
