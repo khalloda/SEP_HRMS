@@ -28,3 +28,5 @@ The payroll run show endpoint rendered an oversized monolithic Blade template, l
 ## Follow-up 2025-10-02
 - Updated the main navigation dropdown to link to `payroll.index` and `payslips.index` when the feature flag is enabled, removing the placeholder alerts while keeping disabled styling when the module remains off (`resources/views/layouts/app.blade.php`).
 - Surface shared status banners on the payroll index page so flash messages and correlation references appear consistently across the module (`resources/views/payroll/index.blade.php`).
+- Ensured all lifecycle actions redirect back to the show page with flash messaging and added feature coverage for lock/unlock/approve/post/cancel flows (`app/Http/Controllers/PayrollController.php`, `tests/Feature/Payroll/PayrollShowViewTest.php`).
+- Added a Bootstrap modal on the payroll show actions card so HR can supply the mandatory cancellation reason before submitting the delete flow (`resources/views/payroll/show.blade.php`).

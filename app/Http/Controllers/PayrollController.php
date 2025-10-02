@@ -466,12 +466,13 @@ class PayrollController extends Controller
         $cancelled = $payrollRun->cancel(auth()->user(), $validated['cancellation_reason']);
 
         if ($cancelled) {
-            return redirect()->route('payroll.index')
-                ->with('success', __('hrms.payroll.cancelled_successfully'));
-        } else {
             return redirect()->route('payroll.show', $payrollRun)
-                ->with('error', __('hrms.payroll.cancellation_failed'));
+                ->with('success', __('hrms.payroll.cancelled_successfully'));
         }
+
+        return redirect()->route('payroll.show', $payrollRun)
+            ->with('error', __('hrms.payroll.cancellation_failed'));
+
     }
 
     /**
@@ -592,3 +593,4 @@ class PayrollController extends Controller
         abort(501, __('Export format not yet supported.'));
     }
 }
+

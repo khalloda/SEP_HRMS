@@ -114,19 +114,42 @@
                             </form>
                         @endcan
                         @can('delete', $payrollRun)
-                            <form method="POST" action="{{ route('payroll.cancel', ['payrollRun' => $payrollRun]) }}" onsubmit="return confirm('{{ __('Are you sure you want to cancel this payroll run?') }}');">
-                                @csrf
-                                <button type="submit" class="btn btn-outline-danger btn-sm">
-                                    <i class="fas fa-ban"></i>
-                                    <span class="ms-1">{{ __('Cancel') }}</span>
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelPayrollModal-{{ $payrollRun->id }}">
+                                <i class="fas fa-ban"></i>
+                                <span class="ms-1">{{ __('Cancel') }}</span>
+                            </button>
                         @endcan
                     </div>
                     <div class="mt-auto small text-muted pt-3">
                         {{ __('Available actions adjust dynamically based on the payroll status and your permissions.') }}
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="cancelPayrollModal-{{ $payrollRun->id }}" tabindex="-1" aria-labelledby="cancelPayrollModalLabel-{{ $payrollRun->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelPayrollModalLabel-{{ $payrollRun->id }}">{{ __('Cancel Payroll Run') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
+                </div>
+                <form method="POST" action="{{ route('payroll.cancel', ['payrollRun' => $payrollRun]) }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="cancel-reason-{{ $payrollRun->id }}" class="form-label">{{ __('Cancellation Reason') }}</label>
+                            <textarea id="cancel-reason-{{ $payrollRun->id }}" name="cancellation_reason" class="form-control" rows="3" required placeholder="{{ __('Provide the reason for cancellation...') }}"></textarea>
+                        </div>
+                        <p class="small text-muted mb-0">{{ __('Cancelling reverts the run to a historical snapshot; recalculation will be required to resume payroll processing.') }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
+                        <button type="submit" class="btn btn-danger">{{ __('Confirm Cancellation') }}</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

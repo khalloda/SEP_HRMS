@@ -175,6 +175,168 @@ class PayrollShowViewTest extends TestCase
     }
 
 
+    public function test_lock_action_redirects_back_with_success_flash(): void
+    {
+        config()->set('payroll.enabled', true);
+
+        $user = $this->makeHrAdminUser();
+
+        $run = PayrollRun::create([
+            'title' => 'Lockable Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_CALCULATED,
+            'currency' => 'SAR',
+            'total_employees' => 2,
+            'total_gross' => 20000,
+            'total_net' => 18000,
+            'total_deductions' => 2000,
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('payroll.lock', $run));
+
+        $response->assertRedirect(route('payroll.show', $run));
+        $response->assertSessionHas('success', __('hrms.payroll.locked_successfully'));
+
+        $run->refresh();
+
+        $this->assertEquals(PayrollRun::STATUS_LOCKED, $run->status);
+        $this->assertEquals($user->id, $run->locked_by);
+    }
+
+    public function test_unlock_action_redirects_back_with_success_flash(): void
+    {
+        config()->set('payroll.enabled', true);
+
+        $user = $this->makeHrAdminUser();
+
+        $run = PayrollRun::create([
+            'title' => 'Unlockable Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_LOCKED,
+            'currency' => 'SAR',
+            'locked_by' => $user->id,
+            'locked_at' => now(),
+            'total_employees' => 2,
+            'total_gross' => 20000,
+            'total_net' => 18000,
+            'total_deductions' => 2000,
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('payroll.unlock', $run));
+
+        $response->assertRedirect(route('payroll.show', $run));
+        $response->assertSessionHas('success', __('hrms.payroll.unlocked_successfully'));
+
+        $run->refresh();
+
+        $this->assertEquals(PayrollRun::STATUS_CALCULATED, $run->status);
+        $this->assertNull($run->locked_by);
+    }
+
+    public function test_approve_action_redirects_back_with_success_flash(): void
+    {
+        config()->set('payroll.enabled', true);
+
+        $user = $this->makeHrAdminUser();
+
+        $run = PayrollRun::create([
+            'title' => 'Approval Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_PENDING_APPROVAL,
+            'currency' => 'SAR',
+            'locked_by' => $user->id,
+            'locked_at' => now(),
+            'total_employees' => 2,
+            'total_gross' => 20000,
+            'total_net' => 18000,
+            'total_deductions' => 2000,
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('payroll.approve', $run));
+
+        $response->assertRedirect(route('payroll.show', $run));
+        $response->assertSessionHas('success', __('hrms.payroll.approved_successfully'));
+
+        $run->refresh();
+
+        $this->assertEquals(PayrollRun::STATUS_APPROVED, $run->status);
+        $this->assertEquals($user->id, $run->approved_by);
+    }
+
+    public function test_post_action_redirects_back_with_success_flash(): void
+    {
+        config()->set('payroll.enabled', true);
+
+        $user = $this->makeHrAdminUser();
+
+        $run = PayrollRun::create([
+            'title' => 'Postable Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_LOCKED,
+            'currency' => 'SAR',
+            'locked_by' => $user->id,
+            'locked_at' => now(),
+            'total_employees' => 2,
+            'total_gross' => 20000,
+            'total_net' => 18000,
+            'total_deductions' => 2000,
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('payroll.post', $run));
+
+        $response->assertRedirect(route('payroll.show', $run));
+        $response->assertSessionHas('success', __('hrms.payroll.posted_successfully'));
+
+        $run->refresh();
+
+        $this->assertEquals(PayrollRun::STATUS_POSTED, $run->status);
+        $this->assertEquals($user->id, $run->posted_by);
+    }
+
+    public function test_cancel_action_redirects_back_with_success_flash(): void
+    {
+        config()->set('payroll.enabled', true);
+
+        $user = $this->makeHrAdminUser();
+
+        $run = PayrollRun::create([
+            'title' => 'Cancelable Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_DRAFT,
+            'currency' => 'SAR',
+            'total_employees' => 2,
+            'total_gross' => 20000,
+            'total_net' => 18000,
+            'total_deductions' => 2000,
+            'created_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('payroll.cancel', $run), [
+            'cancellation_reason' => 'Testing cancellation path',
+        ]);
+
+        $response->assertRedirect(route('payroll.show', $run));
+        $response->assertSessionHas('success', __('hrms.payroll.cancelled_successfully'));
+
+        $run->refresh();
+
+        $this->assertEquals(PayrollRun::STATUS_CANCELLED, $run->status);
+    }
+
     public function test_show_page_respects_feature_flag(): void
     {
         config()->set('payroll.enabled', false);
@@ -204,6 +366,19 @@ class PayrollShowViewTest extends TestCase
             ->get(route('payroll.show', $run))
             ->assertNotFound();
     }
+    private function makeHrAdminUser(): User
+    {
+        $user = User::create([
+            'name' => 'Payroll Admin',
+            'email' => 'payroll-admin-' . Str::uuid() . '@example.com',
+            'password' => bcrypt('password123'),
+        ]);
+
+        $user->assignRole('HR_Admin_Manager');
+
+        return $user;
+    }
+
     protected function ensurePayrollSchema(): void
     {
         if (! Schema::hasColumn('payroll_runs', 'currency')) {
