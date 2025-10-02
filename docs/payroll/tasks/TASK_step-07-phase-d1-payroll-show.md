@@ -33,3 +33,4 @@ The payroll run show endpoint rendered an oversized monolithic Blade template, l
 - Tightened `PayrollPolicy::approve` to require pending approval status and added regression coverage ensuring action buttons only appear when policies allow (`app/Policies/PayrollPolicy.php`, `tests/Feature/Payroll/PayrollShowViewTest.php`).
 
 - Reused the shared status banners partial on payslip index/show so flash + correlation messaging stays consistent across payroll screens (`resources/views/payslips/index.blade.php`, `resources/views/payslips/show.blade.php`).
+- Added Playwright smoke coverage for the payroll show lifecycle UX; run with `npx playwright test --grep "Payroll Run Show Lifecycles"` (requires dev server). (`tests/Playwright/payroll-show.spec.ts`).
