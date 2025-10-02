@@ -24,3 +24,6 @@ The payroll run show endpoint rendered an oversized monolithic Blade template, l
 1. Remove the new partials and restore `resources/views/payroll/show.blade.php` to the previous single-file implementation.
 2. Revert `PayrollController@show`, `routes/web.php`, and `PayrollShowViewTest.php` to their prior versions.
 3. Clear cached routes/config if necessary: `php artisan route:clear && php artisan config:clear`.
+
+## Follow-up 2025-10-02
+- Updated the main navigation dropdown to link to `payroll.index` and `payslips.index` when the feature flag is enabled, removing the placeholder alerts while keeping disabled styling when the module remains off (`resources/views/layouts/app.blade.php`).

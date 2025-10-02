@@ -174,12 +174,21 @@
                                     <i class="fas fa-list"></i> {{ __('Salary Components') }}
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#" onclick="alert('Payroll runs view coming soon!')">
-                                    <i class="fas fa-play-circle"></i> {{ __('Payroll Runs') }}
-                                </a></li>
-                                <li><a class="dropdown-item" href="#" onclick="alert('Payslips view coming soon!')">
-                                    <i class="fas fa-file-invoice-dollar"></i> {{ __('Payslips') }}
-                                </a></li>
+                                @if(payrollEnabled())
+                                    <li><a class="dropdown-item" href="{{ route('payroll.index') }}">
+                                        <i class="fas fa-play-circle"></i> {{ __('Payroll Runs') }}
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ route('payslips.index') }}">
+                                        <i class="fas fa-file-invoice-dollar"></i> {{ __('Payslips') }}
+                                    </a></li>
+                                @else
+                                    <li><span class="dropdown-item text-muted" role="presentation">
+                                        <i class="fas fa-play-circle me-2"></i>{{ __('Payroll Runs') }}
+                                    </span></li>
+                                    <li><span class="dropdown-item text-muted" role="presentation">
+                                        <i class="fas fa-file-invoice-dollar me-2"></i>{{ __('Payslips') }}
+                                    </span></li>
+                                @endif
                             </ul>
                         </li>
 
