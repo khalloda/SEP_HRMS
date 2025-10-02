@@ -440,6 +440,36 @@ class PayrollShowViewTest extends TestCase
             ->assertDontSee("/payroll/{$approvedRun->id}/approve");
     }
 
+    public function test_cancelled_run_displays_cancellation_details(): void
+    {
+        config()->set('payroll.enabled', true);
+
+        $admin = $this->makeHrAdminUser();
+
+        $run = PayrollRun::create([
+            'title' => 'Cancelled Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_DRAFT,
+            'currency' => 'SAR',
+            'total_employees' => 1,
+            'total_gross' => 1200,
+            'total_net' => 900,
+            'total_deductions' => 300,
+            'created_by' => $admin->id,
+        ]);
+
+        $run->cancel($admin, 'Budget constraints');
+
+        $response = $this->actingAs($admin)->get(route('payroll.show', $run));
+
+        $response->assertOk();
+        $response->assertSee('Cancellation Reason');
+        $response->assertSee('Budget constraints');
+        $response->assertSee('Status: Cancelled');
+    }
+
     public function test_unauthorized_users_cannot_trigger_lifecycle_actions(): void
     {
         config()->set('payroll.enabled', true);

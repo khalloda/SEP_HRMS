@@ -187,6 +187,22 @@ class PayrollController extends Controller
         $flashValidationIssues = (array) session('validation_issues', []);
         $validationIssues = array_values(array_unique(array_merge($validationIssues, $flashValidationIssues)));
 
+        $cancellationDetails = null;
+        if ($payrollRun->isCancelled()) {
+            $latestCancellation = $payrollRun->activities()
+                ->where('description', 'Payroll run cancelled')
+                ->latest('created_at')
+                ->with('causer')
+                ->first();
+
+            if ($latestCancellation) {
+                $cancellationDetails = [
+                    'reason' => data_get($latestCancellation->properties, 'cancellation_reason'),
+                    'by' => optional($latestCancellation->causer)->name,
+                    'at' => $latestCancellation->created_at,
+                ];
+            }
+        }
 
         return view('payroll.show', [
             'payrollRun' => $payrollRun,
@@ -198,6 +214,7 @@ class PayrollController extends Controller
             'calculationJob' => session('calculation_job'),
             'successMessage' => session('success'),
             'errorMessage' => session('error'),
+            'cancellationDetails' => $cancellationDetails,
         ]);
     }
 

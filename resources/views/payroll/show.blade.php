@@ -19,6 +19,22 @@
     ])
 
     <div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
+        @if(!empty($cancellationDetails))
+            <div class="alert alert-warning d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3 w-100">
+                <div>
+                    <strong>{{ __('Cancellation Reason') }}:</strong> {{ $cancellationDetails['reason'] ?? __('N/A') }}
+                    @if(!empty($cancellationDetails['by']) || !empty($cancellationDetails['at']))
+                        <div class="small text-muted mt-1">
+                            {{ __('Cancelled by :name on :date', [
+                                'name' => $cancellationDetails['by'] ?? __('Unknown'),
+                                'date' => optional($cancellationDetails['at'])->format('Y-m-d H:i') ?? __('Unknown')
+                            ]) }}
+                        </div>
+                    @endif
+                </div>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">{{ __('Status: Cancelled') }}</span>
+            </div>
+        @endif
         <div>
             <h1 class="h3 mb-1">{{ $payrollRun->title }}</h1>
             <p class="text-muted mb-0">
@@ -179,7 +195,3 @@
     @endif
 </div>
 @endsection
-
-
-
-
