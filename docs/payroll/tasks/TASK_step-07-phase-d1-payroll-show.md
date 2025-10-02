@@ -27,3 +27,4 @@ The payroll run show endpoint rendered an oversized monolithic Blade template, l
 
 ## Follow-up 2025-10-02
 - Updated the main navigation dropdown to link to `payroll.index` and `payslips.index` when the feature flag is enabled, removing the placeholder alerts while keeping disabled styling when the module remains off (`resources/views/layouts/app.blade.php`).
+- Surface shared status banners on the payroll index page so flash messages and correlation references appear consistently across the module (`resources/views/payroll/index.blade.php`).

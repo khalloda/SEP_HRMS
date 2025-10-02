@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="container-fluid">
+    @include('payroll.partials.status-banners')
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
         <div>
             <h1 class="h3 mb-1">{{ __('Payroll Runs') }}</h1>
