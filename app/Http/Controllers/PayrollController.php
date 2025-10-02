@@ -184,7 +184,21 @@ class PayrollController extends Controller
             $validationIssues = $this->calculationService->validatePayrollRun($payrollRun);
         }
 
-        return view('payroll.show', compact('payrollRun', 'summary', 'validationIssues'));
+        $flashValidationIssues = (array) session('validation_issues', []);
+        $validationIssues = array_values(array_unique(array_merge($validationIssues, $flashValidationIssues)));
+
+
+        return view('payroll.show', [
+            'payrollRun' => $payrollRun,
+            'summary' => $summary,
+            'validationIssues' => $validationIssues,
+            'calculationReference' => session('calculation_reference'),
+            'calculationResults' => session('calculation_results'),
+            'calculationErrors' => session('calculation_errors'),
+            'calculationJob' => session('calculation_job'),
+            'successMessage' => session('success'),
+            'errorMessage' => session('error'),
+        ]);
     }
 
     /**

@@ -196,7 +196,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware('payroll.enabled')->group(function () {
         // Payroll runs management
-        Route::resource('payroll', \App\Http\Controllers\PayrollController::class);
+        Route::resource('payroll', \App\Http\Controllers\PayrollController::class)
+            ->parameters(['payroll' => 'payrollRun']);
         Route::post('payroll/{payrollRun}/calculate', [\App\Http\Controllers\PayrollController::class, 'calculate'])
             ->name('payroll.calculate');
         Route::post('payroll/{payrollRun}/lock', [\App\Http\Controllers\PayrollController::class, 'lock'])
