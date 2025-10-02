@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', __('Create Payroll Run'))
 
@@ -17,22 +17,22 @@
         </a>
     </div>
 
-    @if(->any())
+    @if($errors->any())
         <div class="alert alert-danger">
             <h6 class="fw-semibold mb-2">{{ __('Please correct the highlighted fields below.') }}</h6>
             <ul class="mb-0 small">
-                @foreach(->all() as )
-                    <li>{{  }}</li>
+                @foreach($errors->all() as $message)
+                    <li>{{ $message }}</li>
                 @endforeach
             </ul>
         </div>
     @endif
 
     @php
-         = ['USD' => 'USD', 'EUR' => 'EUR', 'EGP' => 'EGP'];
-         = optional()->format('Y-m-d');
-         = optional()->format('Y-m-d');
-         = optional()->format('Y-m-d');
+        $currencyOptions = ['USD' => 'USD', 'EUR' => 'EUR', 'EGP' => 'EGP'];
+        $suggestedStartValue = optional($suggestedStart)->format('Y-m-d');
+        $suggestedEndValue = optional($suggestedEnd)->format('Y-m-d');
+        $suggestedPayDateValue = optional($suggestedPayDate)->format('Y-m-d');
     @endphp
 
     <form method="POST" action="{{ route('payroll.store') }}" class="row g-3">
@@ -57,7 +57,7 @@
                                 maxlength="255"
                             >
                             @error('title')
-                                <div class="invalid-feedback">{{  }}</div>
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">{{ __('Leave blank to auto-generate based on the pay period.') }}</div>
                         </div>
@@ -72,7 +72,7 @@
                                 placeholder="{{ __('Optional summary visible to payroll approvers.') }}"
                             >{{ old('description') }}</textarea>
                             @error('description')
-                                <div class="invalid-feedback">{{  }}</div>
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-4">
@@ -81,12 +81,12 @@
                                 type="date"
                                 id="pay_period_start"
                                 name="pay_period_start"
-                                value="{{ old('pay_period_start', ) }}"
+                                value="{{ old('pay_period_start', $suggestedStartValue) }}"
                                 class="form-control @error('pay_period_start') is-invalid @enderror"
                                 required
                             >
                             @error('pay_period_start')
-                                <div class="invalid-feedback">{{  }}</div>
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-4">
@@ -95,12 +95,12 @@
                                 type="date"
                                 id="pay_period_end"
                                 name="pay_period_end"
-                                value="{{ old('pay_period_end', ) }}"
+                                value="{{ old('pay_period_end', $suggestedEndValue) }}"
                                 class="form-control @error('pay_period_end') is-invalid @enderror"
                                 required
                             >
                             @error('pay_period_end')
-                                <div class="invalid-feedback">{{  }}</div>
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-4">
@@ -109,12 +109,12 @@
                                 type="date"
                                 id="pay_date"
                                 name="pay_date"
-                                value="{{ old('pay_date', ) }}"
+                                value="{{ old('pay_date', $suggestedPayDateValue) }}"
                                 class="form-control @error('pay_date') is-invalid @enderror"
                                 required
                             >
                             @error('pay_date')
-                                <div class="invalid-feedback">{{  }}</div>
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-4">
@@ -125,12 +125,12 @@
                                 class="form-select @error('currency') is-invalid @enderror"
                                 required
                             >
-                                @foreach( as  => )
-                                    <option value="{{  }}" {{ old('currency', 'USD') ===  ? 'selected' : '' }}>{{  }}</option>
+                                @foreach($currencyOptions as $value => $label)
+                                    <option value="{{ $value }}" {{ old('currency', 'USD') === $value ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach
                             </select>
                             @error('currency')
-                                <div class="invalid-feedback">{{  }}</div>
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-8">
@@ -144,7 +144,7 @@
                                 placeholder="{{ __('Optional notes visible to payroll managers only.') }}"
                             >{{ old('notes') }}</textarea>
                             @error('notes')
-                                <div class="invalid-feedback">{{  }}</div>
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-12">
@@ -161,7 +161,7 @@
                                     {{ __('Require approval before posting this payroll run') }}
                                 </label>
                                 @error('approval_required')
-                                    <div class="invalid-feedback d-block">{{  }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                                 <div class="form-text">{{ __('When enabled, the run must be approved after locking and before posting.') }}</div>
                             </div>
