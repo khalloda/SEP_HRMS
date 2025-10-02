@@ -1,3 +1,15 @@
+
+## 2025-10-02 Functional Readiness Review
+
+- **Data Model**: Core tables (payroll_runs, payslips, payslip_lines) now align with model fillables; remaining gaps include missing soft deletes and lack of history tables for approvals/cancellations.
+- **Calculations**: New evaluator + dependency graph in place, but attendance enrichment still synchronous and formula error surfacing limited to logs. Need retry/reporting for per-employee failures.
+- **UI**: Index/show/payslip screens scaffolded; still missing bulk status dashboards, wizard for draft creation, and RTL polish for new modal. Alerts consistent via shared partials but breadcrumbs absent.
+- **Exports**: Payroll Excel export implemented; PDF/CSV variants still stubbed. Payslip bulk exports rely on PayslipPdfService but lack UI hooks/testing.
+- **Permissions**: Policy tightened for approvals; still role-based instead of permission-based (Spatie perms seeded but unused). Need granular gates for export/queue actions.
+- **Auditing**: Activity logging fires for calc/lock/post/cancel but correlation IDs not persisted to DB. Cancellation reason captured yet not surfaced in activity feed.
+- **Testing**: Feature suite now covers lifecycle happy paths; still missing negative cases (e.g., unauthorized actions) and integration coverage for queue mode + exports.
+- **Operational Gaps**: No smoke automation for show page (Playwright pending). Runbook lacks updated cancellation workflow + QA checklist. Config flag defaults remain off; ensure env docs updated before enabling.
+
 # Payroll Module Deep Analysis
 
 ## Current State Inventory
