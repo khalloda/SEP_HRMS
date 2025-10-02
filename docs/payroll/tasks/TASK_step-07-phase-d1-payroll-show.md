@@ -31,3 +31,5 @@ The payroll run show endpoint rendered an oversized monolithic Blade template, l
 - Ensured all lifecycle actions redirect back to the show page with flash messaging and added feature coverage for lock/unlock/approve/post/cancel flows (`app/Http/Controllers/PayrollController.php`, `tests/Feature/Payroll/PayrollShowViewTest.php`).
 - Added a Bootstrap modal on the payroll show actions card so HR can supply the mandatory cancellation reason before submitting the delete flow (`resources/views/payroll/show.blade.php`).
 - Tightened `PayrollPolicy::approve` to require pending approval status and added regression coverage ensuring action buttons only appear when policies allow (`app/Policies/PayrollPolicy.php`, `tests/Feature/Payroll/PayrollShowViewTest.php`).
+
+- Reused the shared status banners partial on payslip index/show so flash + correlation messaging stays consistent across payroll screens (`resources/views/payslips/index.blade.php`, `resources/views/payslips/show.blade.php`).

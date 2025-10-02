@@ -7,7 +7,8 @@
     $isRtl = app()->getLocale() === 'ar';
     $currencyFor = static fn($payslip) => $payslip->currency ?? optional($payslip->payrollRun)->currency ?? '';
 @endphp
-<div class="container-fluid" @if($isRtl) dir="rtl" @endif>
+<div class="container-fluid"
+    @include('payroll.partials.status-banners') @if($isRtl) dir="rtl" @endif>
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
         <div>
             <h1 class="h3 mb-1">{{ __('Payslips') }}</h1>

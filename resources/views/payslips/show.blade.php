@@ -12,7 +12,8 @@
     $positionName = optional(optional($payslip->employee)->position)->name ?? 'N/A';
     $currency = $payslip->currency ?? optional($payslip->payrollRun)->currency ?? '';
 @endphp
-<div class="container-fluid" @if($isRtl) dir="rtl" @endif>
+<div class="container-fluid"
+    @include('payroll.partials.status-banners') @if($isRtl) dir="rtl" @endif>
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start align-items-stretch gap-3 mb-4">
         <div>
             <h1 class="h3 mb-1">{{ $payslip->employee_name }}</h1>
