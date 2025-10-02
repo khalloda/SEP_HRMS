@@ -6,10 +6,14 @@ use App\Models\Payslip;
 use App\Models\PayrollRun;
 use App\Models\Employee;
 use App\Services\PayslipPdfService;
+use App\Exports\ArrayExport;
+use App\Exports\PayslipCsvExport;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PayslipController extends Controller
 {
@@ -27,7 +31,7 @@ class PayslipController extends Controller
     {
         Gate::authorize('viewAny', Payslip::class);
 
-        $query = Payslip::query()->with(['employee.department', 'payrollRun']);
+        $query = Payslip::query()->with(['employee.department', 'employee.position', 'payrollRun']);
 
         // Filter by employee if provided
         if ($employee) {
@@ -284,41 +288,47 @@ class PayslipController extends Controller
         }
     }
 
-    /**
-     * Export payslips data.
-     */
-    public function export(Request $request, PayrollRun $payrollRun = null)
-    {
-        Gate::authorize('export', Payslip::class);
 
-        $format = $request->get('format', 'excel');
+/**
+ * Export payslips data.
+ */
+public function export(Request $request, PayrollRun $payrollRun = null)
+{
+    Gate::authorize('export', Payslip::class);
 
-        if ($payrollRun) {
-            $payslips = $payrollRun->payslips()->with(['employee', 'payslipLines'])->get();
-            $filename = "Payslips-{$payrollRun->title}-" . now()->format('Y-m-d');
-        } else {
-            $query = Payslip::query()->with(['employee', 'payslipLines']);
+    $format = strtolower($request->get('format', 'excel'));
 
-            // Apply filters from request
-            if ($request->filled('payroll_run_id')) {
-                $query->where('payroll_run_id', $request->get('payroll_run_id'));
-            }
+    if ($payrollRun) {
+        $payslips = $payrollRun->payslips()
+            ->with(['employee.department', 'employee.position', 'payrollRun'])
+            ->get();
+        $baseFilename = Str::slug($payrollRun->title ?: 'payroll-run-' . $payrollRun->id) . '-' . now()->format('Y-m-d');
+    } else {
+        $query = Payslip::query()->with(['employee.department', 'employee.position', 'payrollRun']);
 
-            $payslips = $query->get();
-            $filename = "Payslips-" . now()->format('Y-m-d');
+        if ($request->filled('payroll_run_id')) {
+            $query->where('payroll_run_id', $request->get('payroll_run_id'));
         }
 
-        switch ($format) {
-            case 'pdf':
-                return $this->exportToPdf($payslips, $filename);
-            case 'csv':
-                return $this->exportToCsv($payslips, $filename);
-            case 'excel':
-            default:
-                return $this->exportToExcel($payslips, $filename);
+        if ($request->filled('status')) {
+            $query->byStatus($request->get('status'));
         }
+
+        $payslips = $query->get();
+        $baseFilename = 'payslips-' . now()->format('Y-m-d');
     }
 
+    if ($payslips->isEmpty()) {
+        return back()->with('warning', __('No payslips found for export.'));
+    }
+
+    return match ($format) {
+        'excel' => $this->exportToExcel($payslips, $baseFilename),
+        'csv' => $this->exportToCsv($payslips, $baseFilename),
+        'pdf' => $this->exportToPdf($payslips, $baseFilename),
+        default => back()->with('warning', __('Unsupported export format.')),
+    };
+}
     /**
      * Get payslip statistics.
      */
@@ -376,8 +386,106 @@ class PayslipController extends Controller
         return true;
     }
 
-    // Private helper methods for exports would go here...
-    // private function exportToExcel($payslips, $filename) { ... }
-    // private function exportToPdf($payslips, $filename) { ... }
-    // private function exportToCsv($payslips, $filename) { ... }
+
+    private function exportToExcel($payslips, string $baseFilename)
+    {
+        $headings = $this->payslipExportHeadings();
+        $rows = $payslips->map(fn (Payslip $payslip) => array_values($this->mapPayslipRow($payslip)))->all();
+
+        return Excel::download(new ArrayExport($headings, $rows), $baseFilename . '.xlsx');
+    }
+
+    private function exportToCsv($payslips, string $baseFilename)
+    {
+        $headings = $this->payslipExportHeadings();
+        $rows = $payslips->map(fn (Payslip $payslip) => $this->mapPayslipRow($payslip))->all();
+
+        return PayslipCsvExport::download($headings, $rows, $baseFilename . '.csv');
+    }
+
+    private function exportToPdf($payslips, string $baseFilename)
+    {
+        $zip = new ZipArchive();
+        $tmpFile = tempnam(sys_get_temp_dir(), 'payslips_export_');
+
+        if ($zip->open($tmpFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            abort(500, __('Unable to prepare payslip archive.'));
+        }
+
+        foreach ($payslips as $payslip) {
+            if (!$payslip->hasPdf() || $this->isPdfOutdated($payslip)) {
+                $this->pdfService->generatePayslipPdf($payslip);
+                $payslip->refresh();
+            }
+
+            if ($payslip->pdf_path && Storage::disk('private')->exists($payslip->pdf_path)) {
+                $zip->addFromString($this->zipEntryFilename($payslip), Storage::disk('private')->get($payslip->pdf_path));
+            }
+        }
+
+        if ($zip->numFiles === 0) {
+            $zip->close();
+            @unlink($tmpFile);
+            abort(422, __('No payslip PDFs available to export.'));
+        }
+
+        $zip->close();
+
+        return response()->streamDownload(function () use ($tmpFile) {
+            $stream = fopen($tmpFile, 'rb');
+            fpassthru($stream);
+            fclose($stream);
+            @unlink($tmpFile);
+        }, $baseFilename . '.zip', [
+            'Content-Type' => 'application/zip',
+        ]);
+    }
+
+    private function payslipExportHeadings(): array
+    {
+        return [
+            __('Employee Code'),
+            __('Employee Name'),
+            __('Department'),
+            __('Position'),
+            __('Pay Period Start'),
+            __('Pay Period End'),
+            __('Pay Date'),
+            __('Gross Pay'),
+            __('Total Deductions'),
+            __('Net Pay'),
+            __('Currency'),
+            __('Status'),
+        ];
+    }
+
+    private function mapPayslipRow(Payslip $payslip): array
+    {
+        $department = optional(optional($payslip->employee)->department)->name_en ?? $payslip->department_name ?? '-';
+        $position = optional(optional($payslip->employee)->position)->name_en ?? $payslip->position_name ?? '-';
+
+        return [
+            $payslip->employee_code,
+            $payslip->employee_name,
+            $department,
+            $position,
+            optional($payslip->pay_period_start)->format('Y-m-d') ?? '',
+            optional($payslip->pay_period_end)->format('Y-m-d') ?? '',
+            optional($payslip->pay_date)->format('Y-m-d') ?? '',
+            number_format((float) $payslip->gross_pay, 2, '.', ''),
+            number_format((float) $payslip->total_deductions, 2, '.', ''),
+            number_format((float) $payslip->net_pay, 2, '.', ''),
+            $payslip->currency ?? '',
+            $payslip->status,
+        ];
+    }
+
+    private function zipEntryFilename(Payslip $payslip): string
+    {
+        $code = Str::slug($payslip->employee_code ?? ('employee-' . $payslip->employee_id));
+        $period = optional($payslip->pay_period_end)->format('Y-m') ?? now()->format('Y-m');
+
+        return $code . '_' . $period . '.pdf';
+    }
 }
+

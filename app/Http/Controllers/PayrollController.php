@@ -6,6 +6,9 @@ use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Models\Employee;
 use App\Services\PayrollCalculationService;
+use App\Exports\ArrayExport;
+use App\Reports\Adapters\PayrollSummaryReport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
@@ -468,12 +471,12 @@ class PayrollController extends Controller
 
         switch ($format) {
             case 'pdf':
-                return $this->exportToPdf($payrollRun);
+                return $this->exportToPdf($request, $payrollRun);
             case 'csv':
-                return $this->exportToCsv($payrollRun);
+                return $this->exportToCsv($request, $payrollRun);
             case 'excel':
             default:
-                return $this->exportToExcel($payrollRun);
+                return $this->exportToExcel($request, $payrollRun);
         }
     }
 
@@ -506,8 +509,36 @@ class PayrollController extends Controller
         return response()->json($stats);
     }
 
-    // Private helper methods for exports would go here...
-    // private function exportToExcel(PayrollRun $payrollRun) { ... }
-    // private function exportToPdf(PayrollRun $payrollRun) { ... }
-    // private function exportToCsv(PayrollRun $payrollRun) { ... }
+    private function exportToExcel(Request $request, PayrollRun $payrollRun)
+    {
+        $periodStart = $payrollRun->pay_period_start ?? $payrollRun->pay_date ?? now();
+        $month = $periodStart instanceof \Carbon\CarbonInterface
+            ? $periodStart->format('Y-m')
+            : (string) $periodStart;
+
+        $filters = ['month' => $month];
+
+        if ($request->filled('department_id')) {
+            $filters['department_id'] = (int) $request->get('department_id');
+        }
+
+        $headings = PayrollSummaryReport::headings();
+        $rows = PayrollSummaryReport::rows($filters)
+            ->map(static fn (array $row): array => array_values($row))
+            ->all();
+
+        $filename = PayrollSummaryReport::filename($filters, 'excel');
+
+        return Excel::download(new ArrayExport($headings, $rows), $filename);
+    }
+
+    private function exportToPdf(Request $request, PayrollRun $payrollRun)
+    {
+        abort(501, __('Export format not yet supported.'));
+    }
+
+    private function exportToCsv(Request $request, PayrollRun $payrollRun)
+    {
+        abort(501, __('Export format not yet supported.'));
+    }
 }
