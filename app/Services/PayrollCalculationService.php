@@ -16,14 +16,17 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Support\CorrelationIdManager;
 
 class PayrollCalculationService
 {
     protected ExpressionEvaluator $expressionEvaluator;
+    protected CorrelationIdManager $correlationIds;
 
-    public function __construct(ExpressionEvaluator $expressionEvaluator)
+    public function __construct(ExpressionEvaluator $expressionEvaluator, CorrelationIdManager $correlationIds)
     {
         $this->expressionEvaluator = $expressionEvaluator;
+        $this->correlationIds = $correlationIds;
     }
 
     /**
@@ -72,6 +75,7 @@ class PayrollCalculationService
         } catch (PayrollDependencyCycleException $e) {
             Log::error('Failed to recalculate payslip', [
                 'payslip_id' => $payslip->id,
+                'payroll_run_id' => $payslip->payroll_run_id,
                 'structure_id' => $e->getStructureId() ?? ($payslip->salaryStructure ? $payslip->salaryStructure->id : null),
                 'cycle' => $e->getCycle(),
                 'error' => $e->getMessage(),
@@ -81,6 +85,7 @@ class PayrollCalculationService
         } catch (\Exception $e) {
             Log::error('Failed to recalculate payslip', [
                 'payslip_id' => $payslip->id,
+                'payroll_run_id' => $payslip->payroll_run_id,
                 'error' => $e->getMessage(),
                 'correlation_id' => $this->currentCorrelationId(),
             ]);
@@ -156,8 +161,14 @@ class PayrollCalculationService
      */
     public function calculatePayrollRun(PayrollRun $payrollRun, array $context = []): array
     {
-        $correlationId = $context['correlation_id'] ?? $this->currentCorrelationId() ?? (string) Str::uuid();
-        $context['correlation_id'] = $correlationId;
+        if (isset($context['correlation_id'])) {
+            $correlationId = $this->correlationIds->set((string) $context['correlation_id']);
+        } else {
+            $correlationId = $this->correlationIds->ensure();
+            $context['correlation_id'] = $correlationId;
+        }
+
+        $this->applyLogContext($payrollRun, $correlationId);
 
         $result = [
             'success' => true,
@@ -589,15 +600,17 @@ class PayrollCalculationService
         return strtoupper($code);
     }
 
+    protected function applyLogContext(PayrollRun $payrollRun, string $correlationId): void
+    {
+        Log::withContext([
+            'correlation_id' => $correlationId,
+            'payroll_run_id' => $payrollRun->id,
+        ]);
+    }
+
     protected function currentCorrelationId(): ?string
     {
-        $request = request();
-
-        if (!$request) {
-            return null;
-        }
-
-        return $request->attributes->get('correlation_id');
+        return $this->correlationIds->get();
     }
 
 }

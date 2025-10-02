@@ -5,6 +5,7 @@ namespace Tests\Unit\Payroll;
 use App\Models\PayrollRun;
 use App\Services\Payroll\ExpressionEvaluator;
 use App\Services\PayrollCalculationService;
+use App\Support\CorrelationIdManager;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -38,9 +39,14 @@ class PayrollChunkingTest extends TestCase
             'created_by' => $user->id,
         ]);
 
-        $service = new class(app(ExpressionEvaluator::class)) extends PayrollCalculationService {
+        $service = new class(app(ExpressionEvaluator::class), app(CorrelationIdManager::class)) extends PayrollCalculationService {
             /** @var array<int, array<int, mixed>> */
             public array $chunks = [];
+
+            public function __construct(ExpressionEvaluator $expressionEvaluator, CorrelationIdManager $correlationIds)
+            {
+                parent::__construct($expressionEvaluator, $correlationIds);
+            }
 
             protected function getEligibleEmployees(PayrollRun $payrollRun): Collection
             {

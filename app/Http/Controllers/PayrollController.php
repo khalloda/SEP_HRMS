@@ -9,20 +9,23 @@ use App\Services\PayrollCalculationService;
 use App\Exports\ArrayExport;
 use App\Jobs\ProcessPayrollRun;
 use App\Reports\Adapters\PayrollSummaryReport;
+use App\Support\CorrelationIdManager;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class PayrollController extends Controller
 {
     protected PayrollCalculationService $calculationService;
+    protected CorrelationIdManager $correlationIds;
 
-    public function __construct(PayrollCalculationService $calculationService)
+    public function __construct(PayrollCalculationService $calculationService, CorrelationIdManager $correlationIds)
     {
         $this->calculationService = $calculationService;
+        $this->correlationIds = $correlationIds;
     }
 
     /**
@@ -241,9 +244,17 @@ class PayrollController extends Controller
     {
         Gate::authorize('calculate', $payrollRun);
 
+        $correlationId = $this->resolveCalculationCorrelationId();
+
+        Log::withContext([
+            'correlation_id' => $correlationId,
+            'payroll_run_id' => $payrollRun->id,
+        ]);
+
         if (!$payrollRun->canBeCalculated()) {
             return redirect()->route('payroll.show', $payrollRun)
-                ->with('error', __('hrms.payroll.cannot_calculate'));
+                ->with('error', __('hrms.payroll.cannot_calculate'))
+                ->with('calculation_reference', $correlationId);
         }
 
         // Validate before calculation
@@ -251,18 +262,20 @@ class PayrollController extends Controller
         if (!empty($validationIssues)) {
             return redirect()->route('payroll.show', $payrollRun)
                 ->with('error', __('hrms.payroll.validation_failed'))
+                ->with('calculation_reference', $correlationId)
                 ->with('validation_issues', $validationIssues);
         }
 
-        $correlationId = $this->resolveCalculationCorrelationId();
 
         if (config('payroll.queue_enabled')) {
             ProcessPayrollRun::dispatch($payrollRun->id, $correlationId);
 
             return redirect()->route('payroll.show', $payrollRun)
                 ->with('success', __('Payroll run queued for processing.'))
+                ->with('calculation_reference', $correlationId)
                 ->with('calculation_job', [
                     'correlation_id' => $correlationId,
+                    'payroll_run_id' => $payrollRun->id,
                 ]);
         }
 
@@ -282,29 +295,19 @@ class PayrollController extends Controller
 
             return redirect()->route('payroll.show', $payrollRun)
                 ->with('success', $message)
+                ->with('calculation_reference', $correlationId)
                 ->with('calculation_results', $results);
         } else {
             return redirect()->route('payroll.show', $payrollRun)
                 ->with('error', __('hrms.payroll.calculation_failed'))
+                ->with('calculation_reference', $correlationId)
                 ->with('calculation_errors', $results['errors']);
         }
     }
 
     protected function resolveCalculationCorrelationId(): string
     {
-        $request = request();
-
-        if ($request && $request->attributes->has('correlation_id')) {
-            return (string) $request->attributes->get('correlation_id');
-        }
-
-        $correlationId = (string) Str::uuid();
-
-        if ($request) {
-            $request->attributes->set('correlation_id', $correlationId);
-        }
-
-        return $correlationId;
+        return $this->correlationIds->ensure();
     }
 
     /**

@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Support\CorrelationIdManager;
 
 class ProcessPayrollRun implements ShouldQueue
 {
@@ -40,20 +41,28 @@ class ProcessPayrollRun implements ShouldQueue
 
     public function handle(PayrollCalculationService $calculationService): void
     {
+        $correlationIds = app(CorrelationIdManager::class);
+        $correlationId = $correlationIds->set($this->correlationId);
+
         $payrollRun = PayrollRun::find($this->payrollRunId);
 
         if (!$payrollRun) {
             Log::warning('Attempted to process missing payroll run', [
                 'payroll_run_id' => $this->payrollRunId,
-                'correlation_id' => $this->correlationId,
+                'correlation_id' => $correlationId,
             ]);
 
             return;
         }
 
+        Log::withContext([
+            'correlation_id' => $correlationId,
+            'payroll_run_id' => $payrollRun->id,
+        ]);
+
         $calculationService->calculatePayrollRun($payrollRun, [
             'queued' => true,
-            'correlation_id' => $this->correlationId,
+            'correlation_id' => $correlationId,
         ]);
     }
 }
