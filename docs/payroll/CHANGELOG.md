@@ -10,3 +10,4 @@
 
 ## 2025-10-02 (PM refresh)
 - Surfaced cancellation details on payroll.show, reused status banners on payslip screens, added Playwright smoke test for lifecycle actions, and expanded negative authorization coverage.
+\r\n## 2025-10-02 (Late PM)\r\n- Added payroll create Blade with inline validation feedback and default period suggestions so HR can launch new runs on the guarded route.\r\n- Verified route scaffolding by running php artisan test --filter=PayrollIndexViewTest.
