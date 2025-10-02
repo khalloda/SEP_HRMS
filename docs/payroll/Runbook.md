@@ -18,3 +18,5 @@
 - PDF smoke: After generating via UI/API, files saved to `storage/app/private/payslips` or `storage/app/private/reports`. Use `php artisan payroll:generate-report --run=<id>` (to be added) or call service in tinker.
 - Log review: tail `storage/logs/laravel.log` filtering on `correlation_id` once observability tasks implemented.
 
+- **Cancellation Flow (Post Step 07)**: Show view exposes a modal requiring a cancellation reason before POSTing to `/payroll/{id}/cancel`; QA should verify the textarea is mandatory, flash messages return to the show page, and activity logs capture the reason. Include this in pre-release checklists.
+- **QA Checklist Update**: Add Playwright smoke `npx playwright test --grep "Payroll Run Show Lifecycles"` to the regression suite when the feature flag is enabled.
