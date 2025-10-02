@@ -14,3 +14,7 @@
 ## 2025-10-02 (Late PM)
 - Added payroll create Blade with inline validation feedback and default period suggestions so HR can launch new runs on the guarded route.
 - Expanded view coverage via `PayrollCreateViewTest` and re-ran `PayrollIndexViewTest` to confirm routing under the feature flag.
+
+## 2025-10-02 (Late PM+1)
+- Added `approval_required` column to `payroll_runs` to align schema with controller expectations.
+- Introduced `PayrollStoreTest` to cover happy-path creation and overlapping period validation (passes `php artisan test --filter=PayrollStoreTest`).
