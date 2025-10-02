@@ -105,9 +105,8 @@ class PayrollPolicy
      */
     public function approve(User $user, PayrollRun $payrollRun): bool
     {
-        // Only HR Admin Manager can approve payroll runs
-        // Accounting Manager cannot approve (separation of duties)
-        return $user->hasRole('HR_Admin_Manager');
+        // Only HR Admin Manager can approve payroll runs and only while pending approval
+        return $user->hasRole('HR_Admin_Manager') && $payrollRun->isPendingApproval();
     }
 
     /**

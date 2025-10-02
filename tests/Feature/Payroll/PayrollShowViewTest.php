@@ -337,6 +337,109 @@ class PayrollShowViewTest extends TestCase
         $this->assertEquals(PayrollRun::STATUS_CANCELLED, $run->status);
     }
 
+    public function test_action_buttons_honor_policy_states(): void
+    {
+        config()->set('payroll.enabled', true);
+
+        $user = $this->makeHrAdminUser();
+
+        $draftRun = PayrollRun::create([
+            'title' => 'Draft Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_DRAFT,
+            'currency' => 'SAR',
+            'total_employees' => 1,
+            'total_gross' => 10000,
+            'total_net' => 8000,
+            'total_deductions' => 2000,
+            'created_by' => $user->id,
+        ]);
+
+        $calculatedRun = PayrollRun::create([
+            'title' => 'Calculated Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_CALCULATED,
+            'currency' => 'SAR',
+            'total_employees' => 1,
+            'total_gross' => 12000,
+            'total_net' => 9000,
+            'total_deductions' => 3000,
+            'created_by' => $user->id,
+        ]);
+
+        $lockedRun = PayrollRun::create([
+            'title' => 'Locked Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_LOCKED,
+            'currency' => 'SAR',
+            'locked_by' => $user->id,
+            'locked_at' => now(),
+            'total_employees' => 1,
+            'total_gross' => 13000,
+            'total_net' => 9500,
+            'total_deductions' => 3500,
+            'created_by' => $user->id,
+        ]);
+
+        $pendingApprovalRun = PayrollRun::create([
+            'title' => 'Pending Approval Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_PENDING_APPROVAL,
+            'currency' => 'SAR',
+            'locked_by' => $user->id,
+            'locked_at' => now(),
+            'total_employees' => 1,
+            'total_gross' => 14000,
+            'total_net' => 10000,
+            'total_deductions' => 4000,
+            'created_by' => $user->id,
+        ]);
+
+        $approvedRun = PayrollRun::create([
+            'title' => 'Approved Payroll',
+            'pay_period_start' => now()->startOfMonth()->toDateString(),
+            'pay_period_end' => now()->endOfMonth()->toDateString(),
+            'pay_date' => now()->endOfMonth()->addDays(5)->toDateString(),
+            'status' => PayrollRun::STATUS_APPROVED,
+            'currency' => 'SAR',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+            'total_employees' => 1,
+            'total_gross' => 15000,
+            'total_net' => 11000,
+            'total_deductions' => 4000,
+            'created_by' => $user->id,
+        ]);
+
+        $this->actingAs($user)->get(route('payroll.show', $draftRun))
+            ->assertSee("/payroll/{$draftRun->id}/calculate")
+            ->assertDontSee("/payroll/{$draftRun->id}/lock");
+
+        $this->actingAs($user)->get(route('payroll.show', $calculatedRun))
+            ->assertSee("/payroll/{$calculatedRun->id}/lock")
+            ->assertDontSee("/payroll/{$calculatedRun->id}/unlock");
+
+        $this->actingAs($user)->get(route('payroll.show', $lockedRun))
+            ->assertSee("/payroll/{$lockedRun->id}/unlock")
+            ->assertSee("/payroll/{$lockedRun->id}/post");
+
+        $this->actingAs($user)->get(route('payroll.show', $pendingApprovalRun))
+            ->assertSee("/payroll/{$pendingApprovalRun->id}/approve")
+            ->assertDontSee("/payroll/{$pendingApprovalRun->id}/unlock");
+
+        $this->actingAs($user)->get(route('payroll.show', $approvedRun))
+            ->assertSee("/payroll/{$approvedRun->id}/post")
+            ->assertDontSee("/payroll/{$approvedRun->id}/approve");
+    }
+
     public function test_show_page_respects_feature_flag(): void
     {
         config()->set('payroll.enabled', false);
