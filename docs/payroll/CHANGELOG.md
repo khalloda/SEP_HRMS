@@ -7,3 +7,6 @@
 - Expanded feature coverage via `PayslipIndexViewTest` and `PayslipShowViewTest`.
 - Verified with `php artisan test --filter=Payslip` (8 tests / 22 assertions passing).
 - Implemented payroll run Excel export wired to PayrollSummaryReport via PayrollController::exportToExcel, with coverage in 	ests/Feature/Payroll/PayrollExportTest.php (passes php artisan test --filter=PayrollExportTest).
+
+## 2025-10-02 (PM refresh)
+- Surfaced cancellation details on payroll.show, reused status banners on payslip screens, added Playwright smoke test for lifecycle actions, and expanded negative authorization coverage.
