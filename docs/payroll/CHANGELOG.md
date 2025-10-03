@@ -22,3 +22,5 @@
 
 ## 2025-10-03
 - Renamed payroll task documentation files to the unified `TASK_phase-YY-step-XX-…` naming scheme for easier sequencing.
+- Added `payroll.edit` Blade view leveraging centralized currency helpers.
+- Introduced feature coverage for the edit page and update endpoint currency validation.
