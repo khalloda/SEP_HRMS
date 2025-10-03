@@ -25,3 +25,4 @@
 - Added `payroll.edit` Blade view leveraging centralized currency helpers.
 - Introduced feature coverage for the edit page and update endpoint currency validation.
 - Added policy regression tests ensuring only authorized roles can update draft payroll runs and that locked runs remain read-only.
+- Scaffolded employee salary structure views and added feature/unit coverage for view rendering and currency configuration.
