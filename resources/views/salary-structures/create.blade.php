@@ -89,10 +89,6 @@
                     @error('components')
                     <div class="alert alert-danger small">{{ $message }}</div>
                     @enderror
-                    <template x-if="rows.length === 0">
-                        <p class="text-muted mb-0">{{ __('Add at least one component to activate this structure.') }}</p>
-                    </template>
-
                     <div class="list-group" x-ref="sortable">
                         <template x-for="(row, index) in rows" :key="row.uuid">
                             <div class="list-group-item border rounded-3 mb-3">
@@ -101,14 +97,11 @@
                                         <i class="fas fa-grip-vertical"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
                                             <label class="form-label small text-muted mb-0">{{ __('Component') }}</label>
                                             <span class="badge bg-light text-muted">#<span x-text="index + 1"></span></span>
                                         </div>
-                                        <select class="form-select form-select-sm"
-                                            :name="`components[${row.uuid}][component_id]`
-                                            class=" @error('components.' + row.uuid + '.component_id' ) is-invalid @enderror"
-                                            x-model="row.component" required>
+                                    <select class="form-select form-select-sm" :name="`components[${row.uuid}][component_id]`" x-model="row.component" required>
                                             <option value="" disabled>{{ __('Select component') }}</option>
                                             <template x-for="group in componentGroups" :key="group.type">
                                                 <optgroup :label="group.label">
@@ -118,9 +111,6 @@
                                                 </optgroup>
                                             </template>
                                         </select>
-                                        <template x-if="errors[row.uuid]?.component">
-                                            <div class="text-danger small" x-text="errors[row.uuid].component"></div>
-                                        </template>
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted">{{ __('Amount') }}</label>
@@ -194,9 +184,8 @@
             });
         }
 
-        const reorder = () => {
-            // enforce sequential priorities starting at 1
-            this.rows.forEach((row, index) => {
+        const reorder = rows => {
+            rows.forEach((row, index) => {
                 row.priority = index + 1;
             });
         };
@@ -210,22 +199,20 @@
                         new Sortable(this.$refs.sortable, {
                             handle: '.drag-handle',
                             animation: 150,
-                            onUpdate: () => reorder.call(this),
+                            onUpdate: () => reorder(this.rows),
                         });
                     }
                 });
-                reorder.call(this);
+                reorder(this.rows);
             },
             handleSubmit(event) {
-                reorder.call(this);
-                if (this.rows.length === 0) {
+                reorder(this.rows);
+                if (this.rows.length === 0 || this.rows.every(row => !row.component)) {
                     event.preventDefault();
                     this.addRow();
                     this.$dispatch('flash', {
                         type: 'danger',
-                        message: '{{ __('
-                        At least one component is required.
-                        ') }}'
+                        message: '{{ __('At least one component is required.') }}'
                     });
                     return;
                 }
@@ -239,14 +226,14 @@
                     formula: '',
                     priority: ''
                 });
-                reorder.call(this);
+                reorder(this.rows);
             },
             removeRow(index) {
                 this.rows.splice(index, 1);
                 if (this.rows.length === 0) {
                     this.addRow();
                 }
-                reorder.call(this);
+                reorder(this.rows);
             },
         };
     }
