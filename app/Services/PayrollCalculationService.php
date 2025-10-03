@@ -9,6 +9,7 @@ use App\Models\PayslipLine;
 use App\Models\Employee;
 use App\Models\SalaryStructure;
 use App\Models\SalaryComponent;
+use App\Models\SalaryStructureComponent;
 use App\Models\AttendanceSummary;
 use App\Services\Payroll\ExpressionEvaluator;
 use Carbon\Carbon;
@@ -65,10 +66,16 @@ class PayrollCalculationService
                 $payslip->payslipLines()->delete();
 
                 // Recalculate components
-                $this->calculatePayslipComponents($payslip, $salaryStructure);
+                $result = $this->calculatePayslipComponents($payslip, $salaryStructure);
 
                 // Update totals
                 $payslip->updateTotals();
+
+                if (isset($result['values']['BASIC_SALARY'])) {
+                    $payslip->forceFill([
+                        'basic_salary' => $result['values']['BASIC_SALARY'],
+                    ])->saveQuietly();
+                }
             });
 
             return true;
@@ -316,11 +323,232 @@ class PayrollCalculationService
             'generated_at' => now(),
         ]);
 
+        return $this->calculateForPayslip($payslip, $salaryStructure, $context);
+    }
+
+    /**
+     * Calculate full payslip amount based on salary structure.
+     *
+     * @param array<string, mixed> $context
+     * @return array{success: bool, payslip_created: bool, errors: array<int, string>}
+     */
+    protected function calculateForPayslip(Payslip $payslip, SalaryStructure $salaryStructure, array $context = []): array
+    {
+        $payslip->payslipLines()->delete();
+
+        $calculation = $this->calculatePayslipComponents($payslip, $salaryStructure, $context);
+
+        $payslip->updateTotals();
+
+        if (isset($calculation['values']['BASIC_SALARY'])) {
+            $payslip->forceFill([
+                'basic_salary' => $calculation['values']['BASIC_SALARY'],
+            ])->saveQuietly();
+        }
+
         return [
-            'success' => true,
-            'payslip_created' => (bool) $payslip,
-            'errors' => [],
+            'success' => empty($calculation['errors']),
+            'payslip_created' => true,
+            'errors' => $calculation['errors'],
         ];
+    }
+
+    /**
+     * Generate payslip lines for the provided salary structure.
+     *
+     * @param array<string, mixed> $context
+     * @return array{values: array<string, float>, errors: array<int, string>}
+     */
+    protected function calculatePayslipComponents(Payslip $payslip, SalaryStructure $salaryStructure, array $context = []): array
+    {
+        $structureComponents = $salaryStructure->relationLoaded('structureComponents')
+            ? $salaryStructure->structureComponents
+            : $salaryStructure->structureComponents()->with('component')->get();
+
+        $structureComponents = $structureComponents
+            ->loadMissing('component')
+            ->sortBy('priority_order')
+            ->values();
+
+        $calculatedValues = [];
+        $errors = [];
+
+        /** @var SalaryStructureComponent $structureComponent */
+        foreach ($structureComponents as $structureComponent) {
+            $component = $structureComponent->component;
+
+            if (!$component) {
+                $errors[] = sprintf('Salary structure component %d is missing its definition.', $structureComponent->id);
+                continue;
+            }
+
+            $code = $this->normaliseComponentCode($component->code);
+
+            if ($code === null) {
+                $errors[] = sprintf('Encountered salary component with empty code (ID %d).', $component->id);
+                continue;
+            }
+
+            try {
+                $amount = $this->resolveComponentAmount($structureComponent, $calculatedValues, $context);
+            } catch (\Throwable $throwable) {
+                $errors[] = sprintf('Failed to calculate component %s: %s', $code, $throwable->getMessage());
+
+                Log::error('Payroll component calculation failed', [
+                    'payslip_id' => $payslip->id,
+                    'component_code' => $code,
+                    'structure_component_id' => $structureComponent->id,
+                    'error' => $throwable->getMessage(),
+                    'correlation_id' => $this->currentCorrelationId(),
+                ]);
+
+                $amount = 0.0;
+            }
+
+            Log::debug('Payroll component calculated', [
+                'payslip_id' => $payslip->id,
+                'component_code' => $code,
+                'amount' => $amount,
+                'calc_mode' => $component->calc_mode,
+                'value_numeric' => $structureComponent->value_numeric,
+            ]);
+
+            $lineData = [
+                'salary_component_id' => $component->id,
+                'component_code' => $code,
+                'component_name_en' => $component->name_en,
+                'component_name_ar' => $component->name_ar,
+                'component_name' => $component->name_en,
+                'component_type' => $component->comp_type,
+                'calculation_mode' => $component->calc_mode,
+                'formula_used' => $this->buildFormulaDescription($structureComponent),
+                'formula' => $structureComponent->formula_expr,
+                'amount' => $amount,
+                'priority_order' => $structureComponent->priority_order,
+                'priority' => $structureComponent->priority_order,
+                'include_in_gross' => $component->comp_type === 'earning',
+                'taxable' => (bool) $component->taxable,
+                'calculation_notes' => $this->buildCalculationNotes($structureComponent, $amount),
+            ];
+
+            $payslip->payslipLines()->create(array_filter($lineData, static function ($value) {
+                return $value !== null;
+            }));
+
+            $calculatedValues[$code] = $amount;
+        }
+
+        return [
+            'values' => $calculatedValues,
+            'errors' => $errors,
+        ];
+    }
+
+    /**
+     * Resolve the numeric amount for a salary structure component.
+     *
+     * @param array<string, float> $calculatedValues
+     * @param array<string, mixed> $context
+     */
+    protected function resolveComponentAmount(SalaryStructureComponent $structureComponent, array $calculatedValues, array $context = []): float
+    {
+        $component = $structureComponent->component;
+
+        if (!$component) {
+            return 0.0;
+        }
+
+        return match ($component->calc_mode) {
+            'fixed' => (float) ($structureComponent->value_numeric ?? 0),
+            'formula' => $this->evaluateFormulaComponent($structureComponent, $calculatedValues),
+            'variable_net_based' => $this->resolveVariableComponentAmount($structureComponent, $context),
+            default => 0.0,
+        };
+    }
+
+    /**
+     * Evaluate a formula-based component.
+     *
+     * @param array<string, float> $calculatedValues
+     */
+    protected function evaluateFormulaComponent(SalaryStructureComponent $structureComponent, array $calculatedValues): float
+    {
+        $expression = $structureComponent->formula_expr;
+
+        if (empty($expression)) {
+            return (float) ($structureComponent->value_numeric ?? 0);
+        }
+
+        $substituted = preg_replace_callback('/\b[A-Za-z_][A-Za-z0-9_]*\b/', function (array $matches) use ($calculatedValues) {
+            $token = strtoupper($matches[0]);
+
+            if (array_key_exists($token, $calculatedValues)) {
+                return (string) $calculatedValues[$token];
+            }
+
+            return '0';
+        }, $expression);
+
+        if ($substituted === null) {
+            throw new \RuntimeException('Failed to prepare formula expression for evaluation.');
+        }
+
+        return $this->expressionEvaluator->evaluate($substituted);
+    }
+
+    /**
+     * Resolve a variable net-based component amount.
+     *
+     * @param array<string, mixed> $context
+     */
+    protected function resolveVariableComponentAmount(SalaryStructureComponent $structureComponent, array $context = []): float
+    {
+        if (!empty($context['variable_components']) && is_array($context['variable_components'])) {
+            $code = $this->normaliseComponentCode(optional($structureComponent->component)->code);
+
+            if ($code && isset($context['variable_components'][$code])) {
+                return (float) $context['variable_components'][$code];
+            }
+        }
+
+        return (float) ($structureComponent->value_numeric ?? 0);
+    }
+
+    /**
+     * Build a human-readable formula description for audit purposes.
+     */
+    protected function buildFormulaDescription(SalaryStructureComponent $structureComponent): ?string
+    {
+        $component = $structureComponent->component;
+
+        if (!$component) {
+            return null;
+        }
+
+        return match ($component->calc_mode) {
+            'fixed' => 'Fixed amount',
+            'formula' => $structureComponent->formula_expr,
+            'variable_net_based' => 'Variable (net-based)',
+            default => null,
+        };
+    }
+
+    /**
+     * Generate an optional calculation note to store alongside the payslip line.
+     */
+    protected function buildCalculationNotes(SalaryStructureComponent $structureComponent, float $amount): ?string
+    {
+        $component = $structureComponent->component;
+
+        if (!$component) {
+            return null;
+        }
+
+        return match ($component->calc_mode) {
+            'formula' => sprintf('Computed via formula: %s', $structureComponent->formula_expr ?? 'n/a'),
+            'variable_net_based' => 'Variable component captured for this period.',
+            default => null,
+        };
     }
 
     protected function markRunAsCalculating(PayrollRun $payrollRun): void

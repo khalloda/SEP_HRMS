@@ -22,13 +22,7 @@ class PayrollRunCalculationTest extends TestCase
 
     public function test_payroll_run_populates_amounts_from_salary_structure(): void
     {
-        PayslipLine::query()->delete();
-        Payslip::query()->delete();
-        PayrollRun::query()->delete();
-        SalaryStructureComponent::query()->delete();
-        SalaryStructure::query()->delete();
-        SalaryComponent::query()->delete();
-        Employee::query()->delete();
+        Employee::query()->where('status', 'active')->update(['status' => 'inactive']);
 
         config()->set('payroll.enabled', true);
         config()->set('payroll.queue_enabled', false);
@@ -49,28 +43,29 @@ class PayrollRunCalculationTest extends TestCase
             'salary_visibility_flag' => true,
         ]);
 
-        $basicCode = 'BASIC_' . Str::upper(Str::random(6));
-        $taxCode = 'TAX_' . Str::upper(Str::random(6));
+        $basicComponent = SalaryComponent::updateOrCreate(
+            ['code' => 'BASIC_SALARY'],
+            [
+                'name_en' => 'Basic Salary',
+                'name_ar' => 'الراتب الأساسي',
+                'comp_type' => 'earning',
+                'calc_mode' => 'fixed',
+                'taxable' => true,
+                'priority_order' => 1,
+            ]
+        );
 
-        $basicComponent = SalaryComponent::create([
-            'code' => $basicCode,
-            'name_en' => 'Basic Salary',
-            'name_ar' => 'الراتب الأساسي',
-            'comp_type' => 'earning',
-            'calc_mode' => 'fixed',
-            'taxable' => true,
-            'priority_order' => 1,
-        ]);
-
-        $taxComponent = SalaryComponent::create([
-            'code' => $taxCode,
-            'name_en' => 'Income Tax',
-            'name_ar' => 'ضريبة الدخل',
-            'comp_type' => 'deduction',
-            'calc_mode' => 'formula',
-            'taxable' => false,
-            'priority_order' => 2,
-        ]);
+        $taxComponent = SalaryComponent::updateOrCreate(
+            ['code' => 'INCOME_TAX'],
+            [
+                'name_en' => 'Income Tax',
+                'name_ar' => 'ضريبة الدخل',
+                'comp_type' => 'deduction',
+                'calc_mode' => 'formula',
+                'taxable' => false,
+                'priority_order' => 2,
+            ]
+        );
 
         $structure = SalaryStructure::create([
             'employee_id' => $employee->id,
@@ -89,8 +84,8 @@ class PayrollRunCalculationTest extends TestCase
         SalaryStructureComponent::create([
             'structure_id' => $structure->id,
             'component_id' => $taxComponent->id,
-            'formula_expr' => $basicCode . ' * 0.1',
-            'depends_on' => [$basicCode],
+            'formula_expr' => 'BASIC_SALARY * 0.1',
+            'depends_on' => ['BASIC_SALARY'],
             'priority_order' => 2,
         ]);
 
@@ -107,6 +102,29 @@ class PayrollRunCalculationTest extends TestCase
         /** @var PayrollCalculationService $service */
         $service = app(PayrollCalculationService::class);
 
-        $this->expectNotToPerformAssertions();
+        $result = $service->calculatePayrollRun($payrollRun);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(1, $result['employees_processed']);
+        $this->assertEmpty($result['errors']);
+
+        $payrollRun->refresh();
+        $this->assertSame(PayrollRun::STATUS_CALCULATED, $payrollRun->status);
+        $this->assertEquals(10000.0, (float) $payrollRun->total_gross);
+        $this->assertEquals(1000.0, (float) $payrollRun->total_deductions);
+        $this->assertEquals(9000.0, (float) $payrollRun->total_net);
+
+        /** @var Payslip $payslip */
+        $payslip = $payrollRun->payslips()->with('payslipLines')->first();
+        $this->assertNotNull($payslip);
+        $this->assertEquals(10000.0, (float) $payslip->gross_pay);
+        $this->assertEquals(1000.0, (float) $payslip->total_deductions);
+        $this->assertEquals(9000.0, (float) $payslip->net_pay);
+        $this->assertEquals(10000.0, (float) $payslip->basic_salary);
+
+        $lines = $payslip->payslipLines->pluck('amount', 'component_code');
+
+        $this->assertEquals(10000.0, (float) $lines['BASIC_SALARY']);
+        $this->assertEquals(1000.0, (float) $lines['INCOME_TAX']);
     }
 }
