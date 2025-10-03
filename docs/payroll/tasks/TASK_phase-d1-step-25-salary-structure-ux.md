@@ -1,24 +1,54 @@
 # Task: Phase D1 Step 25 - Salary Structure UX Enhancements
 
 ## Problem
-After introducing the salary structure views, we still needed richer UX: component validation feedback, dynamic row ordering, and inline helper text tied to calculation behaviour.
+The salary structure flow required UX improvements, including component grouping, notes, and confirmation dialogs.
 
 ## Approach
-- Added drag-and-drop ordering for component rows using SortableJS with priority normalization.
-- Ensured currency dropdowns pull from `payrollCurrencies()` with sensible fallbacks.
-- Surfaced inline validation messaging and ensured at least one component row persists.
+- Added component grouping cards and priority badges on salary structure pages.
+- Added notes sections and confirmation prompts for destructive actions.
 
 ## Files Changed
-- `package.json`
-- `package-lock.json`
+- `resources/views/salary-structures/index.blade.php`
 - `resources/views/salary-structures/create.blade.php`
 - `resources/views/salary-structures/edit.blade.php`
-- `docs/payroll/CHANGELOG.md`
+- `resources/views/salary-structures/show.blade.php`
 
 ## Tests
 - `php artisan test --filter=SalaryStructureViewTest`
 
 ## Rollback Plan
-1. Remove SortableJS dependency (`npm uninstall sortablejs`).
-2. Restore salary structure views to static forms.
-3. Update changelog entry accordingly.
+1. Revert the Blade view adjustments.
+
+# Task: Phase 11 Step 01 - Salary Component CRUD & Documentation
+
+## Problem
+Salary component management lacked dedicated views, resulting in zero-value payroll deductions and limited administrative insight.
+
+## Approach
+- Restored component calculation pipeline (fixed, formula, variable) so payslip totals populate and `basic_salary` persists.
+- Built reusable Blade form partial and CRUD views (`index`, `create`, `edit`, `show`) aligned with Sarie Eldin branding.
+- Added feature tests for payroll regression and salary component CRUD/view flows.
+- Documented the zeroed deduction bug in `docs/bugs/Bug_01_Fix_02_03-10-25.md`.
+
+## Files Changed
+- `app/Services/PayrollCalculationService.php`
+- `app/Models/SalaryComponent.php`
+- `resources/views/salary-components/_form.blade.php`
+- `resources/views/salary-components/index.blade.php`
+- `resources/views/salary-components/create.blade.php`
+- `resources/views/salary-components/edit.blade.php`
+- `resources/views/salary-components/show.blade.php`
+- `tests/Feature/PayrollRunCalculationTest.php`
+- `tests/Feature/SalaryComponentCrudTest.php`
+- `tests/Feature/SalaryComponentFormTest.php`
+- `docs/bugs/Bug_01_Fix_02_03-10-25.md`
+
+## Tests
+- `php artisan test --filter=PayrollRunCalculationTest`
+- `php artisan test --filter=SalaryComponentCrudTest`
+- `php artisan test --filter=SalaryComponentFormTest`
+
+## Rollback Plan
+1. Revert the listed Blade views and controller/service changes.
+2. Remove the associated feature tests.
+3. Delete the bug documentation entry if necessary.

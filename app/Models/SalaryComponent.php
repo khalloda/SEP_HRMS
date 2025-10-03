@@ -121,8 +121,8 @@ class SalaryComponent extends Model
     {
         return $query->where(function ($q) use ($term) {
             $q->where('name_en', 'like', "%{$term}%")
-              ->orWhere('name_ar', 'like', "%{$term}%")
-              ->orWhere('code', 'like', "%{$term}%");
+                ->orWhere('name_ar', 'like', "%{$term}%")
+                ->orWhere('code', 'like', "%{$term}%");
         });
     }
 
@@ -156,7 +156,7 @@ class SalaryComponent extends Model
     public function canViewForUser($user = null): bool
     {
         $user = $user ?? auth()->user();
-        
+
         if (!$user) {
             return false;
         }
@@ -182,7 +182,7 @@ class SalaryComponent extends Model
     public function scopeVisibleToUser(Builder $query, $user = null): Builder
     {
         $user = $user ?? auth()->user();
-        
+
         if (!$user) {
             return $query->whereNull('id'); // Return empty result
         }
@@ -191,12 +191,12 @@ class SalaryComponent extends Model
 
         return $query->where(function ($q) use ($userRoles) {
             $q->whereNull('visible_to_roles')
-              ->orWhere('visible_to_roles', '[]')
-              ->orWhere(function ($subQ) use ($userRoles) {
-                  foreach ($userRoles as $role) {
-                      $subQ->orWhereJsonContains('visible_to_roles', $role);
-                  }
-              });
+                ->orWhere('visible_to_roles', '[]')
+                ->orWhere(function ($subQ) use ($userRoles) {
+                    foreach ($userRoles as $role) {
+                        $subQ->orWhereJsonContains('visible_to_roles', $role);
+                    }
+                });
         });
     }
 
