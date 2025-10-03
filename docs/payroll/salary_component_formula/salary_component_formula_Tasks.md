@@ -46,6 +46,7 @@ Implement Excel-style conditional formulas under a guarded config flag while pre
 - **Acceptance**: Docs mention feature flag, sample formulas, troubleshooting steps.
 - **Tests**: Not applicable.
 - **Rollback**: Revert documentation commit.
+- **Status**: ✅ Completed (runbook/plan/deep analysis now highlight flag workflow, UI validation, and helper messaging).
 
 ## Task 7 — Post-Deployment Verification Script (Optional)
 - **Purpose**: Provide artisan command to compare legacy vs new outputs for sample data (run manually pre/post toggle).

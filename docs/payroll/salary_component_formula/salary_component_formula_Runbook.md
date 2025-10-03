@@ -16,6 +16,7 @@ Enable conditional expressions inside salary component formulas using the upgrad
    - Create test salary structure with conditional formula, e.g., `IF(BASIC_SALARY>10000, BASIC_SALARY*0.1, BASIC_SALARY*0.05)`.
    - Run payroll calculation for sample employee; inspect payslip lines for correct deduction.
    - Trigger negative path (condition false) to verify branching.
+   - Ensure salary structure form displays IF helper badge/text (feature flag on) and blocks IF usage when flag off.
 4. **Enable Flag**: Toggle `.env` to `PAYROLL_SAFE_ENGINE_CONDITIONALS=true`; run `php artisan config:clear`.
 5. **Regression Sweep**:
    - Re-run payroll for existing structures without conditionals to confirm parity with previous outputs (compare totals against baseline export).
@@ -25,6 +26,7 @@ Enable conditional expressions inside salary component formulas using the upgrad
 
 ## Monitoring & Verification
 - Laravel logs (`storage/logs/laravel.log`) for `Payroll component calculation failed` entries.
+- Form validation: when flag disabled, attempt to save formula containing `IF(` should raise localized error `hrms.salary_structure.conditional_flag_required`.
 - Activity log for payroll runs to confirm status transitions remain accurate.
 - Optional comparison script to diff payslip totals pre/post feature flag for a sample month.
 - Frontend smoke test: confirm salary structure edit form still saves formulas; check RTL layout unaffected.

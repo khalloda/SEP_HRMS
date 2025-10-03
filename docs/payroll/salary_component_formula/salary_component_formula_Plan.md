@@ -41,3 +41,4 @@ Adopt **Option 2 (Excel-style IF function)** with extended operators and boolean
 - Combine with optional helper functions later (`MIN`, `MAX`, `ROUND`) using same function dispatch pattern.
 - Implement parser upgrades incrementally: extend tokenizer for comparison operators, add function handling, evaluate via RPN stack.
 - Provide validation & lint messages in UI to guide authors.
+- Guard rollout behind config flag `use_safe_engine_conditionals` to enable conditional parsing safely; docs/runbook now reference flag usage and UI validation messaging.

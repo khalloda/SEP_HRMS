@@ -11,6 +11,7 @@
 - Substitution happens before calculator call; missing tokens silently default to zero, masking data errors.
 - Cleaned expression passes to `App\Services\Payroll\ExpressionEvaluator::evaluate()`.
 - Evaluator selects engine via `config('payroll.expression_engine')` (`legacy` default, optional `new`).
+- Feature flag `config('payroll.use_safe_engine_conditionals')` (Task 1) now toggles conditional-aware parser path; when enabled component substitution preserves recognised functions (`IF`) and logical keywords.
 - **Legacy engine**: strips everything except digits, `+-*/().` then executes `eval("return {$cleanExpression};")`; supports floats, unary minus via PHP eval, but inherits PHP precedence and double precision quirks.
 - **New engine**: shunting-yard parser producing Reverse Polish Notation; supports operators `+ - * /`, parentheses, unary minus; division guarded by epsilon to block divide-by-zero.
 - Both engines throw `InvalidArgumentException` on invalid syntax or zero division; caller catches generic `\Throwable` and logs error, returning `0.0` for the component.
@@ -25,3 +26,4 @@
 - Salary structures evaluated sequentially per employee; chunking at payroll level uses `config('payroll.chunk_size')`, but expression evaluation is per component without caching.
 - No memoization; repeated references within a formula re-use numeric substitution outputs but not re-computed mid-expression.
 - Logging includes debug entry per component with amount; errors write to log with correlation ID when available, but user-facing feedback limited to generic error list.
+- When conditional flag disabled, validation rejects `IF(` usage in salary structure controllers to prevent silent failures; UI helper text clarifies flag state.
