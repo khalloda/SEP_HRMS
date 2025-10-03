@@ -77,7 +77,10 @@
         </div>
 
         <div class="col-12">
-            <div class="card" x-data="componentRepeater({{ $components->toJson() }}, {{ json_encode(old('components', [])) }})">
+            <div class="card"
+                x-data="componentRepeater(@js($components), @js(old('components', [])))"
+                x-init="init()"
+                data-salary-structure-repeater>
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{{ __('Components') }}</h5>
                     <button type="button" class="btn btn-sm btn-outline-primary" x-on:click="addRow()">
@@ -97,11 +100,11 @@
                                         <i class="fas fa-grip-vertical"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
                                             <label class="form-label small text-muted mb-0">{{ __('Component') }}</label>
                                             <span class="badge bg-light text-muted">#<span x-text="index + 1"></span></span>
                                         </div>
-                                    <select class="form-select form-select-sm" :name="`components[${row.uuid}][component_id]`" x-model="row.component" required>
+                                        <select class="form-select form-select-sm" :name="`components[${row.uuid}][component_id]`" x-model="row.component" required>
                                             <option value="" disabled>{{ __('Select component') }}</option>
                                             <template x-for="group in componentGroups" :key="group.type">
                                                 <optgroup :label="group.label">
@@ -157,7 +160,16 @@
     }
 
     function componentRepeater(componentGroups, oldComponents) {
-        const normalisedGroups = Object.entries(componentGroups).map(([type, items]) => ({
+        const uuid = () => {
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                return window.crypto.randomUUID();
+            }
+
+            return `uuid-${Math.random().toString(36).slice(2, 11)}`;
+        };
+
+        const parsedGroups = typeof componentGroups === 'string' ? JSON.parse(componentGroups) : componentGroups;
+        const normalisedGroups = Object.entries(parsedGroups || {}).map(([type, items]) => ({
             type,
             label: type.charAt(0).toUpperCase() + type.slice(1),
             items: items.map(item => ({
@@ -166,23 +178,22 @@
             })),
         }));
 
-        const oldRows = Object.values(oldComponents || {}).map(component => ({
-            uuid: crypto.randomUUID(),
-            component: component.component_id ?? '',
-            amount: component.value_numeric ?? '',
-            formula: component.formula_expr ?? '',
-            priority: component.priority_order ?? '',
-        }));
+        const ensureRows = () => {
+            const parsedOld = typeof oldComponents === 'string' ? JSON.parse(oldComponents) : oldComponents;
+            const seeded = Object.values(parsedOld || {}).map(component => ({
+                uuid: uuid(),
+                component: component.component_id ?? '',
+                amount: component.value_numeric ?? '',
+                formula: component.formula_expr ?? '',
+                priority: component.priority_order ?? '',
+            }));
 
-        if (oldRows.length === 0) {
-            oldRows.push({
-                uuid: crypto.randomUUID(),
-                component: '',
-                amount: '',
-                formula: '',
-                priority: ''
-            });
-        }
+            if (seeded.length === 0) {
+                seeded.push(newRow());
+            }
+
+            return seeded;
+        };
 
         const reorder = rows => {
             rows.forEach((row, index) => {
@@ -192,11 +203,11 @@
 
         return {
             componentGroups: normalisedGroups,
-            rows: oldRows,
+            rows: ensureRows(),
             init() {
                 this.$nextTick(() => {
-                    if (this.$refs.sortable) {
-                        new Sortable(this.$refs.sortable, {
+                    if (this.$refs.sortable && window.Sortable) {
+                        window.Sortable.create(this.$refs.sortable, {
                             handle: '.drag-handle',
                             animation: 150,
                             onUpdate: () => reorder(this.rows),
@@ -212,26 +223,22 @@
                     this.addRow();
                     this.$dispatch('flash', {
                         type: 'danger',
-                        message: '{{ __('At least one component is required.') }}'
+                        message: '{{ __('
+                        At least one component is required.
+                        ') }}'
                     });
                     return;
                 }
                 event.target.submit();
             },
             addRow() {
-                this.rows.push({
-                    uuid: crypto.randomUUID(),
-                    component: '',
-                    amount: '',
-                    formula: '',
-                    priority: ''
-                });
+                this.rows.push(newRow());
                 reorder(this.rows);
             },
             removeRow(index) {
                 this.rows.splice(index, 1);
                 if (this.rows.length === 0) {
-                    this.addRow();
+                    this.rows.push(newRow());
                 }
                 reorder(this.rows);
             },

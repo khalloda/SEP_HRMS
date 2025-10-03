@@ -77,14 +77,17 @@
         </div>
 
         <div class="col-12">
-            <div class="card" x-data="componentRepeater({{ $components->toJson() }}, {{ json_encode(old('components', $salaryStructure->structureComponents->mapWithKeys(fn ($component) => [
-                $component->component_id => [
-                    'component_id' => $component->component_id,
-                    'value_numeric' => $component->value_numeric,
-                    'formula_expr' => $component->formula_expr,
-                    'priority_order' => $component->priority_order,
-                ],
-            ])->toArray())) }})">
+            <div class="card"
+                x-data="componentRepeater(@js($components), @js(old('components', $salaryStructure->structureComponents->mapWithKeys(fn ($component) => [
+                     (string) $component->component_id => [
+                         'component_id' => $component->component_id,
+                         'value_numeric' => $component->value_numeric,
+                         'formula_expr' => $component->formula_expr,
+                         'priority_order' => $component->priority_order,
+                     ],
+                 ])->toArray())))"
+                x-init="init()"
+                data-salary-structure-repeater>
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{{ __('Components') }}</h5>
                     <button type="button" class="btn btn-sm btn-outline-primary" x-on:click="addRow()">
@@ -165,7 +168,16 @@
     }
 
     function componentRepeater(componentGroups, seededComponents) {
-        const normalisedGroups = Object.entries(componentGroups).map(([type, items]) => ({
+        const uuid = () => {
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                return window.crypto.randomUUID();
+            }
+
+            return `uuid-${Math.random().toString(36).slice(2, 11)}`;
+        };
+
+        const parsedGroups = typeof componentGroups === 'string' ? JSON.parse(componentGroups) : componentGroups;
+        const normalisedGroups = Object.entries(parsedGroups || {}).map(([type, items]) => ({
             type,
             label: type.charAt(0).toUpperCase() + type.slice(1),
             items: items.map(item => ({
@@ -174,18 +186,19 @@
             })),
         }));
 
-        const initialRows = Object.entries(seededComponents || {}).map(([uuid, component]) => ({
-            uuid: uuid !== '0' ? uuid : crypto.randomUUID(),
+        const parsedSeeded = typeof seededComponents === 'string' ? JSON.parse(seededComponents) : seededComponents;
+        const initialRows = Object.entries(parsedSeeded || {}).map(([seed, component]) => ({
+            uuid: seed !== '0' ? seed : uuid(),
             component: component.component_id ?? '',
             amount: component.value_numeric ?? '',
             formula: component.formula_expr ?? '',
             priority: component.priority_order ?? '',
         }));
 
-        const ensureRow = (collection) => {
+        const ensureRow = collection => {
             if (collection.length === 0) {
                 collection.push({
-                    uuid: crypto.randomUUID(),
+                    uuid: uuid(),
                     component: '',
                     amount: '',
                     formula: '',
@@ -195,31 +208,31 @@
             return collection;
         };
 
-        const normalize = (collection) => {
+        const reorder = collection => {
             collection.forEach((row, idx) => {
                 row.priority = idx + 1;
             });
         };
 
         const rows = ensureRow(initialRows);
-        normalize(rows);
+        reorder(rows);
 
         return {
             componentGroups: normalisedGroups,
             rows,
             init() {
                 this.$nextTick(() => {
-                    if (this.$refs.sortable) {
-                        new Sortable(this.$refs.sortable, {
+                    if (this.$refs.sortable && window.Sortable) {
+                        window.Sortable.create(this.$refs.sortable, {
                             handle: '.drag-handle',
                             animation: 150,
-                            onEnd: () => normalize(this.rows),
+                            onEnd: () => reorder(this.rows),
                         });
                     }
                 });
             },
             handleSubmit(event) {
-                normalize(this.rows);
+                reorder(this.rows);
                 if (this.rows.length === 0 || this.rows.every(row => !row.component)) {
                     event.preventDefault();
                     this.addRow();
@@ -235,18 +248,18 @@
             },
             addRow() {
                 this.rows.push({
-                    uuid: crypto.randomUUID(),
+                    uuid: uuid(),
                     component: '',
                     amount: '',
                     formula: '',
-                    priority: ''
+                    priority: '',
                 });
-                normalize(this.rows);
+                reorder(this.rows);
             },
             removeRow(index) {
                 this.rows.splice(index, 1);
                 ensureRow(this.rows);
-                normalize(this.rows);
+                reorder(this.rows);
             },
         };
     }
