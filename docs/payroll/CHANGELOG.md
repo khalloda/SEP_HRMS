@@ -19,3 +19,6 @@
 - Added `approval_required` column to `payroll_runs` to align schema with controller expectations.
 - Introduced `PayrollStoreTest` to cover happy-path creation and overlapping period validation (passes `php artisan test --filter=PayrollStoreTest`).
 \r\n## 2025-10-02 (Late PM+2)\r\n- Set the payroll create form and validation defaults to EGP and updated feature coverage to assert the selection.
+
+## 2025-10-03
+- Renamed payroll task documentation files to the unified `TASK_phase-YY-step-XX-…` naming scheme for easier sequencing.

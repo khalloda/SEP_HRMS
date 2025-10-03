@@ -57,7 +57,7 @@ class PayrollController extends Controller
             $search = $request->get('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -67,13 +67,25 @@ class PayrollController extends Controller
         $statusOptions = PayrollRun::STATUSES;
         $yearOptions = range(date('Y') - 2, date('Y') + 1);
         $monthOptions = [
-            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
-            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
-            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+            1 => 'January',
+            2 => 'February',
+            3 => 'March',
+            4 => 'April',
+            5 => 'May',
+            6 => 'June',
+            7 => 'July',
+            8 => 'August',
+            9 => 'September',
+            10 => 'October',
+            11 => 'November',
+            12 => 'December'
         ];
 
         return view('payroll.index', compact(
-            'payrollRuns', 'statusOptions', 'yearOptions', 'monthOptions'
+            'payrollRuns',
+            'statusOptions',
+            'yearOptions',
+            'monthOptions'
         ));
     }
 
@@ -95,7 +107,9 @@ class PayrollController extends Controller
         $suggestedPayDate = $suggestedEnd->copy()->addDays(5);
 
         return view('payroll.create', compact(
-            'suggestedStart', 'suggestedEnd', 'suggestedPayDate'
+            'suggestedStart',
+            'suggestedEnd',
+            'suggestedPayDate'
         ));
     }
 
@@ -112,7 +126,7 @@ class PayrollController extends Controller
             'pay_period_start' => 'required|date',
             'pay_period_end' => 'required|date|after:pay_period_start',
             'pay_date' => 'required|date|after_or_equal:pay_period_end',
-            'currency' => 'required|string|in:USD,EUR,EGP',
+            'currency' => 'required|string|in:EGP,USD,EUR',
             'approval_required' => 'boolean',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -129,7 +143,7 @@ class PayrollController extends Controller
         $overlapping = PayrollRun::where(function ($query) use ($periodStart, $periodEnd) {
             $query->where(function ($q) use ($periodStart, $periodEnd) {
                 $q->where('pay_period_start', '<=', $periodEnd)
-                  ->where('pay_period_end', '>=', $periodStart);
+                    ->where('pay_period_end', '>=', $periodStart);
             });
         })->whereNotIn('status', [PayrollRun::STATUS_CANCELLED])->exists();
 
@@ -167,7 +181,10 @@ class PayrollController extends Controller
         Gate::authorize('view', $payrollRun);
 
         $payrollRun->load([
-            'creator', 'locker', 'poster', 'approver',
+            'creator',
+            'locker',
+            'poster',
+            'approver',
             'payslips.employee.department',
             'payslips.payslipLines'
         ]);
@@ -251,7 +268,7 @@ class PayrollController extends Controller
             'pay_period_start' => 'required|date',
             'pay_period_end' => 'required|date|after:pay_period_start',
             'pay_date' => 'required|date|after_or_equal:pay_period_end',
-            'currency' => 'required|string|in:USD,EUR,EGP',
+            'currency' => 'required|string|in:EGP,USD,EUR',
             'approval_required' => 'boolean',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -489,7 +506,6 @@ class PayrollController extends Controller
 
         return redirect()->route('payroll.show', $payrollRun)
             ->with('error', __('hrms.payroll.cancellation_failed'));
-
     }
 
     /**
@@ -513,8 +529,8 @@ class PayrollController extends Controller
             $search = $request->get('search');
             $query->where(function ($q) use ($search) {
                 $q->where('employee_name', 'like', "%{$search}%")
-                  ->orWhere('employee_code', 'like', "%{$search}%")
-                  ->orWhere('employee_arabic_name', 'like', "%{$search}%");
+                    ->orWhere('employee_code', 'like', "%{$search}%")
+                    ->orWhere('employee_arabic_name', 'like', "%{$search}%");
             });
         }
 
@@ -592,7 +608,7 @@ class PayrollController extends Controller
 
         $headings = PayrollSummaryReport::headings();
         $rows = PayrollSummaryReport::rows($filters)
-            ->map(static fn (array $row): array => array_values($row))
+            ->map(static fn(array $row): array => array_values($row))
             ->all();
 
         $filename = PayrollSummaryReport::filename($filters, 'excel');
@@ -610,4 +626,3 @@ class PayrollController extends Controller
         abort(501, __('Export format not yet supported.'));
     }
 }
-
