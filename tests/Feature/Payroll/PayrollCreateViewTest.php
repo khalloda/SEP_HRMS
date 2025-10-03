@@ -36,7 +36,7 @@ class PayrollCreateViewTest extends TestCase
         $response->assertSee('Payroll Details');
         $response->assertSee('value="EGP" selected', false);
 
-        $configuredCurrencies = config('payroll.currencies');
+        $configuredCurrencies = payrollCurrencies();
         foreach ($configuredCurrencies as $code => $label) {
             $response->assertSee(sprintf('value="%s"', $code), false);
         }

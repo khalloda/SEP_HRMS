@@ -21,3 +21,6 @@ Payload validation, Blade defaults, and tests each hard-coded payroll currencies
 ## Rollback Plan
 1. Remove the `currencies` entry from `config/payroll.php`.
 2. Restore hard-coded arrays in controller, view, and test.
+
+## Follow-up
+- Added global helper `payrollCurrencies()` (Phase D1 Step 18) to simplify retrieving the configured currency list across controllers, views, and tests.

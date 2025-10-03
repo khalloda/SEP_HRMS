@@ -106,10 +106,7 @@ class PayrollController extends Controller
         $suggestedEnd = $suggestedStart->copy()->endOfMonth();
         $suggestedPayDate = $suggestedEnd->copy()->addDays(5);
 
-        $currencies = config('payroll.currencies', []);
-        if (empty($currencies)) {
-            $currencies = ['EGP' => 'EGP'];
-        }
+        $currencies = payrollCurrencies();
 
         return view('payroll.create', compact(
             'suggestedStart',
@@ -126,10 +123,7 @@ class PayrollController extends Controller
     {
         Gate::authorize('create', PayrollRun::class);
 
-        $currencyKeys = array_keys(config('payroll.currencies', []));
-        if (empty($currencyKeys)) {
-            $currencyKeys = ['EGP'];
-        }
+        $currencyKeys = array_keys(payrollCurrencies());
 
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
@@ -273,10 +267,7 @@ class PayrollController extends Controller
                 ->with('error', __('hrms.payroll.cannot_edit_locked'));
         }
 
-        $currencyKeys = array_keys(config('payroll.currencies', []));
-        if (empty($currencyKeys)) {
-            $currencyKeys = ['EGP'];
-        }
+        $currencyKeys = array_keys(payrollCurrencies());
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
