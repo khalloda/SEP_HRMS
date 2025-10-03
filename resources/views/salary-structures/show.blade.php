@@ -38,7 +38,7 @@
                         <dd class="col-7">
                             @if($salaryStructure->is_expired)
                                 <span class="badge bg-secondary">{{ __('Expired') }}</span>
-                            @elseif($salaryStructure->isFuture())
+                            @elseif($salaryStructure->is_future)
                                 <span class="badge bg-info text-dark">{{ __('Scheduled') }}</span>
                             @else
                                 <span class="badge bg-success">{{ __('Active') }}</span>
@@ -59,38 +59,38 @@
                 </div>
                 <div class="card-body">
                     @php
-                        $grouped = $salaryStructure->structureComponents->groupBy(fn ($component) => $component->component->comp_type ?? 'other');
+                    $grouped = $salaryStructure->structureComponents->groupBy(fn ($component) => $component->component->comp_type ?? 'other');
                     @endphp
 
                     @forelse($grouped as $type => $items)
-                        <div class="mb-4">
-                            <h6 class="fw-semibold text-uppercase small text-muted">{{ ucfirst($type) }}</h6>
-                            <div class="list-group">
-                                @foreach($items as $item)
-                                    <div class="list-group-item">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <strong>{{ $item->component->name ?? __('Unknown Component') }}</strong>
-                                                <div class="text-muted small">{{ $item->component->code ?? '—' }}</div>
-                                                @if($item->formula_expr)
-                                                    <div class="small fst-italic text-primary">{{ __('Formula: :expr', ['expr' => $item->formula_expr]) }}</div>
-                                                @endif
-                                            </div>
-                                            <div class="text-end">
-                                                @if($item->value_numeric !== null)
-                                                    <div class="fw-semibold">{{ number_format((float) $item->value_numeric, 2) }}</div>
-                                                @else
-                                                    <div class="text-muted">—</div>
-                                                @endif
-                                                <div class="text-muted small">{{ __('Priority: :priority', ['priority' => $item->priority_order]) }}</div>
-                                            </div>
-                                        </div>
+                    <div class="mb-4">
+                        <h6 class="fw-semibold text-uppercase small text-muted">{{ ucfirst($type) }}</h6>
+                        <div class="list-group">
+                            @foreach($items as $item)
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>{{ $item->component->name ?? __('Unknown Component') }}</strong>
+                                        <div class="text-muted small">{{ $item->component->code ?? '—' }}</div>
+                                        @if($item->formula_expr)
+                                        <div class="small fst-italic text-primary">{{ __('Formula: :expr', ['expr' => $item->formula_expr]) }}</div>
+                                        @endif
                                     </div>
-                                @endforeach
+                                    <div class="text-end">
+                                        @if($item->value_numeric !== null)
+                                        <div class="fw-semibold">{{ number_format((float) $item->value_numeric, 2) }}</div>
+                                        @else
+                                        <div class="text-muted">—</div>
+                                        @endif
+                                        <div class="text-muted small">{{ __('Priority: :priority', ['priority' => $item->priority_order]) }}</div>
+                                    </div>
+                                </div>
                             </div>
+                            @endforeach
                         </div>
+                    </div>
                     @empty
-                        <p class="text-muted mb-0">{{ __('No components are defined for this structure.') }}</p>
+                    <p class="text-muted mb-0">{{ __('No components are defined for this structure.') }}</p>
                     @endforelse
                 </div>
             </div>

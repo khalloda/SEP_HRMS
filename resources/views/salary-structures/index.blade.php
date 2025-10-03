@@ -33,39 +33,39 @@
                     </thead>
                     <tbody>
                         @forelse($structures as $structure)
-                            <tr>
-                                <td>{{ $structure->currency }}</td>
-                                <td>{{ optional($structure->effective_from)->format('Y-m-d') }}</td>
-                                <td>{{ optional($structure->effective_to)->format('Y-m-d') ?? '—' }}</td>
-                                <td class="text-wrap" style="max-width: 220px;">{{ $structure->notes ?? '—' }}</td>
-                                <td>
-                                    @if($structure->is_expired)
-                                        <span class="badge bg-secondary">{{ __('Expired') }}</span>
-                                    @elseif($structure->isFuture())
-                                        <span class="badge bg-info text-dark">{{ __('Scheduled') }}</span>
-                                    @else
-                                        <span class="badge bg-success">{{ __('Active') }}</span>
-                                    @endif
-                                </td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('employees.salary-structures.show', [$employee, $structure]) }}" class="btn btn-outline-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        @can('update', $structure)
-                                            <a href="{{ route('employees.salary-structures.edit', [$employee, $structure]) }}" class="btn btn-outline-secondary">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                        @endcan
-                                    </div>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td>{{ $structure->currency }}</td>
+                            <td>{{ optional($structure->effective_from)->format('Y-m-d') }}</td>
+                            <td>{{ optional($structure->effective_to)->format('Y-m-d') ?? '—' }}</td>
+                            <td class="text-wrap" style="max-width: 220px;">{{ $structure->notes ?? '—' }}</td>
+                            <td>
+                                @if($structure->is_expired)
+                                <span class="badge bg-secondary">{{ __('Expired') }}</span>
+                                @elseif($structure->is_future)
+                                <span class="badge bg-info text-dark">{{ __('Scheduled') }}</span>
+                                @else
+                                <span class="badge bg-success">{{ __('Active') }}</span>
+                                @endif
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('employees.salary-structures.show', [$employee, $structure]) }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @can('update', $structure)
+                                    <a href="{{ route('employees.salary-structures.edit', [$employee, $structure]) }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @endcan
+                                </div>
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    {{ __('No salary structures have been defined for this employee yet.') }}
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                {{ __('No salary structures have been defined for this employee yet.') }}
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
