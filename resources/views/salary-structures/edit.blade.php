@@ -130,10 +130,10 @@
                                     <div>
                                         <label class="form-label small text-muted d-flex align-items-center gap-1">
                                             <span>{{ __('Formula') }}</span>
-                                            <span class="badge bg-info text-dark" x-show="config.useConditionalsFlag" x-cloak>IF</span>
+                                            <span class="badge bg-info text-dark" x-show="$root.useConditionalsFlag" x-cloak>IF</span>
                                         </label>
                                         <input type="text" class="form-control form-control-sm" :name="`components[${row.uuid}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
-                                        <div class="form-text" x-show="config.useConditionalsFlag" x-cloak>
+                                        <div class="form-text" x-show="$root.useConditionalsFlag" x-cloak>
                                             {{ __('Conditional formulas support IF statements, e.g. IF(BASIC_SALARY>12000, BASIC_SALARY*0.12, BASIC_SALARY*0.05). Nested IFs work when the safe engine flag is enabled.') }}
                                         </div>
                                     </div>
@@ -171,9 +171,7 @@
 <script>
     function salaryStructureForm() {
         return {
-            config: {
-                useConditionalsFlag: {{ config('payroll.use_safe_engine_conditionals') ? 'true' : 'false' }}
-            }
+            useConditionalsFlag: {{ config('payroll.use_safe_engine_conditionals') ? 'true' : 'false' }}
         };
     }
 
