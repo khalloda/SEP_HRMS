@@ -24,3 +24,4 @@
 - Renamed payroll task documentation files to the unified `TASK_phase-YY-step-XX-…` naming scheme for easier sequencing.
 - Added `payroll.edit` Blade view leveraging centralized currency helpers.
 - Introduced feature coverage for the edit page and update endpoint currency validation.
+- Added policy regression tests ensuring only authorized roles can update draft payroll runs and that locked runs remain read-only.
