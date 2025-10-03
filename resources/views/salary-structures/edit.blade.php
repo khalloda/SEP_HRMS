@@ -93,6 +93,9 @@
                     </button>
                 </div>
                 <div class="card-body">
+                    @error('components')
+                        <div class="alert alert-danger small">{{ $message }}</div>
+                    @enderror
                     <template x-if="rows.length === 0">
                         <p class="text-muted mb-0">{{ __('Add at least one component to keep this structure active.') }}</p>
                     </template>
