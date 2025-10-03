@@ -29,7 +29,7 @@
     @endif
 
     @php
-        $currencyOptions = ['USD' => 'USD', 'EUR' => 'EUR', 'EGP' => 'EGP'];
+        $currencyOptions = ['EGP' => 'EGP', 'USD' => 'USD', 'EUR' => 'EUR'];
         $suggestedStartValue = optional($suggestedStart)->format('Y-m-d');
         $suggestedEndValue = optional($suggestedEnd)->format('Y-m-d');
         $suggestedPayDateValue = optional($suggestedPayDate)->format('Y-m-d');
@@ -126,7 +126,7 @@
                                 required
                             >
                                 @foreach($currencyOptions as $value => $label)
-                                    <option value="{{ $value }}" {{ old('currency', 'USD') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    <option value="{{ $value }}" {{ old('currency', 'EGP') === $value ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach
                             </select>
                             @error('currency')

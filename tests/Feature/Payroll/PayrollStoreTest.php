@@ -39,7 +39,7 @@ class PayrollStoreTest extends TestCase
             'pay_period_start' => Carbon::parse('2099-01-01')->toDateString(),
             'pay_period_end' => Carbon::parse('2099-01-31')->toDateString(),
             'pay_date' => Carbon::parse('2099-02-05')->toDateString(),
-            'currency' => 'USD',
+            'currency' => 'EGP',
             'approval_required' => 1,
             'notes' => 'Generated via feature test.',
         ];
@@ -78,7 +78,7 @@ class PayrollStoreTest extends TestCase
             'pay_period_end' => Carbon::parse('2026-02-29'),
             'pay_date' => Carbon::parse('2026-03-05'),
             'status' => PayrollRun::STATUS_DRAFT,
-            'currency' => 'USD',
+            'currency' => 'EGP',
             'total_employees' => 0,
             'total_gross' => 0,
             'total_net' => 0,
@@ -92,7 +92,7 @@ class PayrollStoreTest extends TestCase
             'pay_period_start' => Carbon::parse('2026-02-15')->toDateString(),
             'pay_period_end' => Carbon::parse('2026-03-15')->toDateString(),
             'pay_date' => Carbon::parse('2026-03-20')->toDateString(),
-            'currency' => 'USD',
+            'currency' => 'EGP',
             'approval_required' => 0,
             'notes' => 'Should be rejected.',
         ];

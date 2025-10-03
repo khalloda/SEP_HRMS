@@ -34,6 +34,7 @@ class PayrollCreateViewTest extends TestCase
         $response->assertOk();
         $response->assertSee('Create Payroll Run');
         $response->assertSee('Payroll Details');
+        $response->assertSee('value="EGP" selected', false);
         $response->assertSee('pay_period_start');
     }
 
