@@ -65,7 +65,11 @@ class SalaryStructureController extends Controller
             'components' => 'required|array|min:1',
             'components.*.component_id' => 'required|exists:salary_components,id',
             'components.*.value_numeric' => 'nullable|numeric|min:0',
-            'components.*.formula_expr' => 'nullable|string|max:255',
+            'components.*.formula_expr' => ['nullable', 'string', 'max:255', function ($attribute, $value, $fail) {
+                if (! config('payroll.use_safe_engine_conditionals') && strpos(strtoupper((string) $value), 'IF(') !== false) {
+                    $fail(__('Conditional formulas require the payroll conditional engine flag to be enabled.'));
+                }
+            }],
             'components.*.priority_order' => 'required|integer|min:1|max:999',
         ]);
 
@@ -190,7 +194,11 @@ class SalaryStructureController extends Controller
             'components' => 'required|array|min:1',
             'components.*.component_id' => 'required|exists:salary_components,id',
             'components.*.value_numeric' => 'nullable|numeric|min:0',
-            'components.*.formula_expr' => 'nullable|string|max:255',
+            'components.*.formula_expr' => ['nullable', 'string', 'max:255', function ($attribute, $value, $fail) {
+                if (! config('payroll.use_safe_engine_conditionals') && strpos(strtoupper((string) $value), 'IF(') !== false) {
+                    $fail(__('Conditional formulas require the payroll conditional engine flag to be enabled.'));
+                }
+            }],
             'components.*.priority_order' => 'required|integer|min:1|max:999',
         ]);
 

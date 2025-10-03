@@ -128,8 +128,14 @@
                                         <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${row.uuid}][value_numeric]`" x-model="row.amount" placeholder="0.00">
                                     </div>
                                     <div>
-                                        <label class="form-label small text-muted">{{ __('Formula') }}</label>
+                                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                                            <span>{{ __('Formula') }}</span>
+                                            <span class="badge bg-info text-dark" x-show="config.useConditionalsFlag" x-cloak>IF</span>
+                                        </label>
                                         <input type="text" class="form-control form-control-sm" :name="`components[${row.uuid}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
+                                        <div class="form-text" x-show="config.useConditionalsFlag" x-cloak>
+                                            {{ __('Conditional formulas support IF statements, e.g. IF(BASIC_SALARY>12000, BASIC_SALARY*0.12, BASIC_SALARY*0.05). Nested IFs work when the safe engine flag is enabled.') }}
+                                        </div>
                                     </div>
                                     <input type="hidden" :name="`components[${row.uuid}][priority_order]`" x-model="row.priority">
                                     <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
@@ -164,7 +170,11 @@
 @push('scripts')
 <script>
     function salaryStructureForm() {
-        return {};
+        return {
+            config: {
+                useConditionalsFlag: {{ config('payroll.use_safe_engine_conditionals') ? 'true' : 'false' }}
+            }
+        };
     }
 
     function componentRepeater(componentGroups, seededComponents) {

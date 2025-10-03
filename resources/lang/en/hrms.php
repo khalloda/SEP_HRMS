@@ -393,6 +393,7 @@ return [
         'cloned_successfully' => 'Salary structure cloned successfully',
         'terminated_successfully' => 'Salary structure terminated successfully',
         'cannot_edit_expired' => 'Cannot edit expired salary structure',
+        'conditional_flag_required' => 'Conditional formulas require the payroll conditional engine flag to be enabled.',
         'not_active' => 'Salary structure is not active',
         'effective_from' => 'Effective From',
         'effective_to' => 'Effective To',
