@@ -6,6 +6,13 @@ use InvalidArgumentException;
 
 class ExpressionEvaluator
 {
+    protected ExpressionFunctionRegistry $functionRegistry;
+
+    public function __construct(?ExpressionFunctionRegistry $functionRegistry = null)
+    {
+        $this->functionRegistry = $functionRegistry ?? new ExpressionFunctionRegistry();
+    }
+
     public function evaluate(string $expression, ?string $engine = null): float
     {
         $engine ??= $this->resolveEngine();
@@ -135,6 +142,17 @@ class ExpressionEvaluator
                 continue;
             }
 
+            if ($char === ',') {
+                if ($numberBuffer !== '') {
+                    $tokens[] = $numberBuffer;
+                    $numberBuffer = '';
+                }
+
+                $tokens[] = ',';
+                $previousToken = ',';
+                continue;
+            }
+
             if (ctype_alpha($char)) {
                 if ($numberBuffer !== '') {
                     $tokens[] = $numberBuffer;
@@ -143,14 +161,22 @@ class ExpressionEvaluator
 
                 $word = $this->consumeAlphaToken($expression, $i);
 
-                if (! $this->isOperator($word)) {
-                    throw new InvalidArgumentException('Invalid token encountered: ' . $word);
+                if ($this->isOperator($word)) {
+                    $tokens[] = $word;
+                    $previousToken = $word;
+                    $i += strlen($word) - 1;
+                    continue;
                 }
 
-                $tokens[] = $word;
-                $previousToken = $word;
-                $i += strlen($word) - 1;
-                continue;
+                if ($this->functionRegistry->has($word)) {
+                    $functionToken = $this->buildFunctionToken($word);
+                    $tokens[] = $functionToken;
+                    $previousToken = $functionToken;
+                    $i += strlen($word) - 1;
+                    continue;
+                }
+
+                throw new InvalidArgumentException('Invalid token encountered: ' . $word);
             }
 
             if ($numberBuffer !== '') {
@@ -178,6 +204,7 @@ class ExpressionEvaluator
     {
         $output = [];
         $stack = [];
+        $argumentStack = [];
 
         foreach ($tokens as $token) {
             if ($this->isNumber($token)) {
@@ -185,9 +212,43 @@ class ExpressionEvaluator
                 continue;
             }
 
+            if ($token === ',') {
+                $foundParenthesis = false;
+
+                while (! empty($stack)) {
+                    $top = end($stack);
+
+                    if ($top === '(') {
+                        $foundParenthesis = true;
+                        break;
+                    }
+
+                    $output[] = array_pop($stack);
+                }
+
+                if (! $foundParenthesis) {
+                    throw new InvalidArgumentException('Misplaced comma or mismatched parentheses.');
+                }
+
+                if (empty($argumentStack)) {
+                    throw new InvalidArgumentException('Argument separator without active function context.');
+                }
+
+                $argumentStack[count($argumentStack) - 1]++;
+                continue;
+            }
+
+            if ($this->isFunctionToken($token)) {
+                $stack[] = $token;
+                $argumentStack[] = 0;
+                continue;
+            }
+
             if ($this->isOperator($token)) {
-                while (! empty($stack) && $this->isOperator(end($stack)) &&
-                    $this->precedence(end($stack)) >= $this->precedence($token)) {
+                while (
+                    ! empty($stack) && $this->isOperator(end($stack)) &&
+                    $this->precedence(end($stack)) >= $this->precedence($token)
+                ) {
                     $output[] = array_pop($stack);
                 }
 
@@ -210,6 +271,18 @@ class ExpressionEvaluator
                 }
 
                 array_pop($stack);
+
+                if (! empty($stack) && $this->isFunctionToken(end($stack))) {
+                    $functionToken = array_pop($stack);
+                    $argumentCount = array_pop($argumentStack) ?? 0;
+                    $argumentCount++;
+
+                    $output[] = [
+                        'type' => 'function',
+                        'name' => $this->extractFunctionName($functionToken),
+                        'args' => $argumentCount,
+                    ];
+                }
             }
         }
 
@@ -231,6 +304,32 @@ class ExpressionEvaluator
         $stack = [];
 
         foreach ($tokens as $token) {
+            if (is_array($token) && ($token['type'] ?? null) === 'function') {
+                $argumentCount = $token['args'] ?? 0;
+
+                if ($argumentCount < 0) {
+                    throw new InvalidArgumentException('Invalid function argument count.');
+                }
+
+                if (count($stack) < $argumentCount) {
+                    throw new InvalidArgumentException(
+                        'Insufficient arguments for function ' . ($token['name'] ?? 'unknown')
+                    );
+                }
+
+                $arguments = [];
+
+                for ($index = 0; $index < $argumentCount; $index++) {
+                    $arguments[] = array_pop($stack);
+                }
+
+                $arguments = array_reverse($arguments);
+
+                $result = $this->functionRegistry->invoke($token['name'], $arguments);
+                $stack[] = $result;
+                continue;
+            }
+
             if (is_float($token) || is_int($token)) {
                 $stack[] = $token;
                 continue;
@@ -292,6 +391,11 @@ class ExpressionEvaluator
         return in_array($token, ['+', '-', '*', '/', '>', '<', '>=', '<=', '==', '!=', 'AND', 'OR'], true);
     }
 
+    protected function isFunctionToken(string $token): bool
+    {
+        return str_starts_with($token, 'FUNC:');
+    }
+
     protected function precedence(string $operator): int
     {
         return match ($operator) {
@@ -307,6 +411,16 @@ class ExpressionEvaluator
     protected function isDigitOrDot(string $char): bool
     {
         return ($char >= '0' && $char <= '9') || $char === '.';
+    }
+
+    protected function buildFunctionToken(string $name): string
+    {
+        return 'FUNC:' . strtoupper($name);
+    }
+
+    protected function extractFunctionName(string $token): string
+    {
+        return substr($token, 5);
     }
 
     protected function matchMultiCharOperator(string $expression, int $position): ?string

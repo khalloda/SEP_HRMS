@@ -61,6 +61,32 @@ class ExpressionEvaluatorTest extends TestCase
         $this->assertSame(1.0, $evaluator->evaluate('(2 + 3) * 4 == 20', 'new'));
     }
 
+    public function test_new_engine_supports_if_function(): void
+    {
+        $evaluator = new ExpressionEvaluator();
+
+        $this->assertSame(100.0, $evaluator->evaluate('IF(1, 100, 200)', 'new'));
+        $this->assertSame(200.0, $evaluator->evaluate('IF(0, 100, 200)', 'new'));
+        $this->assertSame(75.0, $evaluator->evaluate('IF(5 > 3, 50 + 25, 0)', 'new'));
+        $this->assertSame(10.0, $evaluator->evaluate('IF(5 > 3 AND 2 < 4, 10, 0)', 'new'));
+    }
+
+    public function test_new_engine_supports_nested_if_function(): void
+    {
+        $evaluator = new ExpressionEvaluator();
+
+        $this->assertSame(10.0, $evaluator->evaluate('IF(5 > 3, IF(2 > 1, 10, 20), 30)', 'new'));
+        $this->assertSame(20.0, $evaluator->evaluate('IF(5 > 6, 5, IF(2 > 1, 20, 30))', 'new'));
+    }
+
+    public function test_new_engine_throws_on_invalid_if_argument_count(): void
+    {
+        $evaluator = new ExpressionEvaluator();
+
+        $this->expectException(InvalidArgumentException::class);
+        $evaluator->evaluate('IF(1, 2)', 'new');
+    }
+
     public function test_new_engine_throws_on_division_by_zero(): void
     {
         $evaluator = new ExpressionEvaluator();

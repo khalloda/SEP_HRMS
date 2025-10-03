@@ -24,6 +24,7 @@ Implement Excel-style conditional formulas under a guarded config flag while pre
 - **Acceptance**: `IF(condition, x, y)` executes first true branch; nested calls supported; invalid argument counts raise descriptive exception.
 - **Tests**: Unit: true/false branches, nested IF, error handling.
 - **Rollback**: Revert commit; delete helper class.
+- **Status**: ✅ Completed (commit introduces `ExpressionFunctionRegistry`, adds IF support with nesting and validation tests).
 
 ## Task 4 — Payroll Service Integration
 - **Purpose**: Wire flag to choose conditional-capable engine, pass contextual variables if needed.
