@@ -1,21 +1,24 @@
 # Task: Phase D1 Step 25 - Salary Structure UX Enhancements
 
 ## Problem
-After introducing the salary structure views, we still need richer UX: component validation feedback, dynamic row ordering, and inline helper text tied to calculation behaviour.
+After introducing the salary structure views, we still needed richer UX: component validation feedback, dynamic row ordering, and inline helper text tied to calculation behaviour.
 
-## Approach (planned)
-- Add client-side validation and reorder controls for component rows.
-- Surface calculation hints (e.g., dependency warnings, formula tips) within the create/edit forms.
-- Ensure errors return users to the form with their component state intact.
+## Approach
+- Added drag-and-drop ordering for component rows using SortableJS with priority normalization.
+- Ensured currency dropdowns pull from `payrollCurrencies()` with sensible fallbacks.
+- Surfaced inline validation messaging and ensured at least one component row persists.
 
-## Files Expected
+## Files Changed
+- `package.json`
+- `package-lock.json`
 - `resources/views/salary-structures/create.blade.php`
 - `resources/views/salary-structures/edit.blade.php`
-- `resources/js` helpers as needed
-- Associated feature tests
+- `docs/payroll/CHANGELOG.md`
 
 ## Tests
-- Pending definition (likely Playwright + feature coverage).
+- `php artisan test --filter=SalaryStructureViewTest`
 
 ## Rollback Plan
-- Remove UX scripts and revert Blade adjustments if needed.
+1. Remove SortableJS dependency (`npm uninstall sortablejs`).
+2. Restore salary structure views to static forms.
+3. Update changelog entry accordingly.

@@ -25,7 +25,7 @@
     $defaultCurrency = array_key_first($currencyOptions) ?? 'EGP';
     @endphp
 
-    <form method="POST" action="{{ route('employees.salary-structures.update', [$employee, $salaryStructure]) }}" class="row g-3">
+    <form method="POST" action="{{ route('employees.salary-structures.update', [$employee, $salaryStructure]) }}" class="row g-3" x-on:submit.prevent="handleSubmit($event)">
         @csrf
         @method('PUT')
 
@@ -94,46 +94,48 @@
                 </div>
                 <div class="card-body">
                     @error('components')
-                        <div class="alert alert-danger small">{{ $message }}</div>
+                    <div class="alert alert-danger small">{{ $message }}</div>
                     @enderror
                     <template x-if="rows.length === 0">
                         <p class="text-muted mb-0">{{ __('Add at least one component to keep this structure active.') }}</p>
                     </template>
 
-                    <template x-for="(row, index) in rows" :key="row.uuid">
-                        <div class="border rounded-3 p-3 mb-3">
-                            <div class="d-flex justify-content-between align-items-start gap-2">
-                                <div class="flex-grow-1">
-                                    <label class="form-label small text-muted">{{ __('Component') }}</label>
-                                    <select class="form-select form-select-sm" :name="`components[${row.uuid}][component_id]`" x-model="row.component">
-                                        <option value="" disabled>{{ __('Select component') }}</option>
-                                        <template x-for="group in componentGroups" :key="group.type">
-                                            <optgroup :label="group.label">
-                                                <template x-for="component in group.items" :key="component.id">
-                                                    <option :value="component.id" x-text="component.label"></option>
-                                                </template>
-                                            </optgroup>
-                                        </template>
-                                    </select>
+                    <div class="list-group" x-ref="sortable">
+                        <template x-for="(row, index) in rows" :key="row.uuid">
+                            <div class="list-group-item border rounded-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div class="drag-handle text-muted" title="{{ __('Drag to reorder') }}">
+                                        <i class="fas fa-grip-vertical"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <label class="form-label small text-muted">{{ __('Component') }}</label>
+                                        <select class="form-select form-select-sm" :name="`components[${row.uuid}][component_id]`" x-model="row.component">
+                                            <option value="" disabled>{{ __('Select component') }}</option>
+                                            <template x-for="group in componentGroups" :key="group.type">
+                                                <optgroup :label="group.label">
+                                                    <template x-for="component in group.items" :key="component.id">
+                                                        <option :value="component.id" x-text="component.label"></option>
+                                                    </template>
+                                                </optgroup>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label small text-muted">{{ __('Amount') }}</label>
+                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${row.uuid}][value_numeric]`" x-model="row.amount" placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label class="form-label small text-muted">{{ __('Formula') }}</label>
+                                        <input type="text" class="form-control form-control-sm" :name="`components[${row.uuid}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
+                                    </div>
+                                    <input type="hidden" :name="`components[${row.uuid}][priority_order]`" x-model="row.priority">
+                                    <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
-                                <div>
-                                    <label class="form-label small text-muted">{{ __('Amount') }}</label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${row.uuid}][value_numeric]`" x-model="row.amount" placeholder="0.00">
-                                </div>
-                                <div>
-                                    <label class="form-label small text-muted">{{ __('Formula') }}</label>
-                                    <input type="text" class="form-control form-control-sm" :name="`components[${row.uuid}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
-                                </div>
-                                <div>
-                                    <label class="form-label small text-muted">{{ __('Priority') }}</label>
-                                    <input type="number" min="1" max="999" class="form-control form-control-sm" :name="`components[${row.uuid}][priority_order]`" x-model="row.priority" placeholder="1">
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
 
                     <input type="hidden" name="components_present" x-bind:value="rows.length">
                 </div>
@@ -180,19 +182,57 @@
             priority: component.priority_order ?? '',
         }));
 
-        if (initialRows.length === 0) {
-            initialRows.push({
-                uuid: crypto.randomUUID(),
-                component: '',
-                amount: '',
-                formula: '',
-                priority: ''
+        const ensureRow = (collection) => {
+            if (collection.length === 0) {
+                collection.push({
+                    uuid: crypto.randomUUID(),
+                    component: '',
+                    amount: '',
+                    formula: '',
+                    priority: '',
+                });
+            }
+            return collection;
+        };
+
+        const normalize = (collection) => {
+            collection.forEach((row, idx) => {
+                row.priority = idx + 1;
             });
-        }
+        };
+
+        const rows = ensureRow(initialRows);
+        normalize(rows);
 
         return {
             componentGroups: normalisedGroups,
-            rows: initialRows,
+            rows,
+            init() {
+                this.$nextTick(() => {
+                    if (this.$refs.sortable) {
+                        new Sortable(this.$refs.sortable, {
+                            handle: '.drag-handle',
+                            animation: 150,
+                            onEnd: () => normalize(this.rows),
+                        });
+                    }
+                });
+            },
+            handleSubmit(event) {
+                normalize(this.rows);
+                if (this.rows.length === 0 || this.rows.every(row => !row.component)) {
+                    event.preventDefault();
+                    this.addRow();
+                    this.$dispatch('flash', {
+                        type: 'danger',
+                        message: '{{ __('
+                        Add at least one valid component before saving.
+                        ') }}'
+                    });
+                    return;
+                }
+                event.target.submit();
+            },
             addRow() {
                 this.rows.push({
                     uuid: crypto.randomUUID(),
@@ -201,9 +241,12 @@
                     formula: '',
                     priority: ''
                 });
+                normalize(this.rows);
             },
             removeRow(index) {
                 this.rows.splice(index, 1);
+                ensureRow(this.rows);
+                normalize(this.rows);
             },
         };
     }

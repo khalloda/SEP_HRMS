@@ -25,7 +25,7 @@
     $defaultCurrency = array_key_first($currencyOptions) ?? 'EGP';
     @endphp
 
-    <form method="POST" action="{{ route('employees.salary-structures.store', $employee) }}" class="row g-3">
+    <form method="POST" action="{{ route('employees.salary-structures.store', $employee) }}" class="row g-3" x-on:submit.prevent="handleSubmit($event)">
         @csrf
 
         <div class="col-12">
@@ -87,46 +87,57 @@
                 </div>
                 <div class="card-body">
                     @error('components')
-                        <div class="alert alert-danger small">{{ $message }}</div>
+                    <div class="alert alert-danger small">{{ $message }}</div>
                     @enderror
                     <template x-if="rows.length === 0">
                         <p class="text-muted mb-0">{{ __('Add at least one component to activate this structure.') }}</p>
                     </template>
 
-                    <template x-for="(row, index) in rows" :key="row.uuid">
-                        <div class="border rounded-3 p-3 mb-3">
-                            <div class="d-flex justify-content-between align-items-start gap-2">
-                                <div class="flex-grow-1">
-                                    <label class="form-label small text-muted">{{ __('Component') }}</label>
-                                    <select class="form-select form-select-sm" :name="`components[${row.uuid}][component_id]`" x-model="row.component">
-                                        <option value="" disabled>{{ __('Select component') }}</option>
-                                        <template x-for="group in componentGroups" :key="group.type">
-                                            <optgroup :label="group.label">
-                                                <template x-for="component in group.items" :key="component.id">
-                                                    <option :value="component.id" x-text="component.label"></option>
-                                                </template>
-                                            </optgroup>
+                    <div class="list-group" x-ref="sortable">
+                        <template x-for="(row, index) in rows" :key="row.uuid">
+                            <div class="list-group-item border rounded-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div class="drag-handle text-muted" title="{{ __('Drag to reorder') }}">
+                                        <i class="fas fa-grip-vertical"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <label class="form-label small text-muted mb-0">{{ __('Component') }}</label>
+                                            <span class="badge bg-light text-muted">#<span x-text="index + 1"></span></span>
+                                        </div>
+                                        <select class="form-select form-select-sm"
+                                            :name="`components[${row.uuid}][component_id]`
+                                            class=" @error('components.' + row.uuid + '.component_id' ) is-invalid @enderror"
+                                            x-model="row.component" required>
+                                            <option value="" disabled>{{ __('Select component') }}</option>
+                                            <template x-for="group in componentGroups" :key="group.type">
+                                                <optgroup :label="group.label">
+                                                    <template x-for="component in group.items" :key="component.id">
+                                                        <option :value="component.id" x-text="component.label"></option>
+                                                    </template>
+                                                </optgroup>
+                                            </template>
+                                        </select>
+                                        <template x-if="errors[row.uuid]?.component">
+                                            <div class="text-danger small" x-text="errors[row.uuid].component"></div>
                                         </template>
-                                    </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label small text-muted">{{ __('Amount') }}</label>
+                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${row.uuid}][value_numeric]`" x-model="row.amount" placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label class="form-label small text-muted">{{ __('Formula') }}</label>
+                                        <input type="text" class="form-control form-control-sm" :name="`components[${row.uuid}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
+                                    </div>
+                                    <input type="hidden" :name="`components[${row.uuid}][priority_order]`" x-model="row.priority">
+                                    <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
-                                <div>
-                                    <label class="form-label small text-muted">{{ __('Amount') }}</label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${row.uuid}][value_numeric]`" x-model="row.amount" placeholder="0.00">
-                                </div>
-                                <div>
-                                    <label class="form-label small text-muted">{{ __('Formula') }}</label>
-                                    <input type="text" class="form-control form-control-sm" :name="`components[${row.uuid}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
-                                </div>
-                                <div>
-                                    <label class="form-label small text-muted">{{ __('Priority') }}</label>
-                                    <input type="number" min="1" max="999" class="form-control form-control-sm" :name="`components[${row.uuid}][priority_order]`" x-model="row.priority" placeholder="1">
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
 
                     <input type="hidden" name="components_present" x-bind:value="rows.length">
                 </div>
@@ -152,9 +163,7 @@
 @push('scripts')
 <script>
     function salaryStructureForm() {
-        return {
-            // wrapper for potential shared helpers
-        };
+        return {};
     }
 
     function componentRepeater(componentGroups, oldComponents) {
@@ -185,9 +194,43 @@
             });
         }
 
+        const reorder = () => {
+            // enforce sequential priorities starting at 1
+            this.rows.forEach((row, index) => {
+                row.priority = index + 1;
+            });
+        };
+
         return {
             componentGroups: normalisedGroups,
             rows: oldRows,
+            init() {
+                this.$nextTick(() => {
+                    if (this.$refs.sortable) {
+                        new Sortable(this.$refs.sortable, {
+                            handle: '.drag-handle',
+                            animation: 150,
+                            onUpdate: () => reorder.call(this),
+                        });
+                    }
+                });
+                reorder.call(this);
+            },
+            handleSubmit(event) {
+                reorder.call(this);
+                if (this.rows.length === 0) {
+                    event.preventDefault();
+                    this.addRow();
+                    this.$dispatch('flash', {
+                        type: 'danger',
+                        message: '{{ __('
+                        At least one component is required.
+                        ') }}'
+                    });
+                    return;
+                }
+                event.target.submit();
+            },
             addRow() {
                 this.rows.push({
                     uuid: crypto.randomUUID(),
@@ -196,9 +239,14 @@
                     formula: '',
                     priority: ''
                 });
+                reorder.call(this);
             },
             removeRow(index) {
                 this.rows.splice(index, 1);
+                if (this.rows.length === 0) {
+                    this.addRow();
+                }
+                reorder.call(this);
             },
         };
     }
