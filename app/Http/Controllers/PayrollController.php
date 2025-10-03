@@ -106,10 +106,16 @@ class PayrollController extends Controller
         $suggestedEnd = $suggestedStart->copy()->endOfMonth();
         $suggestedPayDate = $suggestedEnd->copy()->addDays(5);
 
+        $currencies = config('payroll.currencies', []);
+        if (empty($currencies)) {
+            $currencies = ['EGP' => 'EGP'];
+        }
+
         return view('payroll.create', compact(
             'suggestedStart',
             'suggestedEnd',
-            'suggestedPayDate'
+            'suggestedPayDate',
+            'currencies'
         ));
     }
 
@@ -120,13 +126,18 @@ class PayrollController extends Controller
     {
         Gate::authorize('create', PayrollRun::class);
 
+        $currencyKeys = array_keys(config('payroll.currencies', []));
+        if (empty($currencyKeys)) {
+            $currencyKeys = ['EGP'];
+        }
+
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:500',
             'pay_period_start' => 'required|date',
             'pay_period_end' => 'required|date|after:pay_period_start',
             'pay_date' => 'required|date|after_or_equal:pay_period_end',
-            'currency' => 'required|string|in:EGP,USD,EUR',
+            'currency' => 'required|string|in:' . implode(',', $currencyKeys),
             'approval_required' => 'boolean',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -262,13 +273,18 @@ class PayrollController extends Controller
                 ->with('error', __('hrms.payroll.cannot_edit_locked'));
         }
 
+        $currencyKeys = array_keys(config('payroll.currencies', []));
+        if (empty($currencyKeys)) {
+            $currencyKeys = ['EGP'];
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
             'pay_period_start' => 'required|date',
             'pay_period_end' => 'required|date|after:pay_period_start',
             'pay_date' => 'required|date|after_or_equal:pay_period_end',
-            'currency' => 'required|string|in:EGP,USD,EUR',
+            'currency' => 'required|string|in:' . implode(',', $currencyKeys),
             'approval_required' => 'boolean',
             'notes' => 'nullable|string|max:1000',
         ]);

@@ -15,4 +15,11 @@ return [
     // Queue configuration when asynchronous processing is enabled
     'queue_connection' => env('PAYROLL_QUEUE_CONNECTION', env('QUEUE_CONNECTION', 'sync')),
     'queue_name' => env('PAYROLL_QUEUE_NAME'),
+
+    // Supported payroll currencies keyed by display label
+    'currencies' => [
+        'EGP' => 'EGP',
+        'USD' => 'USD',
+        'EUR' => 'EUR',
+    ],
 ];
