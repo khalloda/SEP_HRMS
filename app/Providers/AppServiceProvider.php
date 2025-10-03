@@ -31,29 +31,28 @@ namespace {
 
 namespace App\Providers {
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\ServiceProvider;
+    use Illuminate\Support\Facades\Schema;
+    use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
-{
-    /**
-     * Register any application services.
-     */
-    public function register(): void
+    class AppServiceProvider extends ServiceProvider
     {
-        Schema::defaultStringLength(191); // ensure compatibility when services register early
+        /**
+         * Register any application services.
+         */
+        public function register(): void
+        {
+            Schema::defaultStringLength(191); // ensure compatibility when services register early
 
-        $this->app->singleton('payroll.enabled', static fn (): bool => payrollEnabled());
-        $this->app->singleton('payroll.currencies', static fn (): array => payrollCurrencies());
+            $this->app->singleton('payroll.enabled', static fn(): bool => payrollEnabled());
+            $this->app->singleton('payroll.currencies', static fn(): array => payrollCurrencies());
+        }
+
+        /**
+         * Bootstrap any application services.
+         */
+        public function boot(): void
+        {
+            Schema::defaultStringLength(191); // ensure compatibility with legacy MySQL defaults
+        }
     }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        Schema::defaultStringLength(191); // ensure compatibility with legacy MySQL defaults
-    }
-}
-
 }

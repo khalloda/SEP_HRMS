@@ -29,10 +29,10 @@
     @endif
 
     @php
-        $currencyOptions = $currencies ?? payrollCurrencies();
-        if (empty($currencyOptions)) {
-            $currencyOptions = ['EGP' => 'EGP'];
-        }
+    $currencyOptions = $currencies ?? payrollCurrencies();
+    if (empty($currencyOptions)) {
+    $currencyOptions = ['EGP' => 'EGP'];
+    }
     $defaultCurrency = array_key_first($currencyOptions) ?? 'EGP';
     $suggestedStartValue = optional($suggestedStart)->format('Y-m-d');
     $suggestedEndValue = optional($suggestedEnd)->format('Y-m-d');

@@ -252,7 +252,9 @@ class PayrollController extends Controller
                 ->with('error', __('hrms.payroll.cannot_edit_locked'));
         }
 
-        return view('payroll.edit', compact('payrollRun'));
+        $currencies = payrollCurrencies();
+
+        return view('payroll.edit', compact('payrollRun', 'currencies'));
     }
 
     /**
