@@ -54,3 +54,4 @@ Implement Excel-style conditional formulas under a guarded config flag while pre
 - **Acceptance**: Command exports comparison CSV; only executes when flag enabled.
 - **Tests**: Unit test using fake data (Pest/PHPUnit).
 - **Rollback**: Revert command commit.
+- **Status**: 🚫 Deferred (current scope sufficient with documentation + manual validation; revisit if stakeholders request automated diff tool).
