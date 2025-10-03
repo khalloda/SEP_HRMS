@@ -6,6 +6,9 @@ return [
     // Calculation engine mode: legacy (eval-based) or new (expression parser)
     'expression_engine' => env('PAYROLL_EXPRESSION_ENGINE', 'legacy'),
 
+    // Feature flag: enable conditional formula support in safe engine
+    'use_safe_engine_conditionals' => (bool) env('PAYROLL_SAFE_ENGINE_CONDITIONALS', false),
+
     // Toggle queued payroll run processing (introduced in later phases)
     'queue_enabled' => (bool) env('PAYROLL_CALC_QUEUE', false),
 

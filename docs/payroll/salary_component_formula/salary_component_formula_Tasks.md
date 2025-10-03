@@ -9,6 +9,7 @@ Implement Excel-style conditional formulas under a guarded config flag while pre
 - **Acceptance**: Flag default false; tests confirm `config('payroll.use_safe_engine_conditionals')` resolves.
 - **Tests**: Update/extend configuration unit test (if existing) or add new `tests/Unit/Payroll/PayrollConfigTest.php`.
 - **Rollback**: Revert commit (`git revert`), remove config entry, clear env docs.
+- **Status**: ✅ Completed (commit adds `use_safe_engine_conditionals` keyed off `PAYROLL_SAFE_ENGINE_CONDITIONALS`).
 
 ## Task 2 — Parser Capability Extension
 - **Purpose**: Add comparison operators and boolean evaluation to `ExpressionEvaluator` new engine.
