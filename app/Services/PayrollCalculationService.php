@@ -37,10 +37,10 @@ class PayrollCalculationService
         return Employee::active()
             ->whereHas('currentSalaryStructure', function ($query) use ($payrollRun) {
                 $query->where('effective_from', '<=', $payrollRun->pay_period_end)
-                      ->where(function ($q) use ($payrollRun) {
-                          $q->whereNull('effective_to')
+                    ->where(function ($q) use ($payrollRun) {
+                        $q->whereNull('effective_to')
                             ->orWhere('effective_to', '>=', $payrollRun->pay_period_start);
-                      });
+                    });
             })
             ->with(['department', 'position', 'currentSalaryStructure.structureComponents.component'])
             ->get();
@@ -612,5 +612,4 @@ class PayrollCalculationService
     {
         return $this->correlationIds->get();
     }
-
 }
