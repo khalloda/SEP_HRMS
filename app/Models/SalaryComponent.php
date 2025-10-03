@@ -52,9 +52,10 @@ class SalaryComponent extends Model
      */
     public function salaryStructures(): BelongsToMany
     {
-        return $this->belongsToMany(SalaryStructure::class, 'salary_structure_components')
-            ->withPivot(['amount_or_formula', 'effective_from', 'effective_to'])
-            ->withTimestamps();
+        return $this->belongsToMany(SalaryStructure::class, 'salary_structure_components', 'component_id', 'structure_id')
+            ->withPivot(['value_numeric', 'formula_expr', 'depends_on', 'priority_order'])
+            ->withTimestamps()
+            ->orderByPivot('priority_order');
     }
 
     /**
