@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Sep 19, 2025 at 06:33 PM
+-- Generation Time: Oct 01, 2025 at 01:09 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `activity_log` (
   KEY `subject` (`subject_type`,`subject_id`),
   KEY `causer` (`causer_type`,`causer_id`),
   KEY `activity_log_log_name_index` (`log_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=157 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `activity_log`
@@ -105,7 +105,25 @@ INSERT INTO `activity_log` (`id`, `log_name`, `description`, `subject_type`, `su
 (51, 'default', 'Generated letter created', 'App\\Models\\GeneratedLetter', 1, 'App\\Models\\User', 1, '{\"attributes\": {\"status\": \"pending_approval\", \"approved_by\": null, \"reference_number\": \"HR-2025-0001\"}}', 'created', NULL, '2025-09-19 15:03:13', '2025-09-19 15:03:13'),
 (52, 'default', 'Generated letter created', 'App\\Models\\GeneratedLetter', 2, 'App\\Models\\User', 1, '{\"attributes\": {\"status\": \"pending_approval\", \"approved_by\": null, \"reference_number\": \"HR-2025-0002\"}}', 'created', NULL, '2025-09-19 15:03:19', '2025-09-19 15:03:19'),
 (53, 'default', 'Generated letter created', 'App\\Models\\GeneratedLetter', 3, 'App\\Models\\User', 1, '{\"attributes\": {\"status\": \"pending_approval\", \"approved_by\": null, \"reference_number\": \"HR-2025-0003\"}}', 'created', NULL, '2025-09-19 15:03:40', '2025-09-19 15:03:40'),
-(54, 'default', 'Generated letter created', 'App\\Models\\GeneratedLetter', 4, 'App\\Models\\User', 1, '{\"attributes\": {\"status\": \"pending_approval\", \"approved_by\": null, \"reference_number\": \"HR-2025-0004\"}}', 'created', NULL, '2025-09-19 15:03:43', '2025-09-19 15:03:43');
+(54, 'default', 'Generated letter created', 'App\\Models\\GeneratedLetter', 4, 'App\\Models\\User', 1, '{\"attributes\": {\"status\": \"pending_approval\", \"approved_by\": null, \"reference_number\": \"HR-2025-0004\"}}', 'created', NULL, '2025-09-19 15:03:43', '2025-09-19 15:03:43'),
+(55, 'default', 'Generated letter created', 'App\\Models\\GeneratedLetter', 5, 'App\\Models\\User', 1, '{\"attributes\": {\"status\": \"pending_approval\", \"approved_by\": null, \"reference_number\": \"HR-2025-0005\"}}', 'created', NULL, '2025-09-21 03:47:12', '2025-09-21 03:47:12'),
+(56, 'default', 'Generated letter created', 'App\\Models\\GeneratedLetter', 6, 'App\\Models\\User', 1, '{\"attributes\": {\"status\": \"draft\", \"approved_by\": null, \"reference_number\": \"HR-2025-0006\"}}', 'created', NULL, '2025-09-21 03:47:19', '2025-09-21 03:47:19'),
+(57, 'employee', 'Employee updated', 'App\\Models\\Employee', 2, 'App\\Models\\User', 1, '{\"old\": {\"employment_type_id\": 1}, \"attributes\": {\"employment_type_id\": 2}}', 'updated', NULL, '2025-09-30 06:15:51', '2025-09-30 06:15:51'),
+(58, 'employee', 'Employee updated', 'App\\Models\\Employee', 2, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-09-30 06:15:51', '2025-09-30 06:15:51'),
+(59, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 07:29:22', '2025-10-01 07:29:22'),
+(60, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 07:34:38', '2025-10-01 07:34:38'),
+(61, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 07:35:35', '2025-10-01 07:35:35'),
+(62, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 07:54:36', '2025-10-01 07:54:36'),
+(63, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 08:02:18', '2025-10-01 08:02:18'),
+(64, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 08:04:19', '2025-10-01 08:04:19'),
+(77, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 09:31:53', '2025-10-01 09:31:53'),
+(78, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 09:32:11', '2025-10-01 09:32:11'),
+(133, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 09:59:53', '2025-10-01 09:59:53'),
+(134, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 10:00:08', '2025-10-01 10:00:08'),
+(135, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 10:00:23', '2025-10-01 10:00:23'),
+(154, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 10:03:52', '2025-10-01 10:03:52'),
+(155, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 10:04:06', '2025-10-01 10:04:06'),
+(156, 'authentication', 'User logged in', NULL, NULL, 'App\\Models\\User', 1, '[]', NULL, NULL, '2025-10-01 10:04:21', '2025-10-01 10:04:21');
 
 -- --------------------------------------------------------
 
@@ -200,14 +218,14 @@ DROP TABLE IF EXISTS `attendance_records`;
 CREATE TABLE IF NOT EXISTS `attendance_records` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `employee_id` bigint UNSIGNED NOT NULL,
-  `employee_code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `employee_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `timestamp` datetime NOT NULL,
-  `type` enum('check_in','check_out','break_start','break_end') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'check_in',
-  `device_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `device_info` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` enum('check_in','check_out','break_start','break_end') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'check_in',
+  `device_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `device_info` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `raw_data` json DEFAULT NULL,
-  `status` enum('valid','invalid','duplicate','anomaly') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'valid',
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `status` enum('valid','invalid','duplicate','anomaly') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'valid',
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -229,7 +247,7 @@ DROP TABLE IF EXISTS `attendance_summaries`;
 CREATE TABLE IF NOT EXISTS `attendance_summaries` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `employee_id` bigint UNSIGNED NOT NULL,
-  `employee_code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `employee_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `date` date NOT NULL,
   `expected_start_time` time DEFAULT NULL,
   `expected_end_time` time DEFAULT NULL,
@@ -242,8 +260,8 @@ CREATE TABLE IF NOT EXISTS `attendance_summaries` (
   `overtime_minutes` int NOT NULL DEFAULT '0',
   `is_absent` tinyint(1) NOT NULL DEFAULT '0',
   `is_holiday` tinyint(1) NOT NULL DEFAULT '0',
-  `status` enum('present','absent','partial','holiday','leave') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'present',
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `status` enum('present','absent','partial','holiday','leave') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'present',
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `anomalies` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -308,7 +326,7 @@ CREATE TABLE IF NOT EXISTS `contracts` (
   KEY `idx_contract_end_date` (`end_date`),
   KEY `contracts_approved_by_index` (`approved_by`),
   KEY `contracts_signed_by_index` (`signed_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `contracts`
@@ -327,8 +345,8 @@ DROP TABLE IF EXISTS `contract_attachments`;
 CREATE TABLE IF NOT EXISTS `contract_attachments` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `contract_id` bigint UNSIGNED NOT NULL,
-  `type` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `meta` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -346,11 +364,11 @@ DROP TABLE IF EXISTS `contract_expiry_notifications`;
 CREATE TABLE IF NOT EXISTS `contract_expiry_notifications` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `contract_id` bigint UNSIGNED NOT NULL,
-  `notification_type` enum('urgent','critical','soon') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notification_type` enum('urgent','critical','soon') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `notification_date` date NOT NULL,
   `recipients` json NOT NULL,
-  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'sent',
-  `message` text COLLATE utf8mb4_unicode_ci,
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'sent',
+  `message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `metadata` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -371,10 +389,10 @@ DROP TABLE IF EXISTS `contract_workflow_logs`;
 CREATE TABLE IF NOT EXISTS `contract_workflow_logs` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `contract_id` bigint UNSIGNED NOT NULL,
-  `from_status` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `to_status` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `from_status` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `to_status` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `by_user_id` bigint UNSIGNED DEFAULT NULL,
-  `note` text COLLATE utf8mb4_unicode_ci,
+  `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -398,7 +416,7 @@ CREATE TABLE IF NOT EXISTS `departments` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `departments`
@@ -524,7 +542,7 @@ CREATE TABLE IF NOT EXISTS `employees` (
   KEY `fk_emp_pos` (`position_id`),
   KEY `fk_emp_type` (`employment_type_id`),
   KEY `fk_emp_manager` (`manager_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `employees`
@@ -532,7 +550,7 @@ CREATE TABLE IF NOT EXISTS `employees` (
 
 INSERT INTO `employees` (`id`, `code`, `first_name`, `last_name`, `arabic_name`, `email`, `phone`, `hire_date`, `status`, `department_id`, `position_id`, `employment_type_id`, `manager_id`, `national_id`, `salary_visibility_flag`, `photo_path`, `photo_original_name`, `photo_size`, `photo_mime_type`, `photo_uploaded_at`, `created_at`, `updated_at`) VALUES
 (1, 'EMP001', 'Khaled', 'Helmy', 'خالد محمد حلمي محمد يسري', 'khaled.h87@gmail.com', '01007847333', '2014-01-05', 'active', 4, 12, 1, 2, 0x65794a7064694936496e5a4e5445685964437475656b704a597a4a784e7a46764d6b354e6457633950534973496e5a686248566c496a6f696447317256454e55545735755157527564326479645735455545746c647a3039496977696257466a496a6f694e7a557a4e7a686a596d55335a444d785a4752685a475a6b595449784d446733597a45314f446c6959574a6c4e5745794d6a63775a475135595463795a44526b5a4451324d446b7a597a42685a6a566b5a57457859534973496e52685a79493649694a39, 1, 'employee_photos/EMP001_1757742664.png', 'FHSign.png', 74062, 'image/png', '2025-09-13 02:51:05', '2025-09-13 02:08:18', '2025-09-13 02:51:05'),
-(2, 'EMP002', 'Doaa', 'Nassar', 'دعاء عبد الدايم نصار', 'dnassar@sarieldin.com', '0235352424', '2012-07-01', 'active', 2, 9, 1, NULL, 0x65794a7064694936496b644e4e56684e563231504d6d46766556463652325a3353316b726557633950534973496e5a686248566c496a6f6956335247636d4a714e43396157555a58646d6b776256524e596c6833647a3039496977696257466a496a6f694e474a694d5449324e4749344f4745305a446c6a4d7a67354f546b325a544a684d5452694e44686b5a6a52684d574d784f54677859545a6d4f546c6b4f44677a4e5467795a5445334d446c6a5a445a6b59574a6c5a434973496e52685a79493649694a39, 1, 'employee_photos/EMP002_1757742694.png', 'RASign.png', 84658, 'image/png', '2025-09-13 02:51:34', '2025-09-13 02:19:08', '2025-09-13 02:51:34');
+(2, 'EMP002', 'Doaa', 'Nassar', 'دعاء عبد الدايم نصار', 'dnassar@sarieldin.com', '0235352424', '2012-07-01', 'active', 2, 9, 2, NULL, 0x65794a7064694936496b644e4e56684e563231504d6d46766556463652325a3353316b726557633950534973496e5a686248566c496a6f6956335247636d4a714e43396157555a58646d6b776256524e596c6833647a3039496977696257466a496a6f694e474a694d5449324e4749344f4745305a446c6a4d7a67354f546b325a544a684d5452694e44686b5a6a52684d574d784f54677859545a6d4f546c6b4f44677a4e5467795a5445334d446c6a5a445a6b59574a6c5a434973496e52685a79493649694a39, 1, 'employee_photos/EMP002_1757742694.png', 'RASign.png', 84658, 'image/png', '2025-09-13 02:51:34', '2025-09-13 02:19:08', '2025-09-30 06:15:51');
 
 -- --------------------------------------------------------
 
@@ -570,7 +588,7 @@ CREATE TABLE IF NOT EXISTS `employment_types` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_employment_types_name` (`name_en`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `employment_types`
@@ -586,6 +604,25 @@ INSERT INTO `employment_types` (`id`, `name_en`, `name_ar`, `created_at`, `updat
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `failed_jobs`
+--
+
+DROP TABLE IF EXISTS `failed_jobs`;
+CREATE TABLE IF NOT EXISTS `failed_jobs` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `generated_letters`
 --
 
@@ -594,16 +631,16 @@ CREATE TABLE IF NOT EXISTS `generated_letters` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `letter_template_id` bigint UNSIGNED NOT NULL,
   `employee_id` bigint UNSIGNED NOT NULL,
-  `reference_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `subject` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `content` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` enum('draft','pending_approval','approved','sent','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
+  `reference_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('draft','pending_approval','approved','sent','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
   `generated_by` bigint UNSIGNED NOT NULL,
   `approved_by` bigint UNSIGNED DEFAULT NULL,
   `approved_at` timestamp NULL DEFAULT NULL,
   `sent_at` timestamp NULL DEFAULT NULL,
   `additional_data` json DEFAULT NULL,
-  `file_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -613,7 +650,7 @@ CREATE TABLE IF NOT EXISTS `generated_letters` (
   KEY `generated_letters_approved_by_foreign` (`approved_by`),
   KEY `generated_letters_status_created_at_index` (`status`,`created_at`),
   KEY `generated_letters_employee_id_status_index` (`employee_id`,`status`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `generated_letters`
@@ -623,7 +660,9 @@ INSERT INTO `generated_letters` (`id`, `letter_template_id`, `employee_id`, `ref
 (1, 1, 1, 'HR-2025-0001', 'Employment Certificate - Khaled Helmy', '<div>\n            <h2 style=\"text-align: center;\">EMPLOYMENT CERTIFICATE</h2>\n\n            <p>Date: 19/09/2025</p>\n\n            <p>To Whom It May Concern,</p>\n\n            <p>This is to certify that Mr./Ms. <strong>Khaled Helmy</strong> (Employee ID: EMP001) has been employed with Sarie Eldin & Partners Legal Advisors as <strong>Senior Systems Engineer</strong> in the Information Technology department since 05/01/2014.</p>\n\n            <p>During the employment period, the above-mentioned employee has performed duties with dedication and responsibility.</p>\n\n            <p>This certificate is issued upon the employee\'s request and without any liability on the company.</p>\n\n            <div style=\"margin-top: 50px;\">\n                <p>Sincerely,</p>\n                <p><strong>Doaa Nassar</strong><br>\n                Human Resources Department<br>\n                Sarie Eldin & Partners Legal Advisors</p>\n            </div>\n        </div>', 'pending_approval', 1, NULL, NULL, NULL, '[]', NULL, '2025-09-19 15:03:13', '2025-09-19 15:03:13'),
 (2, 1, 1, 'HR-2025-0002', 'Employment Certificate - Khaled Helmy', '<div>\n            <h2 style=\"text-align: center;\">EMPLOYMENT CERTIFICATE</h2>\n\n            <p>Date: 19/09/2025</p>\n\n            <p>To Whom It May Concern,</p>\n\n            <p>This is to certify that Mr./Ms. <strong>Khaled Helmy</strong> (Employee ID: EMP001) has been employed with Sarie Eldin & Partners Legal Advisors as <strong>Senior Systems Engineer</strong> in the Information Technology department since 05/01/2014.</p>\n\n            <p>During the employment period, the above-mentioned employee has performed duties with dedication and responsibility.</p>\n\n            <p>This certificate is issued upon the employee\'s request and without any liability on the company.</p>\n\n            <div style=\"margin-top: 50px;\">\n                <p>Sincerely,</p>\n                <p><strong>Doaa Nassar</strong><br>\n                Human Resources Department<br>\n                Sarie Eldin & Partners Legal Advisors</p>\n            </div>\n        </div>', 'pending_approval', 1, NULL, NULL, NULL, '[]', NULL, '2025-09-19 15:03:19', '2025-09-19 15:03:19'),
 (3, 1, 1, 'HR-2025-0003', 'Employment Certificate - Khaled Helmy', '<div>\n            <h2 style=\"text-align: center;\">EMPLOYMENT CERTIFICATE</h2>\n\n            <p>Date: 19/09/2025</p>\n\n            <p>To Whom It May Concern,</p>\n\n            <p>This is to certify that Mr./Ms. <strong>Khaled Helmy</strong> (Employee ID: EMP001) has been employed with Sarie Eldin & Partners Legal Advisors as <strong>Senior Systems Engineer</strong> in the Information Technology department since 05/01/2014.</p>\n\n            <p>During the employment period, the above-mentioned employee has performed duties with dedication and responsibility.</p>\n\n            <p>This certificate is issued upon the employee\'s request and without any liability on the company.</p>\n\n            <div style=\"margin-top: 50px;\">\n                <p>Sincerely,</p>\n                <p><strong>Doaa Nassar</strong><br>\n                Human Resources Department<br>\n                Sarie Eldin & Partners Legal Advisors</p>\n            </div>\n        </div>', 'pending_approval', 1, NULL, NULL, NULL, '[]', NULL, '2025-09-19 15:03:40', '2025-09-19 15:03:40'),
-(4, 1, 1, 'HR-2025-0004', 'Employment Certificate - Khaled Helmy', '<div>\n            <h2 style=\"text-align: center;\">EMPLOYMENT CERTIFICATE</h2>\n\n            <p>Date: 19/09/2025</p>\n\n            <p>To Whom It May Concern,</p>\n\n            <p>This is to certify that Mr./Ms. <strong>Khaled Helmy</strong> (Employee ID: EMP001) has been employed with Sarie Eldin & Partners Legal Advisors as <strong>Senior Systems Engineer</strong> in the Information Technology department since 05/01/2014.</p>\n\n            <p>During the employment period, the above-mentioned employee has performed duties with dedication and responsibility.</p>\n\n            <p>This certificate is issued upon the employee\'s request and without any liability on the company.</p>\n\n            <div style=\"margin-top: 50px;\">\n                <p>Sincerely,</p>\n                <p><strong>Doaa Nassar</strong><br>\n                Human Resources Department<br>\n                Sarie Eldin & Partners Legal Advisors</p>\n            </div>\n        </div>', 'pending_approval', 1, NULL, NULL, NULL, '[]', NULL, '2025-09-19 15:03:43', '2025-09-19 15:03:43');
+(4, 1, 1, 'HR-2025-0004', 'Employment Certificate - Khaled Helmy', '<div>\n            <h2 style=\"text-align: center;\">EMPLOYMENT CERTIFICATE</h2>\n\n            <p>Date: 19/09/2025</p>\n\n            <p>To Whom It May Concern,</p>\n\n            <p>This is to certify that Mr./Ms. <strong>Khaled Helmy</strong> (Employee ID: EMP001) has been employed with Sarie Eldin & Partners Legal Advisors as <strong>Senior Systems Engineer</strong> in the Information Technology department since 05/01/2014.</p>\n\n            <p>During the employment period, the above-mentioned employee has performed duties with dedication and responsibility.</p>\n\n            <p>This certificate is issued upon the employee\'s request and without any liability on the company.</p>\n\n            <div style=\"margin-top: 50px;\">\n                <p>Sincerely,</p>\n                <p><strong>Doaa Nassar</strong><br>\n                Human Resources Department<br>\n                Sarie Eldin & Partners Legal Advisors</p>\n            </div>\n        </div>', 'pending_approval', 1, NULL, NULL, NULL, '[]', NULL, '2025-09-19 15:03:43', '2025-09-19 15:03:43'),
+(5, 1, 1, 'HR-2025-0005', 'Employment Certificate - Khaled Helmy', '<div>\n            <h2 style=\"text-align: center;\">EMPLOYMENT CERTIFICATE</h2>\n\n            <p>Date: 21/09/2025</p>\n\n            <p>To Whom It May Concern,</p>\n\n            <p>This is to certify that Mr./Ms. <strong>Khaled Helmy</strong> (Employee ID: EMP001) has been employed with Sarie Eldin & Partners Legal Advisors as <strong>Senior Systems Engineer</strong> in the Information Technology department since 05/01/2014.</p>\n\n            <p>During the employment period, the above-mentioned employee has performed duties with dedication and responsibility.</p>\n\n            <p>This certificate is issued upon the employee\'s request and without any liability on the company.</p>\n\n            <div style=\"margin-top: 50px;\">\n                <p>Sincerely,</p>\n                <p><strong>Doaa Nassar</strong><br>\n                Human Resources Department<br>\n                Sarie Eldin & Partners Legal Advisors</p>\n            </div>\n        </div>', 'pending_approval', 1, NULL, NULL, NULL, '[]', NULL, '2025-09-21 03:47:12', '2025-09-21 03:47:12'),
+(6, 1, 1, 'HR-2025-0006', 'Employment Certificate - Khaled Helmy', '<div>\n            <h2 style=\"text-align: center;\">EMPLOYMENT CERTIFICATE</h2>\n\n            <p>Date: 21/09/2025</p>\n\n            <p>To Whom It May Concern,</p>\n\n            <p>This is to certify that Mr./Ms. <strong>Khaled Helmy</strong> (Employee ID: EMP001) has been employed with Sarie Eldin & Partners Legal Advisors as <strong>Senior Systems Engineer</strong> in the Information Technology department since 05/01/2014.</p>\n\n            <p>During the employment period, the above-mentioned employee has performed duties with dedication and responsibility.</p>\n\n            <p>This certificate is issued upon the employee\'s request and without any liability on the company.</p>\n\n            <div style=\"margin-top: 50px;\">\n                <p>Sincerely,</p>\n                <p><strong>Doaa Nassar</strong><br>\n                Human Resources Department<br>\n                Sarie Eldin & Partners Legal Advisors</p>\n            </div>\n        </div>', 'draft', 1, NULL, NULL, NULL, '[]', NULL, '2025-09-21 03:47:19', '2025-09-21 03:47:19');
 
 -- --------------------------------------------------------
 
@@ -636,7 +675,7 @@ CREATE TABLE IF NOT EXISTS `leave_balances` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` bigint UNSIGNED NOT NULL,
   `policy_id` bigint UNSIGNED NOT NULL,
-  `period` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `period` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `opening` decimal(6,2) NOT NULL DEFAULT '0.00',
   `accrued` decimal(6,2) NOT NULL DEFAULT '0.00',
   `taken` decimal(6,2) NOT NULL DEFAULT '0.00',
@@ -659,9 +698,9 @@ CREATE TABLE IF NOT EXISTS `leave_balances` (
 DROP TABLE IF EXISTS `leave_policies`;
 CREATE TABLE IF NOT EXISTS `leave_policies` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `accrual_rule` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'fixed',
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `accrual_rule` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'fixed',
   `days_per_year` decimal(5,2) NOT NULL DEFAULT '0.00',
   `carry_over` tinyint(1) NOT NULL DEFAULT '0',
   `max_carry_over` decimal(5,2) NOT NULL DEFAULT '0.00',
@@ -685,9 +724,9 @@ CREATE TABLE IF NOT EXISTS `leave_requests` (
   `from_date` date NOT NULL,
   `to_date` date NOT NULL,
   `days` decimal(6,2) NOT NULL,
-  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `approver_id` bigint UNSIGNED DEFAULT NULL,
-  `reason` text COLLATE utf8mb4_unicode_ci,
+  `reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -706,12 +745,12 @@ CREATE TABLE IF NOT EXISTS `leave_requests` (
 DROP TABLE IF EXISTS `letter_templates`;
 CREATE TABLE IF NOT EXISTS `letter_templates` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `category` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `language` enum('en','ar') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
-  `subject` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `content` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `language` enum('en','ar') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
+  `subject` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `variables` json DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_by` bigint UNSIGNED NOT NULL,
@@ -745,7 +784,7 @@ INSERT INTO `letter_templates` (`id`, `name`, `type`, `category`, `language`, `s
 DROP TABLE IF EXISTS `migrations`;
 CREATE TABLE IF NOT EXISTS `migrations` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `migration` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -841,19 +880,33 @@ CREATE TABLE IF NOT EXISTS `notifications` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `password_reset_tokens`
+--
+
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`email`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `payroll_runs`
 --
 
 DROP TABLE IF EXISTS `payroll_runs`;
 CREATE TABLE IF NOT EXISTS `payroll_runs` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `pay_period_start` date NOT NULL,
   `pay_period_end` date NOT NULL,
   `pay_date` date NOT NULL,
-  `status` enum('draft','calculating','calculated','locked','pending_approval','approved','posted','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
-  `currency` varchar(3) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'SAR',
+  `status` enum('draft','calculating','calculated','locked','pending_approval','approved','posted','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
+  `currency` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'SAR',
   `total_employees` int NOT NULL DEFAULT '0',
   `total_gross` decimal(15,2) NOT NULL DEFAULT '0.00',
   `total_net` decimal(15,2) NOT NULL DEFAULT '0.00',
@@ -866,7 +919,7 @@ CREATE TABLE IF NOT EXISTS `payroll_runs` (
   `posted_by` bigint UNSIGNED DEFAULT NULL,
   `posted_at` timestamp NULL DEFAULT NULL,
   `calculation_summary` json DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -879,7 +932,17 @@ CREATE TABLE IF NOT EXISTS `payroll_runs` (
   KEY `payroll_runs_pay_period_end_index` (`pay_period_end`),
   KEY `payroll_runs_pay_date_index` (`pay_date`),
   KEY `payroll_runs_status_pay_date_index` (`status`,`pay_date`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `payroll_runs`
+--
+
+INSERT INTO `payroll_runs` (`id`, `title`, `description`, `pay_period_start`, `pay_period_end`, `pay_date`, `status`, `currency`, `total_employees`, `total_gross`, `total_net`, `total_deductions`, `created_by`, `locked_by`, `locked_at`, `approved_by`, `approved_at`, `posted_by`, `posted_at`, `calculation_summary`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 'Test Payroll', 'Autogenerated for tests', '2025-10-01', '2025-10-31', '2025-10-31', 'approved', 'USD', 1, 1000.00, 900.00, 100.00, 7, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-01 09:55:15', '2025-10-01 09:55:15'),
+(2, 'Test Payroll', 'Autogenerated for tests', '2025-10-01', '2025-10-31', '2025-10-31', 'approved', 'USD', 1, 1000.00, 900.00, 100.00, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-01 09:56:36', '2025-10-01 09:56:36'),
+(3, 'Test Payroll', 'Autogenerated for tests', '2025-10-01', '2025-10-31', '2025-10-31', 'approved', 'USD', 1, 1000.00, 900.00, 100.00, 13, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-01 09:58:43', '2025-10-01 09:58:43'),
+(4, 'Test Payroll', 'Autogenerated for tests', '2025-10-01', '2025-10-31', '2025-10-31', 'approved', 'USD', 1, 1000.00, 900.00, 100.00, 16, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-01 10:03:27', '2025-10-01 10:03:27');
 
 -- --------------------------------------------------------
 
@@ -892,21 +955,21 @@ CREATE TABLE IF NOT EXISTS `payslips` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `payroll_run_id` bigint UNSIGNED NOT NULL,
   `employee_id` bigint UNSIGNED NOT NULL,
-  `employee_code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `employee_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `employee_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `employee_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `pay_period_start` date NOT NULL,
   `pay_period_end` date NOT NULL,
   `pay_date` date NOT NULL,
   `gross_pay` decimal(15,2) NOT NULL DEFAULT '0.00',
   `net_pay` decimal(15,2) NOT NULL DEFAULT '0.00',
   `total_deductions` decimal(15,2) NOT NULL DEFAULT '0.00',
-  `status` enum('draft','calculated','generated','sent','viewed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
-  `pdf_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('draft','calculated','generated','sent','viewed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'draft',
+  `pdf_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `pdf_generated_at` timestamp NULL DEFAULT NULL,
   `sent_at` timestamp NULL DEFAULT NULL,
   `viewed_at` timestamp NULL DEFAULT NULL,
   `calculation_breakdown` json DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -916,7 +979,17 @@ CREATE TABLE IF NOT EXISTS `payslips` (
   KEY `payslips_status_index` (`status`),
   KEY `payslips_pay_date_index` (`pay_date`),
   KEY `payslips_payroll_run_id_employee_id_index` (`payroll_run_id`,`employee_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `payslips`
+--
+
+INSERT INTO `payslips` (`id`, `payroll_run_id`, `employee_id`, `employee_code`, `employee_name`, `pay_period_start`, `pay_period_end`, `pay_date`, `gross_pay`, `net_pay`, `total_deductions`, `status`, `pdf_path`, `pdf_generated_at`, `sent_at`, `viewed_at`, `calculation_breakdown`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 1, 11, 'EMPXSJSQP', 'Payroll Analyst', '2025-10-01', '2025-10-31', '2025-10-31', 1000.00, 900.00, 100.00, 'generated', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-01 09:55:15', '2025-10-01 09:55:15'),
+(2, 2, 16, 'EMPEHII1O', 'Payroll Analyst', '2025-10-01', '2025-10-31', '2025-10-31', 1000.00, 900.00, 100.00, 'generated', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-01 09:56:36', '2025-10-01 09:56:36'),
+(3, 3, 21, 'EMPGQX2ID', 'Payroll Analyst', '2025-10-01', '2025-10-31', '2025-10-31', 1000.00, 900.00, 100.00, 'generated', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-01 09:58:43', '2025-10-01 09:58:43'),
+(4, 4, 26, 'EMPONMGX8', 'Payroll Analyst', '2025-10-01', '2025-10-31', '2025-10-31', 1000.00, 900.00, 100.00, 'generated', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-01 10:03:27', '2025-10-01 10:03:27');
 
 -- --------------------------------------------------------
 
@@ -929,15 +1002,15 @@ CREATE TABLE IF NOT EXISTS `payslip_lines` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `payslip_id` bigint UNSIGNED NOT NULL,
   `salary_component_id` bigint UNSIGNED NOT NULL,
-  `component_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `component_type` enum('earning','deduction','info') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `calculation_mode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `formula` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `component_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `component_type` enum('earning','deduction','info') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `calculation_mode` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `formula` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `rate` decimal(15,4) DEFAULT NULL,
   `amount` decimal(15,2) NOT NULL DEFAULT '0.00',
   `priority` int NOT NULL DEFAULT '0',
   `is_taxable` tinyint(1) NOT NULL DEFAULT '0',
-  `calculation_notes` text COLLATE utf8mb4_unicode_ci,
+  `calculation_notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1031,6 +1104,29 @@ INSERT INTO `permission_role` (`permission_id`, `role_id`) VALUES
 (3, 3),
 (4, 3),
 (5, 3);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `personal_access_tokens`
+--
+
+DROP TABLE IF EXISTS `personal_access_tokens`;
+CREATE TABLE IF NOT EXISTS `personal_access_tokens` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `tokenable_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_id` bigint UNSIGNED NOT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text COLLATE utf8mb4_unicode_ci,
+  `last_used_at` timestamp NULL DEFAULT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
+  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -1274,12 +1370,12 @@ DROP TABLE IF EXISTS `saved_reports`;
 CREATE TABLE IF NOT EXISTS `saved_reports` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` bigint UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `report_key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `report_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `params` json DEFAULT NULL,
-  `format` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'xlsx',
-  `schedule` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `recipients` text COLLATE utf8mb4_unicode_ci,
+  `format` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'xlsx',
+  `schedule` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `recipients` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1343,7 +1439,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `fk_users_employee` (`employee_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `users`

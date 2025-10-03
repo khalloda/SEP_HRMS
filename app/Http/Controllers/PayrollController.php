@@ -6,18 +6,26 @@ use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Models\Employee;
 use App\Services\PayrollCalculationService;
+use App\Exports\ArrayExport;
+use App\Jobs\ProcessPayrollRun;
+use App\Reports\Adapters\PayrollSummaryReport;
+use App\Support\CorrelationIdManager;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class PayrollController extends Controller
 {
     protected PayrollCalculationService $calculationService;
+    protected CorrelationIdManager $correlationIds;
 
-    public function __construct(PayrollCalculationService $calculationService)
+    public function __construct(PayrollCalculationService $calculationService, CorrelationIdManager $correlationIds)
     {
         $this->calculationService = $calculationService;
+        $this->correlationIds = $correlationIds;
     }
 
     /**
@@ -49,7 +57,7 @@ class PayrollController extends Controller
             $search = $request->get('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -59,13 +67,25 @@ class PayrollController extends Controller
         $statusOptions = PayrollRun::STATUSES;
         $yearOptions = range(date('Y') - 2, date('Y') + 1);
         $monthOptions = [
-            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
-            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
-            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+            1 => 'January',
+            2 => 'February',
+            3 => 'March',
+            4 => 'April',
+            5 => 'May',
+            6 => 'June',
+            7 => 'July',
+            8 => 'August',
+            9 => 'September',
+            10 => 'October',
+            11 => 'November',
+            12 => 'December'
         ];
 
         return view('payroll.index', compact(
-            'payrollRuns', 'statusOptions', 'yearOptions', 'monthOptions'
+            'payrollRuns',
+            'statusOptions',
+            'yearOptions',
+            'monthOptions'
         ));
     }
 
@@ -86,8 +106,13 @@ class PayrollController extends Controller
         $suggestedEnd = $suggestedStart->copy()->endOfMonth();
         $suggestedPayDate = $suggestedEnd->copy()->addDays(5);
 
+        $currencies = payrollCurrencies();
+
         return view('payroll.create', compact(
-            'suggestedStart', 'suggestedEnd', 'suggestedPayDate'
+            'suggestedStart',
+            'suggestedEnd',
+            'suggestedPayDate',
+            'currencies'
         ));
     }
 
@@ -98,13 +123,15 @@ class PayrollController extends Controller
     {
         Gate::authorize('create', PayrollRun::class);
 
+        $currencyKeys = array_keys(payrollCurrencies());
+
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:500',
             'pay_period_start' => 'required|date',
             'pay_period_end' => 'required|date|after:pay_period_start',
             'pay_date' => 'required|date|after_or_equal:pay_period_end',
-            'currency' => 'required|string|in:USD,EUR,EGP',
+            'currency' => 'required|string|in:' . implode(',', $currencyKeys),
             'approval_required' => 'boolean',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -121,7 +148,7 @@ class PayrollController extends Controller
         $overlapping = PayrollRun::where(function ($query) use ($periodStart, $periodEnd) {
             $query->where(function ($q) use ($periodStart, $periodEnd) {
                 $q->where('pay_period_start', '<=', $periodEnd)
-                  ->where('pay_period_end', '>=', $periodStart);
+                    ->where('pay_period_end', '>=', $periodStart);
             });
         })->whereNotIn('status', [PayrollRun::STATUS_CANCELLED])->exists();
 
@@ -159,7 +186,10 @@ class PayrollController extends Controller
         Gate::authorize('view', $payrollRun);
 
         $payrollRun->load([
-            'creator', 'locker', 'poster', 'approver',
+            'creator',
+            'locker',
+            'poster',
+            'approver',
             'payslips.employee.department',
             'payslips.payslipLines'
         ]);
@@ -176,7 +206,38 @@ class PayrollController extends Controller
             $validationIssues = $this->calculationService->validatePayrollRun($payrollRun);
         }
 
-        return view('payroll.show', compact('payrollRun', 'summary', 'validationIssues'));
+        $flashValidationIssues = (array) session('validation_issues', []);
+        $validationIssues = array_values(array_unique(array_merge($validationIssues, $flashValidationIssues)));
+
+        $cancellationDetails = null;
+        if ($payrollRun->isCancelled()) {
+            $latestCancellation = $payrollRun->activities()
+                ->where('description', 'Payroll run cancelled')
+                ->latest('created_at')
+                ->with('causer')
+                ->first();
+
+            if ($latestCancellation) {
+                $cancellationDetails = [
+                    'reason' => data_get($latestCancellation->properties, 'cancellation_reason'),
+                    'by' => optional($latestCancellation->causer)->name,
+                    'at' => $latestCancellation->created_at,
+                ];
+            }
+        }
+
+        return view('payroll.show', [
+            'payrollRun' => $payrollRun,
+            'summary' => $summary,
+            'validationIssues' => $validationIssues,
+            'calculationReference' => session('calculation_reference'),
+            'calculationResults' => session('calculation_results'),
+            'calculationErrors' => session('calculation_errors'),
+            'calculationJob' => session('calculation_job'),
+            'successMessage' => session('success'),
+            'errorMessage' => session('error'),
+            'cancellationDetails' => $cancellationDetails,
+        ]);
     }
 
     /**
@@ -191,7 +252,9 @@ class PayrollController extends Controller
                 ->with('error', __('hrms.payroll.cannot_edit_locked'));
         }
 
-        return view('payroll.edit', compact('payrollRun'));
+        $currencies = payrollCurrencies();
+
+        return view('payroll.edit', compact('payrollRun', 'currencies'));
     }
 
     /**
@@ -206,13 +269,15 @@ class PayrollController extends Controller
                 ->with('error', __('hrms.payroll.cannot_edit_locked'));
         }
 
+        $currencyKeys = array_keys(payrollCurrencies());
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
             'pay_period_start' => 'required|date',
             'pay_period_end' => 'required|date|after:pay_period_start',
             'pay_date' => 'required|date|after_or_equal:pay_period_end',
-            'currency' => 'required|string|in:USD,EUR,EGP',
+            'currency' => 'required|string|in:' . implode(',', $currencyKeys),
             'approval_required' => 'boolean',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -236,9 +301,17 @@ class PayrollController extends Controller
     {
         Gate::authorize('calculate', $payrollRun);
 
+        $correlationId = $this->resolveCalculationCorrelationId();
+
+        Log::withContext([
+            'correlation_id' => $correlationId,
+            'payroll_run_id' => $payrollRun->id,
+        ]);
+
         if (!$payrollRun->canBeCalculated()) {
             return redirect()->route('payroll.show', $payrollRun)
-                ->with('error', __('hrms.payroll.cannot_calculate'));
+                ->with('error', __('hrms.payroll.cannot_calculate'))
+                ->with('calculation_reference', $correlationId);
         }
 
         // Validate before calculation
@@ -246,10 +319,26 @@ class PayrollController extends Controller
         if (!empty($validationIssues)) {
             return redirect()->route('payroll.show', $payrollRun)
                 ->with('error', __('hrms.payroll.validation_failed'))
+                ->with('calculation_reference', $correlationId)
                 ->with('validation_issues', $validationIssues);
         }
 
-        $results = $this->calculationService->calculatePayrollRun($payrollRun);
+
+        if (config('payroll.queue_enabled')) {
+            ProcessPayrollRun::dispatch($payrollRun->id, $correlationId);
+
+            return redirect()->route('payroll.show', $payrollRun)
+                ->with('success', __('Payroll run queued for processing.'))
+                ->with('calculation_reference', $correlationId)
+                ->with('calculation_job', [
+                    'correlation_id' => $correlationId,
+                    'payroll_run_id' => $payrollRun->id,
+                ]);
+        }
+
+        $results = $this->calculationService->calculatePayrollRun($payrollRun, [
+            'correlation_id' => $correlationId,
+        ]);
 
         if ($results['success']) {
             $message = __('hrms.payroll.calculated_successfully', [
@@ -263,12 +352,19 @@ class PayrollController extends Controller
 
             return redirect()->route('payroll.show', $payrollRun)
                 ->with('success', $message)
+                ->with('calculation_reference', $correlationId)
                 ->with('calculation_results', $results);
         } else {
             return redirect()->route('payroll.show', $payrollRun)
                 ->with('error', __('hrms.payroll.calculation_failed'))
+                ->with('calculation_reference', $correlationId)
                 ->with('calculation_errors', $results['errors']);
         }
+    }
+
+    protected function resolveCalculationCorrelationId(): string
+    {
+        return $this->correlationIds->ensure();
     }
 
     /**
@@ -413,12 +509,12 @@ class PayrollController extends Controller
         $cancelled = $payrollRun->cancel(auth()->user(), $validated['cancellation_reason']);
 
         if ($cancelled) {
-            return redirect()->route('payroll.index')
-                ->with('success', __('hrms.payroll.cancelled_successfully'));
-        } else {
             return redirect()->route('payroll.show', $payrollRun)
-                ->with('error', __('hrms.payroll.cancellation_failed'));
+                ->with('success', __('hrms.payroll.cancelled_successfully'));
         }
+
+        return redirect()->route('payroll.show', $payrollRun)
+            ->with('error', __('hrms.payroll.cancellation_failed'));
     }
 
     /**
@@ -442,8 +538,8 @@ class PayrollController extends Controller
             $search = $request->get('search');
             $query->where(function ($q) use ($search) {
                 $q->where('employee_name', 'like', "%{$search}%")
-                  ->orWhere('employee_code', 'like', "%{$search}%")
-                  ->orWhere('employee_arabic_name', 'like', "%{$search}%");
+                    ->orWhere('employee_code', 'like', "%{$search}%")
+                    ->orWhere('employee_arabic_name', 'like', "%{$search}%");
             });
         }
 
@@ -468,12 +564,12 @@ class PayrollController extends Controller
 
         switch ($format) {
             case 'pdf':
-                return $this->exportToPdf($payrollRun);
+                return $this->exportToPdf($request, $payrollRun);
             case 'csv':
-                return $this->exportToCsv($payrollRun);
+                return $this->exportToCsv($request, $payrollRun);
             case 'excel':
             default:
-                return $this->exportToExcel($payrollRun);
+                return $this->exportToExcel($request, $payrollRun);
         }
     }
 
@@ -506,8 +602,36 @@ class PayrollController extends Controller
         return response()->json($stats);
     }
 
-    // Private helper methods for exports would go here...
-    // private function exportToExcel(PayrollRun $payrollRun) { ... }
-    // private function exportToPdf(PayrollRun $payrollRun) { ... }
-    // private function exportToCsv(PayrollRun $payrollRun) { ... }
+    private function exportToExcel(Request $request, PayrollRun $payrollRun)
+    {
+        $periodStart = $payrollRun->pay_period_start ?? $payrollRun->pay_date ?? now();
+        $month = $periodStart instanceof \Carbon\CarbonInterface
+            ? $periodStart->format('Y-m')
+            : (string) $periodStart;
+
+        $filters = ['month' => $month];
+
+        if ($request->filled('department_id')) {
+            $filters['department_id'] = (int) $request->get('department_id');
+        }
+
+        $headings = PayrollSummaryReport::headings();
+        $rows = PayrollSummaryReport::rows($filters)
+            ->map(static fn(array $row): array => array_values($row))
+            ->all();
+
+        $filename = PayrollSummaryReport::filename($filters, 'excel');
+
+        return Excel::download(new ArrayExport($headings, $rows), $filename);
+    }
+
+    private function exportToPdf(Request $request, PayrollRun $payrollRun)
+    {
+        abort(501, __('Export format not yet supported.'));
+    }
+
+    private function exportToCsv(Request $request, PayrollRun $payrollRun)
+    {
+        abort(501, __('Export format not yet supported.'));
+    }
 }

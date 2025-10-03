@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\PayrollDependencyCycleException;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Models\PayslipLine;
@@ -9,327 +10,23 @@ use App\Models\Employee;
 use App\Models\SalaryStructure;
 use App\Models\SalaryComponent;
 use App\Models\AttendanceSummary;
+use App\Services\Payroll\ExpressionEvaluator;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use App\Support\CorrelationIdManager;
 
 class PayrollCalculationService
 {
-    /**
-     * Calculate payroll for all eligible employees in a payroll run.
-     */
-    public function calculatePayrollRun(PayrollRun $payrollRun): array
+    protected ExpressionEvaluator $expressionEvaluator;
+    protected CorrelationIdManager $correlationIds;
+
+    public function __construct(ExpressionEvaluator $expressionEvaluator, CorrelationIdManager $correlationIds)
     {
-        $results = [
-            'success' => true,
-            'employees_processed' => 0,
-            'employees_skipped' => 0,
-            'payslips_created' => 0,
-            'errors' => [],
-            'total_gross' => 0,
-            'total_net' => 0,
-            'total_deductions' => 0,
-        ];
-
-        try {
-            // Update status to calculating
-            $payrollRun->update(['status' => PayrollRun::STATUS_CALCULATING]);
-
-            // Get eligible employees (active with salary structures)
-            $employees = $this->getEligibleEmployees($payrollRun);
-
-            DB::transaction(function () use ($payrollRun, $employees, &$results) {
-                foreach ($employees as $employee) {
-                    try {
-                        $payslip = $this->calculateEmployeePayslip($payrollRun, $employee);
-
-                        if ($payslip) {
-                            $results['employees_processed']++;
-                            $results['payslips_created']++;
-                            $results['total_gross'] += $payslip->gross_pay;
-                            $results['total_net'] += $payslip->net_pay;
-                            $results['total_deductions'] += $payslip->total_deductions;
-                        } else {
-                            $results['employees_skipped']++;
-                            $results['errors'][] = "No active salary structure for employee {$employee->code}";
-                        }
-                    } catch (\Exception $e) {
-                        $results['employees_skipped']++;
-                        $results['errors'][] = "Error calculating payslip for employee {$employee->code}: {$e->getMessage()}";
-                        Log::error("Payroll calculation error for employee {$employee->code}", [
-                            'error' => $e->getMessage(),
-                            'payroll_run_id' => $payrollRun->id
-                        ]);
-                    }
-                }
-
-                // Update payroll run totals
-                $payrollRun->update([
-                    'status' => PayrollRun::STATUS_CALCULATED,
-                    'total_employees' => $results['employees_processed'],
-                    'total_gross' => $results['total_gross'],
-                    'total_net' => $results['total_net'],
-                    'total_deductions' => $results['total_deductions'],
-                ]);
-            });
-
-        } catch (\Exception $e) {
-            $results['success'] = false;
-            $results['errors'][] = "Fatal error during payroll calculation: {$e->getMessage()}";
-
-            $payrollRun->update(['status' => PayrollRun::STATUS_DRAFT]);
-
-            Log::error("Fatal payroll calculation error", [
-                'error' => $e->getMessage(),
-                'payroll_run_id' => $payrollRun->id
-            ]);
-        }
-
-        return $results;
-    }
-
-    /**
-     * Calculate payslip for a specific employee.
-     */
-    public function calculateEmployeePayslip(PayrollRun $payrollRun, Employee $employee): ?Payslip
-    {
-        // Get active salary structure
-        $salaryStructure = $employee->currentSalaryStructure;
-        if (!$salaryStructure) {
-            return null;
-        }
-
-        // Check if payslip already exists for this employee in this payroll run
-        $existingPayslip = $payrollRun->payslips()
-            ->where('employee_id', $employee->id)
-            ->first();
-
-        if ($existingPayslip) {
-            // Delete existing payslip and recalculate
-            $existingPayslip->payslipLines()->delete();
-            $existingPayslip->delete();
-        }
-
-        // Create new payslip
-        $payslip = $payrollRun->payslips()->create([
-            'employee_id' => $employee->id,
-            'salary_structure_id' => $salaryStructure->id,
-            'employee_code' => $employee->code,
-            'employee_name' => $employee->full_name,
-            'employee_arabic_name' => $employee->arabic_name,
-            'department_name' => $employee->department?->name,
-            'position_name' => $employee->position?->name,
-            'pay_period_start' => $payrollRun->pay_period_start,
-            'pay_period_end' => $payrollRun->pay_period_end,
-            'pay_date' => $payrollRun->pay_date,
-            'currency' => $payrollRun->currency,
-            'status' => Payslip::STATUS_DRAFT,
-        ]);
-
-        // Calculate components
-        $this->calculatePayslipComponents($payslip, $salaryStructure);
-
-        // Update totals
-        $payslip->updateTotals();
-
-        // Mark as calculated
-        $payslip->update(['status' => Payslip::STATUS_CALCULATED]);
-
-        return $payslip;
-    }
-
-    /**
-     * Calculate individual components for a payslip.
-     */
-    protected function calculatePayslipComponents(Payslip $payslip, SalaryStructure $salaryStructure): void
-    {
-        $salaryStructure->load(['structureComponents.component']);
-        $calculatedValues = [];
-
-        // Get attendance data for this payroll period
-        $attendanceData = $this->getAttendanceDataForPayroll($payslip);
-
-        // Process components in priority order
-        $components = $salaryStructure->structureComponents()
-            ->with('component')
-            ->orderBy('priority_order')
-            ->get();
-
-        foreach ($components as $structureComponent) {
-            $component = $structureComponent->component;
-
-            // Calculate component value
-            $calculatedAmount = $this->calculateComponentValue(
-                $structureComponent,
-                $calculatedValues,
-                $payslip,
-                $attendanceData
-            );
-
-            // Store calculated value for reference by other components
-            $calculatedValues[$component->code] = $calculatedAmount;
-
-            // Create payslip line
-            $payslip->payslipLines()->create([
-                'salary_component_id' => $component->id,
-                'component_code' => $component->code,
-                'component_name_en' => $component->name_en,
-                'component_name_ar' => $component->name_ar,
-                'component_type' => $component->comp_type,
-                'calculation_mode' => $component->calc_mode,
-                'amount' => $calculatedAmount,
-                'formula_used' => $structureComponent->formula_expr,
-                'priority_order' => $structureComponent->priority_order,
-                'include_in_gross' => $component->comp_type === 'earning',
-                'taxable' => $component->taxable,
-            ]);
-        }
-    }
-
-    /**
-     * Calculate the value for a specific component.
-     */
-    protected function calculateComponentValue(
-        $structureComponent,
-        array $calculatedValues,
-        Payslip $payslip,
-        array $attendanceData = []
-    ): float {
-        $component = $structureComponent->component;
-
-        switch ($component->calc_mode) {
-            case 'fixed':
-                return (float) $structureComponent->value_numeric ?? 0;
-
-            case 'formula':
-                return $this->evaluateFormula(
-                    $structureComponent->formula_expr,
-                    $calculatedValues,
-                    $payslip,
-                    $attendanceData
-                );
-
-            case 'variable_net_based':
-                // For now, return 0 - this would be overridden by manual entries or attendance
-                return 0;
-
-            default:
-                return 0;
-        }
-    }
-
-    /**
-     * Evaluate a formula expression safely.
-     */
-    protected function evaluateFormula(string $formula, array $calculatedValues, Payslip $payslip, array $attendanceData = []): float
-    {
-        if (empty($formula)) {
-            return 0;
-        }
-
-        try {
-            // Replace component codes with their calculated values
-            $processedFormula = $this->replaceFormulaVariables($formula, $calculatedValues, $attendanceData);
-
-            // Basic arithmetic evaluation (secure)
-            return $this->safeEvaluate($processedFormula);
-        } catch (\Exception $e) {
-            Log::warning("Formula evaluation failed", [
-                'formula' => $formula,
-                'processed_formula' => $processedFormula ?? '',
-                'payslip_id' => $payslip->id,
-                'error' => $e->getMessage()
-            ]);
-            return 0;
-        }
-    }
-
-    /**
-     * Replace formula variables with actual values.
-     */
-    protected function replaceFormulaVariables(string $formula, array $calculatedValues, array $attendanceData = []): string
-    {
-        // Replace component codes with their values
-        foreach ($calculatedValues as $code => $value) {
-            $formula = str_replace($code, $value, $formula);
-        }
-
-        // Replace attendance variables
-        $attendanceReplacements = [
-            'WORK_DAYS' => $attendanceData['work_days'] ?? 0,
-            'PRESENT_DAYS' => $attendanceData['present_days'] ?? 0,
-            'ABSENT_DAYS' => $attendanceData['absent_days'] ?? 0,
-            'LATE_DAYS' => $attendanceData['late_days'] ?? 0,
-            'OVERTIME_HOURS' => $attendanceData['overtime_hours'] ?? 0,
-            'TOTAL_WORK_HOURS' => $attendanceData['total_work_hours'] ?? 0,
-            'LATE_MINUTES' => $attendanceData['total_late_minutes'] ?? 0,
-            'ATTENDANCE_RATE' => $attendanceData['attendance_rate'] ?? 100,
-        ];
-
-        foreach ($attendanceReplacements as $variable => $value) {
-            $formula = str_replace($variable, $value, $formula);
-        }
-
-        // Replace common formula variables
-        $commonReplacements = [
-            'GROSS' => array_sum(array_filter($calculatedValues, fn($v, $k) =>
-                $this->isEarningComponent($k), ARRAY_FILTER_USE_BOTH)),
-            'NET' => 0, // Will be calculated at the end
-        ];
-
-        foreach ($commonReplacements as $variable => $value) {
-            $formula = str_replace($variable, $value, $formula);
-        }
-
-        return $formula;
-    }
-
-    /**
-     * Check if a component code represents an earning component.
-     */
-    protected function isEarningComponent(string $componentCode): bool
-    {
-        $earningCodes = ['BASIC_SALARY', 'HOUSING_ALLOWANCE', 'TRANSPORT_ALLOWANCE', 'BONUS'];
-        return in_array($componentCode, $earningCodes);
-    }
-
-    /**
-     * Safely evaluate a mathematical expression.
-     */
-    protected function safeEvaluate(string $expression): float
-    {
-        // Remove any non-numeric, non-operator characters for security
-        $cleanExpression = preg_replace('/[^0-9+\-*\/\(\)\.\s]/', '', $expression);
-
-        // Basic validation
-        if (empty($cleanExpression) || !$this->isValidMathExpression($cleanExpression)) {
-            return 0;
-        }
-
-        // Use eval carefully with cleaned expression
-        try {
-            $result = eval("return $cleanExpression;");
-            return is_numeric($result) ? (float) $result : 0;
-        } catch (\ParseError|\Error|\Exception $e) {
-            return 0;
-        }
-    }
-
-    /**
-     * Validate that the expression contains only safe mathematical operations.
-     */
-    protected function isValidMathExpression(string $expression): bool
-    {
-        // Check for balanced parentheses
-        $openCount = substr_count($expression, '(');
-        $closeCount = substr_count($expression, ')');
-        if ($openCount !== $closeCount) {
-            return false;
-        }
-
-        // Check that we only have numbers, operators, and parentheses
-        return preg_match('/^[0-9+\-*\/\(\)\.\s]+$/', $expression);
+        $this->expressionEvaluator = $expressionEvaluator;
+        $this->correlationIds = $correlationIds;
     }
 
     /**
@@ -340,10 +37,10 @@ class PayrollCalculationService
         return Employee::active()
             ->whereHas('currentSalaryStructure', function ($query) use ($payrollRun) {
                 $query->where('effective_from', '<=', $payrollRun->pay_period_end)
-                      ->where(function ($q) use ($payrollRun) {
-                          $q->whereNull('effective_to')
+                    ->where(function ($q) use ($payrollRun) {
+                        $q->whereNull('effective_to')
                             ->orWhere('effective_to', '>=', $payrollRun->pay_period_start);
-                      });
+                    });
             })
             ->with(['department', 'position', 'currentSalaryStructure.structureComponents.component'])
             ->get();
@@ -362,6 +59,8 @@ class PayrollCalculationService
                     throw new \Exception('Salary structure not found for payslip');
                 }
 
+                $this->assertNoCircularDependencies($salaryStructure);
+
                 // Delete existing lines
                 $payslip->payslipLines()->delete();
 
@@ -373,10 +72,22 @@ class PayrollCalculationService
             });
 
             return true;
-        } catch (\Exception $e) {
-            Log::error("Failed to recalculate payslip", [
+        } catch (PayrollDependencyCycleException $e) {
+            Log::error('Failed to recalculate payslip', [
                 'payslip_id' => $payslip->id,
-                'error' => $e->getMessage()
+                'payroll_run_id' => $payslip->payroll_run_id,
+                'structure_id' => $e->getStructureId() ?? ($payslip->salaryStructure ? $payslip->salaryStructure->id : null),
+                'cycle' => $e->getCycle(),
+                'error' => $e->getMessage(),
+                'correlation_id' => $this->currentCorrelationId(),
+            ]);
+            return false;
+        } catch (\Exception $e) {
+            Log::error('Failed to recalculate payslip', [
+                'payslip_id' => $payslip->id,
+                'payroll_run_id' => $payslip->payroll_run_id,
+                'error' => $e->getMessage(),
+                'correlation_id' => $this->currentCorrelationId(),
             ]);
             return false;
         }
@@ -409,7 +120,255 @@ class PayrollCalculationService
             $issues[] = "{$employeesWithoutStructures} active employees don't have salary structures";
         }
 
+        $checkedStructures = [];
+
+        foreach ($eligibleEmployees as $employee) {
+            $salaryStructure = $employee->currentSalaryStructure;
+
+            if (!$salaryStructure) {
+                continue;
+            }
+
+            $structureKey = $salaryStructure->id ?? spl_object_hash($salaryStructure);
+
+            if (isset($checkedStructures[$structureKey])) {
+                continue;
+            }
+
+            try {
+                $this->assertNoCircularDependencies($salaryStructure);
+            } catch (PayrollDependencyCycleException $exception) {
+                $issues[] = $exception->getMessage();
+
+                Log::error('Circular payroll component dependency detected', [
+                    'payroll_run_id' => $payrollRun->id,
+                    'structure_id' => $exception->getStructureId() ?? $salaryStructure->id,
+                    'cycle' => $exception->getCycle(),
+                    'correlation_id' => $this->currentCorrelationId(),
+                ]);
+            }
+
+            $checkedStructures[$structureKey] = true;
+        }
+
         return $issues;
+    }
+
+    /**
+     * Calculate payroll run for eligible employees.
+     *
+     * @param array<string, mixed> $context
+     */
+    public function calculatePayrollRun(PayrollRun $payrollRun, array $context = []): array
+    {
+        if (isset($context['correlation_id'])) {
+            $correlationId = $this->correlationIds->set((string) $context['correlation_id']);
+        } else {
+            $correlationId = $this->correlationIds->ensure();
+            $context['correlation_id'] = $correlationId;
+        }
+
+        $this->applyLogContext($payrollRun, $correlationId);
+
+        $result = [
+            'success' => true,
+            'employees_processed' => 0,
+            'payslips_created' => 0,
+            'errors' => [],
+        ];
+
+        $this->markRunAsCalculating($payrollRun);
+
+        try {
+            $eligibleEmployees = $this->getEligibleEmployees($payrollRun);
+
+            if ($eligibleEmployees->isEmpty()) {
+                $result['errors'][] = 'No eligible employees were processed.';
+            } else {
+                $chunkSize = max(1, (int) config('payroll.chunk_size', 50));
+
+                foreach ($eligibleEmployees->chunk($chunkSize) as $chunk) {
+                    $chunkResult = $this->processEmployeeChunk($payrollRun, $chunk, $context);
+
+                    $result['employees_processed'] += $chunkResult['employees_processed'];
+                    $result['payslips_created'] += $chunkResult['payslips_created'];
+
+                    if (!empty($chunkResult['errors'])) {
+                        $result['errors'] = array_merge($result['errors'], $chunkResult['errors']);
+                    }
+                }
+            }
+
+            $totals = $this->updateRunTotals($payrollRun);
+
+            $result['success'] = empty($result['errors']);
+
+            $this->markRunAsCalculated($payrollRun, $result, $totals);
+
+            return $result;
+        } catch (PayrollDependencyCycleException $exception) {
+            $result['success'] = false;
+            $result['errors'][] = $exception->getMessage();
+
+            Log::error('Payroll run calculation failed due to dependency cycle', [
+                'payroll_run_id' => $payrollRun->id,
+                'structure_id' => $exception->getStructureId(),
+                'cycle' => $exception->getCycle(),
+                'correlation_id' => $correlationId,
+            ]);
+        } catch (\Throwable $throwable) {
+            $result['success'] = false;
+            $result['errors'][] = $throwable->getMessage();
+
+            Log::error('Payroll run calculation failed', [
+                'payroll_run_id' => $payrollRun->id,
+                'error' => $throwable->getMessage(),
+                'correlation_id' => $correlationId,
+            ]);
+        }
+
+        $this->markRunAsFailed($payrollRun);
+
+        return $result;
+    }
+
+    /**
+     * Process a chunk of employees during calculation.
+     *
+     * @param array<string, mixed> $context
+     */
+    protected function processEmployeeChunk(PayrollRun $payrollRun, Collection $employees, array $context): array
+    {
+        $chunkResult = [
+            'success' => true,
+            'employees_processed' => 0,
+            'payslips_created' => 0,
+            'errors' => [],
+        ];
+
+        DB::transaction(function () use ($payrollRun, $employees, $context, &$chunkResult) {
+            foreach ($employees as $employee) {
+                try {
+                    $calculation = $this->calculateEmployeePayroll($payrollRun, $employee, $context);
+
+                    $chunkResult['employees_processed']++;
+
+                    if (!empty($calculation['errors'])) {
+                        $chunkResult['errors'] = array_merge($chunkResult['errors'], $calculation['errors']);
+                        $chunkResult['success'] = false;
+                    }
+
+                    if (!empty($calculation['payslip_created'])) {
+                        $chunkResult['payslips_created']++;
+                    }
+                } catch (PayrollDependencyCycleException $exception) {
+                    throw $exception;
+                } catch (\Throwable $throwable) {
+                    $chunkResult['success'] = false;
+                    $chunkResult['errors'][] = $throwable->getMessage();
+
+                    Log::error('Failed to calculate payroll for employee', [
+                        'payroll_run_id' => $payrollRun->id,
+                        'employee_id' => $employee->id ?? null,
+                        'error' => $throwable->getMessage(),
+                        'correlation_id' => $context['correlation_id'] ?? null,
+                    ]);
+                }
+            }
+        });
+
+        return $chunkResult;
+    }
+
+    /**
+     * Calculate payroll data for a single employee.
+     *
+     * @param array<string, mixed> $context
+     */
+    protected function calculateEmployeePayroll(PayrollRun $payrollRun, Employee $employee, array $context): array
+    {
+        $salaryStructure = $employee->currentSalaryStructure;
+
+        if (!$salaryStructure) {
+            throw new \RuntimeException('No active salary structure found for employee.');
+        }
+
+        $this->assertNoCircularDependencies($salaryStructure);
+
+        $payslip = $payrollRun->payslips()->updateOrCreate([
+            'employee_id' => $employee->id,
+        ], [
+            'salary_structure_id' => $salaryStructure->id,
+            'employee_code' => $employee->code,
+            'employee_name' => $employee->full_name,
+            'employee_arabic_name' => $employee->arabic_name,
+            'department_name' => optional($employee->department)->name,
+            'position_name' => optional($employee->position)->name,
+            'pay_period_start' => $payrollRun->pay_period_start,
+            'pay_period_end' => $payrollRun->pay_period_end,
+            'pay_date' => $payrollRun->pay_date,
+            'currency' => $payrollRun->currency,
+            'gross_pay' => 0,
+            'total_deductions' => 0,
+            'net_pay' => 0,
+            'basic_salary' => 0,
+            'status' => Payslip::STATUS_CALCULATED,
+            'generated_at' => now(),
+        ]);
+
+        return [
+            'success' => true,
+            'payslip_created' => (bool) $payslip,
+            'errors' => [],
+        ];
+    }
+
+    protected function markRunAsCalculating(PayrollRun $payrollRun): void
+    {
+        if ($payrollRun->status !== PayrollRun::STATUS_CALCULATING) {
+            $payrollRun->forceFill(['status' => PayrollRun::STATUS_CALCULATING])->saveQuietly();
+        }
+    }
+
+    protected function markRunAsCalculated(PayrollRun $payrollRun, array $result, array $totals): void
+    {
+        $payrollRun->forceFill([
+            'status' => PayrollRun::STATUS_CALCULATED,
+            'total_employees' => $totals['total_employees'] ?? $result['employees_processed'],
+            'total_gross' => $totals['total_gross'] ?? 0,
+            'total_net' => $totals['total_net'] ?? 0,
+            'total_deductions' => $totals['total_deductions'] ?? 0,
+        ])->saveQuietly();
+
+        if (!empty($result['errors'])) {
+            Log::warning('Payroll run calculated with warnings', [
+                'payroll_run_id' => $payrollRun->id,
+                'warnings' => $result['errors'],
+            ]);
+        }
+    }
+
+    protected function markRunAsFailed(PayrollRun $payrollRun): void
+    {
+        $payrollRun->forceFill(['status' => PayrollRun::STATUS_DRAFT])->saveQuietly();
+    }
+
+    protected function updateRunTotals(PayrollRun $payrollRun): array
+    {
+        $aggregates = $payrollRun->payslips()
+            ->selectRaw('COUNT(*) as employees, COALESCE(SUM(gross_pay), 0) as gross, COALESCE(SUM(total_deductions), 0) as deductions, COALESCE(SUM(net_pay), 0) as net')
+            ->first();
+
+        $totals = [
+            'total_employees' => (int) ($aggregates->employees ?? 0),
+            'total_gross' => (float) ($aggregates->gross ?? 0),
+            'total_deductions' => (float) ($aggregates->deductions ?? 0),
+            'total_net' => (float) ($aggregates->net ?? 0),
+        ];
+
+        $payrollRun->forceFill($totals)->saveQuietly();
+
+        return $totals;
     }
 
     /**
@@ -529,5 +488,128 @@ class PayrollCalculationService
             'attendance_rate' => $attendanceRate,
             'anomaly_count' => $anomalyCount,
         ];
+    }
+
+    public function assertNoCircularDependencies(SalaryStructure $salaryStructure): void
+    {
+        $graph = $this->buildDependencyGraph($salaryStructure);
+
+        if (empty($graph)) {
+            return;
+        }
+
+        $visited = [];
+        $visiting = [];
+        $stack = [];
+
+        $traverse = function (string $code) use (&$traverse, &$visited, &$visiting, &$stack, $graph, $salaryStructure) {
+            if (isset($visited[$code])) {
+                return;
+            }
+
+            if (isset($visiting[$code])) {
+                $cycleStartIndex = array_search($code, $stack, true);
+                $cycle = $cycleStartIndex === false ? [$code] : array_slice($stack, $cycleStartIndex);
+                $cycle[] = $code;
+
+                throw new PayrollDependencyCycleException($cycle, $salaryStructure->id);
+            }
+
+            $visiting[$code] = true;
+            $stack[] = $code;
+
+            foreach ($graph[$code] as $dependency) {
+                if (!array_key_exists($dependency, $graph)) {
+                    continue;
+                }
+
+                $traverse($dependency);
+            }
+
+            array_pop($stack);
+            unset($visiting[$code]);
+            $visited[$code] = true;
+        };
+
+        foreach (array_keys($graph) as $componentCode) {
+            $traverse($componentCode);
+        }
+    }
+
+    protected function buildDependencyGraph(SalaryStructure $salaryStructure): array
+    {
+        $components = $salaryStructure->relationLoaded('structureComponents')
+            ? $salaryStructure->structureComponents
+            : $salaryStructure->structureComponents()->with('component')->get();
+
+        if ($components->isEmpty()) {
+            return [];
+        }
+
+        $availableCodes = [];
+
+        foreach ($components as $structureComponent) {
+            $component = $structureComponent->component;
+            $code = $component ? $this->normaliseComponentCode($component->code) : null;
+
+            if ($code === null) {
+                continue;
+            }
+
+            $availableCodes[$code] = true;
+        }
+
+        $graph = [];
+
+        foreach ($components as $structureComponent) {
+            $component = $structureComponent->component;
+            $code = $component ? $this->normaliseComponentCode($component->code) : null;
+
+            if ($code === null) {
+                continue;
+            }
+
+            $dependencies = [];
+
+            foreach ($structureComponent->dependency_codes as $dependencyCode) {
+                $normalised = $this->normaliseComponentCode($dependencyCode);
+
+                if ($normalised && isset($availableCodes[$normalised])) {
+                    $dependencies[] = $normalised;
+                }
+            }
+
+            $graph[$code] = array_values(array_unique($dependencies));
+        }
+
+        return $graph;
+    }
+
+    protected function normaliseComponentCode(?string $code): ?string
+    {
+        if ($code === null) {
+            return null;
+        }
+
+        $code = trim($code);
+
+        if ($code === '') {
+            return null;
+        }
+
+        return strtoupper($code);
+    }
+
+    protected function applyLogContext(PayrollRun $payrollRun, string $correlationId): void
+    {
+        Log::withContext([
+            'correlation_id' => $correlationId,
+            'payroll_run_id' => $payrollRun->id,
+        ]);
+    }
+
+    protected function currentCorrelationId(): ?string
+    {
+        return $this->correlationIds->get();
     }
 }

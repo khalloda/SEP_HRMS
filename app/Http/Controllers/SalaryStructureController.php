@@ -52,8 +52,13 @@ class SalaryStructureController extends Controller
         Gate::authorize('update', $employee);
         Gate::authorize('create', SalaryStructure::class);
 
+        $currencyKeys = array_keys(payrollCurrencies());
+        if (empty($currencyKeys)) {
+            $currencyKeys = ['EGP'];
+        }
+
         $validated = $request->validate([
-            'currency' => 'required|string|max:3|in:USD,EUR,EGP',
+            'currency' => 'required|string|max:3|in:' . implode(',', $currencyKeys),
             'effective_from' => 'required|date|after_or_equal:today',
             'effective_to' => 'nullable|date|after:effective_from',
             'notes' => 'nullable|string|max:500',
@@ -172,8 +177,13 @@ class SalaryStructureController extends Controller
                 ->with('error', __('hrms.salary_structure.cannot_edit_expired'));
         }
 
+        $currencyKeys = array_keys(payrollCurrencies());
+        if (empty($currencyKeys)) {
+            $currencyKeys = ['EGP'];
+        }
+
         $validated = $request->validate([
-            'currency' => 'required|string|max:3|in:USD,EUR,EGP',
+            'currency' => 'required|string|max:3|in:' . implode(',', $currencyKeys),
             'effective_from' => 'required|date',
             'effective_to' => 'nullable|date|after:effective_from',
             'notes' => 'nullable|string|max:500',

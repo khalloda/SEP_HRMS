@@ -14,20 +14,28 @@ class PayslipLine extends Model
         'component_code',
         'component_name_en',
         'component_name_ar',
+        'component_name',
         'component_type',
         'calculation_mode',
-        'amount',
         'formula_used',
+        'formula',
+        'rate',
+        'amount',
         'priority_order',
+        'priority',
         'include_in_gross',
         'taxable',
+        'is_taxable',
+        'calculation_notes',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'priority_order' => 'integer',
+        'priority' => 'integer',
         'include_in_gross' => 'boolean',
         'taxable' => 'boolean',
+        'is_taxable' => 'boolean',
     ];
 
     /**
@@ -83,7 +91,10 @@ class PayslipLine extends Model
      */
     public function scopeTaxable(Builder $query): Builder
     {
-        return $query->where('taxable', true);
+        return $query->where(function (Builder $q) {
+            $q->where('taxable', true)
+              ->orWhere('is_taxable', true);
+        });
     }
 
     /**
@@ -91,7 +102,7 @@ class PayslipLine extends Model
      */
     public function scopeOrdered(Builder $query): Builder
     {
-        return $query->orderBy('priority_order');
+        return $query->orderByRaw('COALESCE(priority_order, priority, 0)');
     }
 
     /**
@@ -99,7 +110,17 @@ class PayslipLine extends Model
      */
     public function getComponentDisplayNameAttribute(): string
     {
-        return app()->getLocale() === 'ar' ? $this->component_name_ar : $this->component_name_en;
+        $locale = app()->getLocale();
+
+        if ($locale === 'ar' && ! empty($this->component_name_ar)) {
+            return $this->component_name_ar;
+        }
+
+        if (! empty($this->component_name_en)) {
+            return $this->component_name_en;
+        }
+
+        return $this->component_name ?? '';
     }
 
     /**
@@ -108,6 +129,46 @@ class PayslipLine extends Model
     public function getFormattedAmountAttribute(): string
     {
         return number_format($this->amount, 2);
+    }
+
+    /**
+     * Normalise priority order retrieval.
+     */
+    public function getPriorityOrderAttribute($value): int
+    {
+        if (! is_null($value)) {
+            return (int) $value;
+        }
+
+        return (int) ($this->attributes['priority'] ?? 0);
+    }
+
+    /**
+     * Ensure priority order changes mirror legacy column for backwards compatibility.
+     */
+    public function setPriorityOrderAttribute($value): void
+    {
+        $this->attributes['priority_order'] = $value;
+        $this->attributes['priority'] = $value;
+    }
+
+    /**
+     * Taxable attribute with legacy fallback.
+     */
+    public function getTaxableAttribute($value): bool
+    {
+        if (! is_null($value)) {
+            return (bool) $value;
+        }
+
+        return (bool) ($this->attributes['is_taxable'] ?? false);
+    }
+
+    public function setTaxableAttribute($value): void
+    {
+        $boolValue = (bool) $value;
+        $this->attributes['taxable'] = $boolValue;
+        $this->attributes['is_taxable'] = $boolValue;
     }
 
     /**
@@ -139,7 +200,11 @@ class PayslipLine extends Model
      */
     public function isIncludedInGross(): bool
     {
-        return $this->include_in_gross;
+        if (! is_null($this->include_in_gross)) {
+            return (bool) $this->include_in_gross;
+        }
+
+        return $this->isEarning();
     }
 
     /**

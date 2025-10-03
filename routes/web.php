@@ -194,47 +194,50 @@ Route::middleware(['auth'])->group(function () {
             ->name('employees.salary-structures.calculate');
     });
 
-    // Payroll runs management
-    Route::resource('payroll', \App\Http\Controllers\PayrollController::class);
-    Route::post('payroll/{payrollRun}/calculate', [\App\Http\Controllers\PayrollController::class, 'calculate'])
-        ->name('payroll.calculate');
-    Route::post('payroll/{payrollRun}/lock', [\App\Http\Controllers\PayrollController::class, 'lock'])
-        ->name('payroll.lock');
-    Route::post('payroll/{payrollRun}/unlock', [\App\Http\Controllers\PayrollController::class, 'unlock'])
-        ->name('payroll.unlock');
-    Route::post('payroll/{payrollRun}/approve', [\App\Http\Controllers\PayrollController::class, 'approve'])
-        ->name('payroll.approve');
-    Route::post('payroll/{payrollRun}/reject', [\App\Http\Controllers\PayrollController::class, 'reject'])
-        ->name('payroll.reject');
-    Route::post('payroll/{payrollRun}/post', [\App\Http\Controllers\PayrollController::class, 'post'])
-        ->name('payroll.post');
-    Route::post('payroll/{payrollRun}/cancel', [\App\Http\Controllers\PayrollController::class, 'cancel'])
-        ->name('payroll.cancel');
-    Route::get('payroll/{payrollRun}/payslips', [\App\Http\Controllers\PayrollController::class, 'payslips'])
-        ->name('payroll.payslips');
-    Route::get('payroll/{payrollRun}/export', [\App\Http\Controllers\PayrollController::class, 'export'])
-        ->name('payroll.export');
-    Route::get('payroll-statistics', [\App\Http\Controllers\PayrollController::class, 'statistics'])
-        ->name('payroll.statistics');
+    Route::middleware('payroll.enabled')->group(function () {
+        // Payroll runs management
+        Route::resource('payroll', \App\Http\Controllers\PayrollController::class)
+            ->parameters(['payroll' => 'payrollRun']);
+        Route::post('payroll/{payrollRun}/calculate', [\App\Http\Controllers\PayrollController::class, 'calculate'])
+            ->name('payroll.calculate');
+        Route::post('payroll/{payrollRun}/lock', [\App\Http\Controllers\PayrollController::class, 'lock'])
+            ->name('payroll.lock');
+        Route::post('payroll/{payrollRun}/unlock', [\App\Http\Controllers\PayrollController::class, 'unlock'])
+            ->name('payroll.unlock');
+        Route::post('payroll/{payrollRun}/approve', [\App\Http\Controllers\PayrollController::class, 'approve'])
+            ->name('payroll.approve');
+        Route::post('payroll/{payrollRun}/reject', [\App\Http\Controllers\PayrollController::class, 'reject'])
+            ->name('payroll.reject');
+        Route::post('payroll/{payrollRun}/post', [\App\Http\Controllers\PayrollController::class, 'post'])
+            ->name('payroll.post');
+        Route::post('payroll/{payrollRun}/cancel', [\App\Http\Controllers\PayrollController::class, 'cancel'])
+            ->name('payroll.cancel');
+        Route::get('payroll/{payrollRun}/payslips', [\App\Http\Controllers\PayrollController::class, 'payslips'])
+            ->name('payroll.payslips');
+        Route::get('payroll/{payrollRun}/export', [\App\Http\Controllers\PayrollController::class, 'export'])
+            ->name('payroll.export');
+        Route::get('payroll-statistics', [\App\Http\Controllers\PayrollController::class, 'statistics'])
+            ->name('payroll.statistics');
 
-    // Individual payslip management
-    Route::resource('payslips', \App\Http\Controllers\PayslipController::class)->only(['index', 'show']);
-    Route::get('employees/{employee}/payslips', [\App\Http\Controllers\PayslipController::class, 'index'])
-        ->name('employees.payslips.index');
-    Route::get('payslips/{payslip}/pdf', [\App\Http\Controllers\PayslipController::class, 'downloadPdf'])
-        ->name('payslips.download-pdf');
-    Route::post('payslips/{payslip}/generate-pdf', [\App\Http\Controllers\PayslipController::class, 'generatePdf'])
-        ->name('payslips.generate-pdf');
-    Route::post('payroll/{payrollRun}/generate-bulk-pdf', [\App\Http\Controllers\PayslipController::class, 'generateBulkPdf'])
-        ->name('payroll.generate-bulk-pdf');
-    Route::post('payslips/{payslip}/send-email', [\App\Http\Controllers\PayslipController::class, 'sendEmail'])
-        ->name('payslips.send-email');
-    Route::post('payroll/{payrollRun}/send-bulk-email', [\App\Http\Controllers\PayslipController::class, 'sendBulkEmail'])
-        ->name('payroll.send-bulk-email');
-    Route::get('payslips-export', [\App\Http\Controllers\PayslipController::class, 'export'])
-        ->name('payslips.export');
-    Route::get('payslip-statistics', [\App\Http\Controllers\PayslipController::class, 'statistics'])
-        ->name('payslips.statistics');
+        // Individual payslip management
+        Route::resource('payslips', \App\Http\Controllers\PayslipController::class)->only(['index', 'show']);
+        Route::get('employees/{employee}/payslips', [\App\Http\Controllers\PayslipController::class, 'index'])
+            ->name('employees.payslips.index');
+        Route::get('payslips/{payslip}/pdf', [\App\Http\Controllers\PayslipController::class, 'downloadPdf'])
+            ->name('payslips.download-pdf');
+        Route::post('payslips/{payslip}/generate-pdf', [\App\Http\Controllers\PayslipController::class, 'generatePdf'])
+            ->name('payslips.generate-pdf');
+        Route::post('payroll/{payrollRun}/generate-bulk-pdf', [\App\Http\Controllers\PayslipController::class, 'generateBulkPdf'])
+            ->name('payroll.generate-bulk-pdf');
+        Route::post('payslips/{payslip}/send-email', [\App\Http\Controllers\PayslipController::class, 'sendEmail'])
+            ->name('payslips.send-email');
+        Route::post('payroll/{payrollRun}/send-bulk-email', [\App\Http\Controllers\PayslipController::class, 'sendBulkEmail'])
+            ->name('payroll.send-bulk-email');
+        Route::get('payslips-export', [\App\Http\Controllers\PayslipController::class, 'export'])
+            ->name('payslips.export');
+        Route::get('payslip-statistics', [\App\Http\Controllers\PayslipController::class, 'statistics'])
+            ->name('payslips.statistics');
+    });
     // Audit trail management routes (HR Admin and IT Admin only)
     Route::middleware(['can:viewAny,Spatie\Activitylog\Models\Activity'])->group(function () {
         Route::get('audit-trail', [\App\Http\Controllers\AuditTrailController::class, 'index'])
