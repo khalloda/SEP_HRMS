@@ -18,11 +18,11 @@
     </div>
 
     @php
-        $currencyOptions = payrollCurrencies();
-        if (empty($currencyOptions)) {
-            $currencyOptions = ['EGP' => 'EGP'];
-        }
-        $defaultCurrency = array_key_first($currencyOptions) ?? 'EGP';
+    $currencyOptions = payrollCurrencies();
+    if (empty($currencyOptions)) {
+    $currencyOptions = ['EGP' => 'EGP'];
+    }
+    $defaultCurrency = array_key_first($currencyOptions) ?? 'EGP';
     @endphp
 
     <form method="POST" action="{{ route('employees.salary-structures.store', $employee) }}" class="row g-3">
@@ -39,11 +39,11 @@
                             <label for="currency" class="form-label">{{ __('Currency') }}</label>
                             <select id="currency" name="currency" class="form-select @error('currency') is-invalid @enderror" required>
                                 @foreach($currencyOptions as $value => $label)
-                                    <option value="{{ $value }}" {{ old('currency', $currentStructure?->currency ?? $defaultCurrency) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                <option value="{{ $value }}" {{ old('currency', $currentStructure?->currency ?? $defaultCurrency) === $value ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach
                             </select>
                             @error('currency')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">{{ __('Currencies come from the payroll configuration to keep parity across modules.') }}</div>
                         </div>
@@ -51,7 +51,7 @@
                             <label for="effective_from" class="form-label">{{ __('Effective From') }}</label>
                             <input type="date" id="effective_from" name="effective_from" value="{{ old('effective_from') }}" class="form-control @error('effective_from') is-invalid @enderror" required>
                             @error('effective_from')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">{{ __('New structures must start today or later.') }}</div>
                         </div>
@@ -59,7 +59,7 @@
                             <label for="effective_to" class="form-label">{{ __('Effective To') }}</label>
                             <input type="date" id="effective_to" name="effective_to" value="{{ old('effective_to') }}" class="form-control @error('effective_to') is-invalid @enderror">
                             @error('effective_to')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">{{ __('Leave blank to keep the structure active until replaced.') }}</div>
                         </div>
@@ -67,7 +67,7 @@
                             <label for="notes" class="form-label">{{ __('Notes') }}</label>
                             <textarea id="notes" name="notes" rows="3" class="form-control @error('notes') is-invalid @enderror" maxlength="500">{{ old('notes') }}</textarea>
                             @error('notes')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">{{ __('Optional memo visible to payroll managers only.') }}</div>
                         </div>
@@ -173,14 +173,26 @@
         }));
 
         if (oldRows.length === 0) {
-            oldRows.push({ uuid: crypto.randomUUID(), component: '', amount: '', formula: '', priority: '' });
+            oldRows.push({
+                uuid: crypto.randomUUID(),
+                component: '',
+                amount: '',
+                formula: '',
+                priority: ''
+            });
         }
 
         return {
             componentGroups: normalisedGroups,
             rows: oldRows,
             addRow() {
-                this.rows.push({ uuid: crypto.randomUUID(), component: '', amount: '', formula: '', priority: '' });
+                this.rows.push({
+                    uuid: crypto.randomUUID(),
+                    component: '',
+                    amount: '',
+                    formula: '',
+                    priority: ''
+                });
             },
             removeRow(index) {
                 this.rows.splice(index, 1);
