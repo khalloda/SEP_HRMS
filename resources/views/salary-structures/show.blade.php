@@ -37,11 +37,11 @@
                         <dt class="col-5 text-muted">{{ __('Status') }}</dt>
                         <dd class="col-7">
                             @if($salaryStructure->is_expired)
-                                <span class="badge bg-secondary">{{ __('Expired') }}</span>
+                            <span class="badge bg-secondary">{{ __('Expired') }}</span>
                             @elseif($salaryStructure->is_future)
-                                <span class="badge bg-info text-dark">{{ __('Scheduled') }}</span>
+                            <span class="badge bg-info text-dark">{{ __('Scheduled') }}</span>
                             @else
-                                <span class="badge bg-success">{{ __('Active') }}</span>
+                            <span class="badge bg-success">{{ __('Active') }}</span>
                             @endif
                         </dd>
 
