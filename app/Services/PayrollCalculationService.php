@@ -12,6 +12,7 @@ use App\Models\SalaryComponent;
 use App\Models\SalaryStructureComponent;
 use App\Models\AttendanceSummary;
 use App\Services\Payroll\ExpressionEvaluator;
+use App\Services\Payroll\ExpressionFunctionRegistry;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -479,11 +480,28 @@ class PayrollCalculationService
             return (float) ($structureComponent->value_numeric ?? 0);
         }
 
-        $substituted = preg_replace_callback('/\b[A-Za-z_][A-Za-z0-9_]*\b/', function (array $matches) use ($calculatedValues) {
+        $useSafeEngine = (bool) config('payroll.use_safe_engine_conditionals');
+        static $functionRegistry;
+
+        if ($functionRegistry === null) {
+            $functionRegistry = new ExpressionFunctionRegistry();
+        }
+
+        $reservedTokens = ['AND', 'OR'];
+
+        $substituted = preg_replace_callback('/\b[A-Za-z_][A-Za-z0-9_]*\b/', function (array $matches) use ($calculatedValues, $useSafeEngine, $functionRegistry, $reservedTokens) {
             $token = strtoupper($matches[0]);
 
             if (array_key_exists($token, $calculatedValues)) {
                 return (string) $calculatedValues[$token];
+            }
+
+            if ($useSafeEngine) {
+                if (in_array($token, $reservedTokens, true) || $functionRegistry->has($token)) {
+                    return $token;
+                }
+
+                return $matches[0];
             }
 
             return '0';
@@ -493,7 +511,13 @@ class PayrollCalculationService
             throw new \RuntimeException('Failed to prepare formula expression for evaluation.');
         }
 
-        return $this->expressionEvaluator->evaluate($substituted);
+        $engine = null;
+
+        if (config('payroll.use_safe_engine_conditionals')) {
+            $engine = 'new';
+        }
+
+        return $this->expressionEvaluator->evaluate($substituted, $engine);
     }
 
     /**
