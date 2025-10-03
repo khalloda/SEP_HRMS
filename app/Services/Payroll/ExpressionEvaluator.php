@@ -109,6 +109,20 @@ class ExpressionEvaluator
                 continue;
             }
 
+            $twoCharOperator = $this->matchMultiCharOperator($expression, $i);
+
+            if ($twoCharOperator !== null) {
+                if ($numberBuffer !== '') {
+                    $tokens[] = $numberBuffer;
+                    $numberBuffer = '';
+                }
+
+                $tokens[] = $twoCharOperator;
+                $previousToken = $twoCharOperator;
+                $i += strlen($twoCharOperator) - 1;
+                continue;
+            }
+
             if ($this->isDigitOrDot($char)) {
                 $numberBuffer .= $char;
                 $previousToken = 'number';
@@ -118,6 +132,24 @@ class ExpressionEvaluator
             if ($char === '-' && ($previousToken === null || $previousToken === '(' || $this->isOperator($previousToken))) {
                 $numberBuffer .= $char;
                 $previousToken = 'number';
+                continue;
+            }
+
+            if (ctype_alpha($char)) {
+                if ($numberBuffer !== '') {
+                    $tokens[] = $numberBuffer;
+                    $numberBuffer = '';
+                }
+
+                $word = $this->consumeAlphaToken($expression, $i);
+
+                if (! $this->isOperator($word)) {
+                    throw new InvalidArgumentException('Invalid token encountered: ' . $word);
+                }
+
+                $tokens[] = $word;
+                $previousToken = $word;
+                $i += strlen($word) - 1;
                 continue;
             }
 
@@ -216,6 +248,14 @@ class ExpressionEvaluator
                 '-' => $left - $right,
                 '*' => $left * $right,
                 '/' => $this->divide($left, $right),
+                '>' => $this->booleanResult($left > $right),
+                '<' => $this->booleanResult($left < $right),
+                '>=' => $this->booleanResult($left >= $right),
+                '<=' => $this->booleanResult($left <= $right),
+                '==' => $this->booleanResult(abs($left - $right) < 1e-12),
+                '!=' => $this->booleanResult(abs($left - $right) >= 1e-12),
+                'AND' => $this->booleanResult($this->toBoolean($left) && $this->toBoolean($right)),
+                'OR' => $this->booleanResult($this->toBoolean($left) || $this->toBoolean($right)),
                 default => throw new InvalidArgumentException('Unsupported operator: ' . $token),
             };
         }
@@ -249,14 +289,17 @@ class ExpressionEvaluator
 
     protected function isOperator(string $token): bool
     {
-        return in_array($token, ['+', '-', '*', '/'], true);
+        return in_array($token, ['+', '-', '*', '/', '>', '<', '>=', '<=', '==', '!=', 'AND', 'OR'], true);
     }
 
     protected function precedence(string $operator): int
     {
         return match ($operator) {
-            '+', '-' => 1,
-            '*', '/' => 2,
+            'OR' => 1,
+            'AND' => 2,
+            '>', '<', '>=', '<=', '==', '!=' => 3,
+            '+', '-' => 4,
+            '*', '/' => 5,
             default => 0,
         };
     }
@@ -264,5 +307,48 @@ class ExpressionEvaluator
     protected function isDigitOrDot(string $char): bool
     {
         return ($char >= '0' && $char <= '9') || $char === '.';
+    }
+
+    protected function matchMultiCharOperator(string $expression, int $position): ?string
+    {
+        $operators = ['>=', '<=', '==', '!='];
+
+        foreach ($operators as $operator) {
+            $length = strlen($operator);
+
+            if (substr($expression, $position, $length) === $operator) {
+                return $operator;
+            }
+        }
+
+        return null;
+    }
+
+    protected function consumeAlphaToken(string $expression, int $startIndex): string
+    {
+        $length = strlen($expression);
+        $buffer = '';
+
+        for ($i = $startIndex; $i < $length; $i++) {
+            $char = $expression[$i];
+
+            if (! ctype_alpha($char)) {
+                break;
+            }
+
+            $buffer .= $char;
+        }
+
+        return strtoupper($buffer);
+    }
+
+    protected function toBoolean(float $value): bool
+    {
+        return abs($value) > 1e-12;
+    }
+
+    protected function booleanResult(bool $value): float
+    {
+        return $value ? 1.0 : 0.0;
     }
 }
