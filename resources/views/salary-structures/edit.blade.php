@@ -184,6 +184,14 @@
             return `uuid-${Math.random().toString(36).slice(2, 11)}`;
         };
 
+        const newRow = () => ({
+            uuid: uuid(),
+            component: '',
+            amount: '',
+            formula: '',
+            priority: '',
+        });
+
         const parsedGroups = typeof componentGroups === 'string' ? JSON.parse(componentGroups) : componentGroups;
         const normalisedGroups = Object.entries(parsedGroups || {}).map(([type, items]) => ({
             type,
@@ -195,23 +203,17 @@
         }));
 
         const parsedSeeded = typeof seededComponents === 'string' ? JSON.parse(seededComponents) : seededComponents;
-        const initialRows = Object.entries(parsedSeeded || {}).map(([seed, component]) => ({
-            uuid: seed !== '0' ? seed : uuid(),
+        const initialRows = Object.values(parsedSeeded || {}).map(component => ({
+            uuid: uuid(),
             component: component.component_id ?? '',
             amount: component.value_numeric ?? '',
             formula: component.formula_expr ?? '',
             priority: component.priority_order ?? '',
         }));
 
-        const ensureRow = collection => {
+        const ensureRows = collection => {
             if (collection.length === 0) {
-                collection.push({
-                    uuid: uuid(),
-                    component: '',
-                    amount: '',
-                    formula: '',
-                    priority: '',
-                });
+                collection.push(newRow());
             }
             return collection;
         };
@@ -222,7 +224,7 @@
             });
         };
 
-        const rows = ensureRow(initialRows);
+        const rows = ensureRows(initialRows);
         reorder(rows);
 
         return {
@@ -255,18 +257,12 @@
                 event.target.submit();
             },
             addRow() {
-                this.rows.push({
-                    uuid: uuid(),
-                    component: '',
-                    amount: '',
-                    formula: '',
-                    priority: '',
-                });
+                this.rows.push(newRow());
                 reorder(this.rows);
             },
             removeRow(index) {
                 this.rows.splice(index, 1);
-                ensureRow(this.rows);
+                ensureRows(this.rows);
                 reorder(this.rows);
             },
         };

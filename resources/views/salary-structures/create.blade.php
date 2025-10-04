@@ -176,6 +176,14 @@
             return `uuid-${Math.random().toString(36).slice(2, 11)}`;
         };
 
+        const newRow = () => ({
+            uuid: uuid(),
+            component: '',
+            amount: '',
+            formula: '',
+            priority: '',
+        });
+
         const parsedGroups = typeof componentGroups === 'string' ? JSON.parse(componentGroups) : componentGroups;
         const normalisedGroups = Object.entries(parsedGroups || {}).map(([type, items]) => ({
             type,
