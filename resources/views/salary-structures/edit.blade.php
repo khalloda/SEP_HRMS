@@ -171,7 +171,11 @@
 <script>
     function salaryStructureForm() {
         return {
-            useConditionalsFlag: {{ config('payroll.use_safe_engine_conditionals') ? 'true' : 'false' }}
+            useConditionalsFlag: {
+                {
+                    config('payroll.use_safe_engine_conditionals') ? 'true' : 'false'
+                }
+            }
         };
     }
 
@@ -192,31 +196,41 @@
             priority: '',
         });
 
+        const normaliseSeed = (data) => {
+            if (Array.isArray(data)) {
+                return data;
+            }
+
+            if (data && typeof data === 'object') {
+                return Object.values(data);
+            }
+
+            return [];
+        };
+
         const parsedGroups = typeof componentGroups === 'string' ? JSON.parse(componentGroups) : componentGroups;
         const normalisedGroups = Object.entries(parsedGroups || {}).map(([type, items]) => ({
             type,
             label: type.charAt(0).toUpperCase() + type.slice(1),
             items: items.map(item => ({
-                id: item.id,
+                id: String(item.id),
                 label: `${item.code} · ${item.name}`,
             })),
         }));
 
-        const parsedSeeded = typeof seededComponents === 'string' ? JSON.parse(seededComponents) : seededComponents;
-        const initialRows = Object.values(parsedSeeded || {}).map(component => ({
+        const seedRows = normaliseSeed(seededComponents).map(component => ({
             uuid: uuid(),
-            component: component.component_id ?? '',
-            amount: component.value_numeric ?? '',
-            formula: component.formula_expr ?? '',
-            priority: component.priority_order ?? '',
+            component: component.component_id !== undefined && component.component_id !== null ?
+                String(component.component_id) :
+                '',
+            amount: component.value_numeric ?? component.amount ?? '',
+            formula: component.formula_expr ?? component.formula ?? '',
+            priority: component.priority_order ?? component.priority ?? '',
         }));
 
-        const ensureRows = collection => {
-            if (collection.length === 0) {
-                collection.push(newRow());
-            }
-            return collection;
-        };
+        if (seedRows.length === 0) {
+            seedRows.push(newRow());
+        }
 
         const reorder = collection => {
             collection.forEach((row, idx) => {
@@ -224,12 +238,11 @@
             });
         };
 
-        const rows = ensureRows(initialRows);
-        reorder(rows);
+        reorder(seedRows);
 
         return {
             componentGroups: normalisedGroups,
-            rows,
+            rows: seedRows,
             init() {
                 this.$nextTick(() => {
                     if (this.$refs.sortable && window.Sortable) {
@@ -262,7 +275,9 @@
             },
             removeRow(index) {
                 this.rows.splice(index, 1);
-                ensureRows(this.rows);
+                if (this.rows.length === 0) {
+                    this.rows.push(newRow());
+                }
                 reorder(this.rows);
             },
         };

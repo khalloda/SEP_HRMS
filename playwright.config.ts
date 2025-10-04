@@ -7,7 +7,7 @@ export default defineConfig({
         timeout: 10_000,
     },
     use: {
-        baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000',
+        baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://hrms.local',
         headless: true,
         viewport: { width: 1440, height: 900 },
         ignoreHTTPSErrors: true,

@@ -4,23 +4,25 @@
 When opening the salary structure edit screen, every component dropdown rendered as `BASIC_SALARY` even though the database retained the original `component_id` values. Amounts and formulas stayed correct, but saving without reselecting each component risked overwriting associations.
 
 ## Investigation
-- **Database sanity** – Tinker query (`php artisan tinker --execute '...->structureComponents->map(...)'`) confirmed persisted `component_id` values (e.g., `43`, `49`) match expectations.
-- **Controller flow** – `SalaryStructureController@edit` simply loads `$salaryStructure` with `structureComponents.component`; no server-side defaulting.
-- **Blade/Alpine initialisation** – Edit view seeded Alpine state via `componentRepeater(@js(...), @js(old(... mapWithKeys ...)))`. Inside `componentRepeater` the helper `ensureRow()` ran before assigning seeded rows, pushing a blank `{ component: '' }` row. That empty entry occupied index 0, so the `<select>` defaulted to its first option (`BASIC_SALARY`) even though subsequent entries contained the real component IDs.
+- **Database sanity** – `php artisan tinker --execute '$s=App\Models\SalaryStructure::with("structureComponents")->whereHas("structureComponents")->latest()->first(); dump($s?->structureComponents->map(fn ($c)=>[$c->component_id,$c->formula_expr,$c->value_numeric]));'` confirmed persisted component IDs align with expectations.
+- **Controller flow** – `SalaryStructureController@edit` simply loads structure components and passes them to the view; no server-side mutation.
+- **Blade/Alpine initialisation** – Edit view seeded Alpine with `componentRepeater(@js($components), @js(...mapWithKeys(...)))`. The repeater helper normalised seed data by calling `Object.values` and then immediately appended a placeholder `{ component: '' }` when the initial collection length was `0`. Because the helper executed before the seeded rows were appended, the blank row occupied index `0`, so each `<select>` defaulted to the first option (`BASIC_SALARY`).
 
-## Fix
-- Updated `componentRepeater` in both `create.blade.php` and `edit.blade.php`:
-  - Introduced a shared `newRow()` helper.
-  - Seed data now populates `rows` before `ensureRow()` runs; the helper only injects a blank row when no components exist.
-  - Removed redundant in-line blank row creation logic.
-- Added PHPUnit feature test `tests/Feature/SalaryStructure/SalaryStructureEditTest.php` to assert that seeded `component_id` payloads are present in the rendered edit form.
-- Added Playwright E2E coverage (`salary-structures.spec.ts`) to verify the UI retains distinct component selections after opening and saving the edit form.
+## Fix (Commit `0df380d`)
+- Refactored `componentRepeater` in both `create.blade.php` and `edit.blade.php`:
+  - Added explicit `normaliseSeed` helper that converts either object maps (from `mapWithKeys`) or arrays into a clean array of component objects **before** seeding.
+  - Introduced a shared `newRow()` factory; blank rows are now only added when the final seed array is empty (create flow).
+  - Ensured all IDs are stringified (`String(item.id)` / `String(component.component_id)`) to keep `x-model` and `<option :value>` comparisons consistent.
+  - Preserved row priorities via a central `reorder` helper.
+- Updated Alpine add/remove handlers to use `newRow()` consistently and avoid reintroducing blanks when rows already exist.
+- Added PHP feature test `tests/Feature/SalaryStructure/SalaryStructureEditTest.php` to verify the view data contains the correct seeded component payload.
+- Added Playwright regression (existing `salary-structures.spec.ts` extended) to confirm edit page retains selections and saving without changes keeps component IDs intact. Playwright config now defaults to `http://hrms.local` and respects env overrides (`PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_USER`, `PLAYWRIGHT_PASSWORD`).
 
 ## Rollback Plan
-1. `git revert <fix-commit-hash>` to restore previous view scripts and tests.
-2. Clear caches/assets (`php artisan optimize:clear`) to ensure old Alpine bundles reload.
-3. If end-users saved incorrect associations prior to rollback, restore `salary_structure_components` rows from the latest DB backup.
+1. `git revert 0df380d` to restore previous Blade/Alpine logic and tests.
+2. Clear caches/assets (`php artisan optimize:clear`) to flush compiled view/JS state.
+3. If incorrect associations were saved post-fix, restore affected `salary_structure_components` rows from the latest database backup.
 
 ## Status
-Fix implemented, tests passing.
+Fix deployed and tests passing.
 

@@ -104,7 +104,7 @@
                                             <label class="form-label small text-muted mb-0">{{ __('Component') }}</label>
                                             <span class="badge bg-light text-muted">#<span x-text="index + 1"></span></span>
                                         </div>
-                                        <select class="form-select form-select-sm" :name="`components[${row.uuid}][component_id]`" x-model="row.component" required>
+                                        <select class="form-select form-select-sm" :name="`components[${rows[index].uuid}][component_id]`" x-model="rows[index].component" required>
                                             <option value="" disabled>{{ __('Select component') }}</option>
                                             <template x-for="group in componentGroups" :key="group.type">
                                                 <optgroup :label="group.label">
@@ -117,19 +117,19 @@
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted">{{ __('Amount') }}</label>
-                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${row.uuid}][value_numeric]`" x-model="row.amount" placeholder="0.00">
+                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${rows[index].uuid}][value_numeric]`" x-model="rows[index].amount" placeholder="0.00">
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted d-flex align-items-center gap-1">
                                             <span>{{ __('Formula') }}</span>
                                             <span class="badge bg-info text-dark" x-show="$root.useConditionalsFlag" x-cloak>IF</span>
                                         </label>
-                                        <input type="text" class="form-control form-control-sm" :name="`components[${row.uuid}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
+                                        <input type="text" class="form-control form-control-sm" :name="`components[${rows[index].uuid}][formula_expr]`" x-model="rows[index].formula" placeholder="{{ __('Optional formula expression') }}">
                                         <div class="form-text" x-show="$root.useConditionalsFlag" x-cloak>
                                             {{ __('Use Excel-style IF, e.g. IF(BASIC_SALARY>10000, BASIC_SALARY*0.1, BASIC_SALARY*0.05). Nested IFs are supported when the conditional engine flag is enabled.') }}
                                         </div>
                                     </div>
-                                    <input type="hidden" :name="`components[${row.uuid}][priority_order]`" x-model="row.priority">
+                                    <input type="hidden" :name="`components[${rows[index].uuid}][priority_order]`" x-model="rows[index].priority">
                                     <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -163,7 +163,11 @@
 <script>
     function salaryStructureForm() {
         return {
-            useConditionalsFlag: {{ config('payroll.use_safe_engine_conditionals') ? 'true' : 'false' }}
+            useConditionalsFlag: {
+                {
+                    config('payroll.use_safe_engine_conditionals') ? 'true' : 'false'
+                }
+            }
         };
     }
 
@@ -184,32 +188,40 @@
             priority: '',
         });
 
+        const normaliseSeed = (data) => {
+            if (Array.isArray(data)) {
+                return data;
+            }
+
+            if (data && typeof data === 'object') {
+                return Object.values(data);
+            }
+
+            return [];
+        };
+
         const parsedGroups = typeof componentGroups === 'string' ? JSON.parse(componentGroups) : componentGroups;
         const normalisedGroups = Object.entries(parsedGroups || {}).map(([type, items]) => ({
             type,
             label: type.charAt(0).toUpperCase() + type.slice(1),
             items: items.map(item => ({
-                id: item.id,
+                id: String(item.id),
                 label: `${item.code} · ${item.name}`,
             })),
         }));
 
-        const ensureRows = () => {
-            const parsedOld = typeof oldComponents === 'string' ? JSON.parse(oldComponents) : oldComponents;
-            const seeded = Object.values(parsedOld || {}).map(component => ({
-                uuid: uuid(),
-                component: component.component_id ?? '',
-                amount: component.value_numeric ?? '',
-                formula: component.formula_expr ?? '',
-                priority: component.priority_order ?? '',
-            }));
+        const preparedRows = normaliseSeed(oldComponents).map(component => ({
+            uuid: uuid(),
+            component: component.component_id !== undefined && component.component_id !== null ?
+                String(component.component_id) : '',
+            amount: component.value_numeric ?? component.amount ?? '',
+            formula: component.formula_expr ?? component.formula ?? '',
+            priority: component.priority_order ?? component.priority ?? '',
+        }));
 
-            if (seeded.length === 0) {
-                seeded.push(newRow());
-            }
-
-            return seeded;
-        };
+        if (preparedRows.length === 0) {
+            preparedRows.push(newRow());
+        }
 
         const reorder = rows => {
             rows.forEach((row, index) => {
@@ -219,7 +231,7 @@
 
         return {
             componentGroups: normalisedGroups,
-            rows: ensureRows(),
+            rows: preparedRows,
             init() {
                 this.$nextTick(() => {
                     if (this.$refs.sortable && window.Sortable) {

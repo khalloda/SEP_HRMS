@@ -51,4 +51,3 @@ class ExpressionFunctionRegistry
         return (float) $result;
     }
 }
- 

@@ -152,7 +152,7 @@ return [
     'loading' => 'Loading...',
     'confirm_delete' => 'Are you sure you want to delete this item?',
     'recent_activity' => 'Recent Activity',
-    
+
     // Employee Management
     'add_employee' => 'Add Employee',
     'employee_created' => 'Employee created successfully',
@@ -161,7 +161,7 @@ return [
     'employment_information' => 'Employment Information',
     'personal_information' => 'Personal Information',
     'contact_information' => 'Contact Information',
-    
+
     // Employee specific translations
     'employee' => [
         'title' => 'Employee',
@@ -211,7 +211,7 @@ return [
         'uploaded_date' => 'Uploaded Date',
         'photo_actions' => 'Photo Actions',
     ],
-    
+
     // Status translations (individual status items are defined above as simple strings)
 
     // Document Types
@@ -321,7 +321,7 @@ return [
         'hourly_rate' => 'Hourly Rate',
         'invoice_required' => 'Invoice Required',
     ],
-    
+
     // Contract types
     'contract_types' => [
         'permanent' => 'Permanent',
@@ -330,7 +330,7 @@ return [
         'internship' => 'Internship',
         'consultancy' => 'Consultancy',
     ],
-    
+
     // Contract status
     'contract_status' => [
         'active' => 'Active',

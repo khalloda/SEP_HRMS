@@ -102,7 +102,7 @@ class SalaryStructureEditTest extends TestCase
 
         $response->assertOk();
 
-        $parsed = json_decode($response->viewData('salaryStructure')->structureComponents->mapWithKeys(fn ($component) => [
+        $parsed = json_decode($response->viewData('salaryStructure')->structureComponents->mapWithKeys(fn($component) => [
             (string) $component->component_id => [
                 'component_id' => $component->component_id,
                 'value_numeric' => $component->value_numeric,
