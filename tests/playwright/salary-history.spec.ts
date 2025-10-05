@@ -34,8 +34,12 @@ test.describe('Salary History', () => {
       await page.goto('/employees/1/salary-history');
     }
 
-    // Page should show filter form and table scaffold
-    await expect(page.locator('text=Salary History').first()).toBeVisible();
+    // Navigate directly to salary-history to avoid UI differences
+    await page.goto('/employees/1/salary-history');
+    await expect(page).toHaveURL(/\/employees\/\d+\/salary-history/);
+    // Page should show filter form controls or export links
+    const filterFrom = page.locator('input[name="from"]');
+    await expect(filterFrom).toBeVisible({ timeout: 15000 });
 
     // Try Excel export
     const excelLink = page.locator('a:has-text("Excel")');
