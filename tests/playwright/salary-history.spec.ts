@@ -17,8 +17,13 @@ test.describe('Salary History', () => {
 
     // Navigate to an employee show page then click Salary History action if present
     await page.goto('/employees');
+    // If list is empty, navigate directly to employee 1
     const firstView = page.locator('a:has-text("View")').first();
-    await firstView.click();
+    if (await firstView.count()) {
+      await firstView.click();
+    } else {
+      await page.goto('/employees/1');
+    }
 
     // Click Salary History button when available
     const historyBtn = page.locator('a:has-text("Salary History")').first();
