@@ -20,7 +20,7 @@ class EnsureEmployeePhotoColumns extends Command
 
     public function handle(): int
     {
-        if (! app()->environment(['local','testing','production'])) {
+        if (! app()->environment(['local', 'testing', 'production'])) {
             $this->warn('Environment not allowed.');
             return self::FAILURE;
         }
