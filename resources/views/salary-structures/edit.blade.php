@@ -104,7 +104,7 @@
                     </template>
 
                     <div class="list-group" x-ref="sortable">
-                        <template x-for="(row, index) in rows" :key="row.uuid">
+                        <template x-for="(row, index) in rows" :key="row.uuid ?? `row-${index}`">
                             <div class="list-group-item border rounded-3 mb-3">
                                 <div class="d-flex justify-content-between align-items-start gap-2">
                                     <div class="drag-handle text-muted" title="{{ __('Drag to reorder') }}">
@@ -112,7 +112,7 @@
                                     </div>
                                     <div class="flex-grow-1">
                                         <label class="form-label small text-muted">{{ __('Component') }}</label>
-                                        <select class="form-select form-select-sm" :name="`components[${row.uuid}][component_id]`" x-model="row.component">
+                                        <select class="form-select form-select-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][component_id]`" x-model="rows[index].component">
                                             <option value="" disabled>{{ __('Select component') }}</option>
                                             <template x-for="group in componentGroups" :key="group.type">
                                                 <optgroup :label="group.label">
@@ -125,19 +125,19 @@
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted">{{ __('Amount') }}</label>
-                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${row.uuid}][value_numeric]`" x-model="row.amount" placeholder="0.00">
+                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][value_numeric]`" x-model="rows[index].amount" placeholder="0.00">
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted d-flex align-items-center gap-1">
                                             <span>{{ __('Formula') }}</span>
                                             <span class="badge bg-info text-dark" x-show="$root.useConditionalsFlag" x-cloak>IF</span>
                                         </label>
-                                        <input type="text" class="form-control form-control-sm" :name="`components[${row.uuid}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
+                                        <input type="text" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][formula_expr]`" x-model="rows[index].formula" placeholder="{{ __('Optional formula expression') }}">
                                         <div class="form-text" x-show="$root.useConditionalsFlag" x-cloak>
                                             {{ __('Conditional formulas support IF statements, e.g. IF(BASIC_SALARY>12000, BASIC_SALARY*0.12, BASIC_SALARY*0.05). Nested IFs work when the safe engine flag is enabled.') }}
                                         </div>
                                     </div>
-                                    <input type="hidden" :name="`components[${row.uuid}][priority_order]`" x-model="row.priority">
+                                    <input type="hidden" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][priority_order]`" x-model="rows[index].priority">
                                     <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -218,8 +218,8 @@
             })),
         }));
 
-        const seedRows = normaliseSeed(seededComponents).map(component => ({
-            uuid: uuid(),
+        const seedRows = normaliseSeed(seededComponents).map((component, index) => ({
+            uuid: component.row_key ?? component.uuid ?? `row-${index}`,
             component: component.component_id !== undefined && component.component_id !== null ?
                 String(component.component_id) : '',
             amount: component.value_numeric ?? component.amount ?? '',
@@ -260,9 +260,7 @@
                     this.addRow();
                     this.$dispatch('flash', {
                         type: 'danger',
-                        message: '{{ __('
-                        Add at least one valid component before saving.
-                        ') }}'
+                        message: 'Add at least one valid component before saving.'
                     });
                     return;
                 }

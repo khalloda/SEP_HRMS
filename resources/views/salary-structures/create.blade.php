@@ -93,7 +93,7 @@
                     <div class="alert alert-danger small">{{ $message }}</div>
                     @enderror
                     <div class="list-group" x-ref="sortable">
-                        <template x-for="(row, index) in rows" :key="row.uuid">
+                        <template x-for="(row, index) in rows" :key="row.uuid ?? `row-${index}`">
                             <div class="list-group-item border rounded-3 mb-3">
                                 <div class="d-flex justify-content-between align-items-start gap-2">
                                     <div class="drag-handle text-muted" title="{{ __('Drag to reorder') }}">
@@ -104,7 +104,7 @@
                                             <label class="form-label small text-muted mb-0">{{ __('Component') }}</label>
                                             <span class="badge bg-light text-muted">#<span x-text="index + 1"></span></span>
                                         </div>
-                                        <select class="form-select form-select-sm" :name="`components[${rows[index].uuid}][component_id]`" x-model="rows[index].component" required>
+                                        <select class="form-select form-select-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][component_id]`" x-model="rows[index].component" required>
                                             <option value="" disabled>{{ __('Select component') }}</option>
                                             <template x-for="group in componentGroups" :key="group.type">
                                                 <optgroup :label="group.label">
@@ -117,19 +117,19 @@
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted">{{ __('Amount') }}</label>
-                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${rows[index].uuid}][value_numeric]`" x-model="rows[index].amount" placeholder="0.00">
+                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][value_numeric]`" x-model="rows[index].amount" placeholder="0.00">
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted d-flex align-items-center gap-1">
                                             <span>{{ __('Formula') }}</span>
                                             <span class="badge bg-info text-dark" x-show="$root.useConditionalsFlag" x-cloak>IF</span>
                                         </label>
-                                        <input type="text" class="form-control form-control-sm" :name="`components[${rows[index].uuid}][formula_expr]`" x-model="rows[index].formula" placeholder="{{ __('Optional formula expression') }}">
+                                        <input type="text" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][formula_expr]`" x-model="rows[index].formula" placeholder="{{ __('Optional formula expression') }}">
                                         <div class="form-text" x-show="$root.useConditionalsFlag" x-cloak>
                                             {{ __('Use Excel-style IF, e.g. IF(BASIC_SALARY>10000, BASIC_SALARY*0.1, BASIC_SALARY*0.05). Nested IFs are supported when the conditional engine flag is enabled.') }}
                                         </div>
                                     </div>
-                                    <input type="hidden" :name="`components[${rows[index].uuid}][priority_order]`" x-model="rows[index].priority">
+                                    <input type="hidden" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][priority_order]`" x-model="rows[index].priority">
                                     <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -210,8 +210,8 @@
             })),
         }));
 
-        const preparedRows = normaliseSeed(oldComponents).map(component => ({
-            uuid: uuid(),
+        const preparedRows = normaliseSeed(oldComponents).map((component, index) => ({
+            uuid: component.row_key ?? component.uuid ?? `row-${index}`,
             component: component.component_id !== undefined && component.component_id !== null ?
                 String(component.component_id) : '',
             amount: component.value_numeric ?? component.amount ?? '',
@@ -251,9 +251,7 @@
                     this.addRow();
                     this.$dispatch('flash', {
                         type: 'danger',
-                        message: '{{ __('
-                        At least one component is required.
-                        ') }}'
+                        message: 'Add at least one component before saving.'
                     });
                     return;
                 }
