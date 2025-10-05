@@ -13,7 +13,12 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        \App\Models\Employee::class => \App\Policies\EmployeePolicy::class,
+        \App\Models\Contract::class => \App\Policies\ContractPolicy::class,
+        \App\Models\SalaryStructure::class => \App\Policies\SalaryStructurePolicy::class,
+        \App\Models\PayrollRun::class => \App\Policies\PayrollPolicy::class,
+        \App\Models\Payslip::class => \App\Policies\PayrollPolicy::class,
+        \Spatie\Activitylog\Models\Activity::class => \App\Policies\AuditTrailPolicy::class,
     ];
 
     /**

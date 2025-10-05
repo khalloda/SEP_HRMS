@@ -10,6 +10,7 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
+        "laravel/ui": "*",
         "maatwebsite/excel": "^3.1",
         "mpdf/mpdf": "^8.2",
         "spatie/laravel-activitylog": "^4.10",
@@ -22,7 +23,7 @@
         "laravel/sail": "^1.18",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^7.0",
-        "phpunit/phpunit": "^10.1",
+        "phpunit/phpunit": "^10.5",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {
@@ -43,13 +44,20 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "@php -r \"if (getenv('AUTO_DB_BOOTSTRAP')==='1'){ passthru('php artisan app:bootstrap --rbac --no-interaction'); }\""
+        ],
+        "post-install-cmd": [
+            "@php -r \"if (getenv('AUTO_DB_BOOTSTRAP')==='1'){ passthru('php artisan app:bootstrap --rbac --no-interaction'); }\""
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
+        ],
+        "deploy": [
+            "@php artisan app:bootstrap --rbac --no-interaction"
         ]
     },
     "extra": {

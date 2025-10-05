@@ -2,18 +2,17 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
     /**
-     * A basic test example.
+     * Basic smoke test for public entry points.
      */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_application_redirects_guests_to_login(): void
     {
-        $response = $this->get('/');
+        $this->get('/')->assertRedirect();
 
-        $response->assertStatus(200);
+        $this->get('/login')->assertOk();
     }
 }

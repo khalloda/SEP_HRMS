@@ -75,7 +75,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Activity log options
+     * Activity log options.
      */
     public function getActivitylogOptions(): LogOptions
     {

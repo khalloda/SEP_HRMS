@@ -1,0 +1,100 @@
+{
+  "project": {
+    "name": "SEP_HRMS",
+    "description": "Human Resource Management System for Sarie Eldin & Partners Legal Advisors",
+    "type": "Web Application",
+    "primary_domain": "WEB",
+    "deployment_targets": ["GoDaddy cPanel"]
+  },
+  "stack": {
+    "languages": ["PHP 8.4", "JavaScript"],
+    "frameworks": {
+      "backend": ["Laravel 10.49.0"],
+      "frontend": ["Bootstrap 5.3"]
+    },
+    "databases": ["MySQL 8.0"]
+  },
+  "dependencies": {
+    "runtime": {
+      "php": {
+        "guzzlehttp/guzzle": "^7.2",
+        "laravel/framework": "^10.10",
+        "laravel/sanctum": "^3.3",
+        "laravel/tinker": "^2.8",
+        "laravel/ui": "*",
+        "maatwebsite/excel": "^3.1",
+        "mpdf/mpdf": "^8.2",
+        "spatie/laravel-activitylog": "^4.10",
+        "spatie/laravel-medialibrary": "^11.14",
+        "spatie/laravel-permission": "^6.21"
+      }
+    },
+    "development": {
+      "php": {
+        "fakerphp/faker": "^1.9.1",
+        "laravel/pint": "^1.0",
+        "laravel/sail": "^1.18",
+        "mockery/mockery": "^1.4.4",
+        "nunomaduro/collision": "^7.0",
+        "phpunit/phpunit": "^10.1",
+        "spatie/laravel-ignition": "^2.0"
+      }
+    }
+  },
+  "entrypoints": {
+    "web": {
+      "public/index.php": "Main web application entry point",
+      "artisan": "Laravel command-line interface"
+    },
+    "api": {
+      "routes/api.php": "API route definitions"
+    }
+  },
+  "build_commands": {
+    "development": [
+      "composer install",
+      "php artisan key:generate",
+      "php artisan migrate",
+      "php artisan db:seed --class=DefaultUsersSeeder",
+      "php artisan serve --host=0.0.0.0 --port=8000"
+    ],
+    "production": [
+      "composer install --no-dev --optimize-autoloader",
+      "php artisan config:cache",
+      "php artisan route:cache",
+      "php artisan view:cache"
+    ]
+  },
+  "config_files": {
+    "application": [
+      "config/app.php",
+      "config/auth.php",
+      "config/database.php",
+      ".env.example"
+    ],
+    "package_managers": [
+      "composer.json",
+      "package.json"
+    ]
+  },
+  "data_artifacts": {
+    "migrations": "database/migrations/*",
+    "seeders": "database/seeders/*",
+    "schema": "docs/HRMS_Schema.sql"
+  },
+  "testing": {
+    "frameworks": ["PHPUnit"],
+    "config": "phpunit.xml",
+    "locations": {
+      "unit": "tests/Unit/",
+      "feature": "tests/Feature/"
+    }
+  },
+  "licenses": {
+    "project": "Proprietary",
+    "dependencies": {
+      "laravel/framework": "MIT",
+      "spatie/laravel-permission": "MIT"
+    }
+  }
+}

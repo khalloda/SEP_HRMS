@@ -1,0 +1,274 @@
+@extends('layouts.app')
+
+@section('title', __('Create Salary Structure'))
+
+@section('content')
+<div class="container-fluid" x-data="salaryStructureForm()">
+    @include('payroll.partials.status-banners')
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h1 class="h3 mb-1">{{ __('Create Salary Structure for :name', ['name' => $employee->display_name]) }}</h1>
+            <p class="text-muted mb-0">{{ __('Define the currency and components that will determine this employee’s compensation.') }}</p>
+        </div>
+        <a href="{{ route('employees.salary-structures.index', $employee) }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i>
+            <span class="ms-1">{{ __('Back to structures') }}</span>
+        </a>
+    </div>
+
+    @php
+    $currencyOptions = payrollCurrencies();
+    if (empty($currencyOptions)) {
+    $currencyOptions = ['EGP' => 'EGP'];
+    }
+    $defaultCurrency = array_key_first($currencyOptions) ?? 'EGP';
+    @endphp
+
+    <form method="POST" action="{{ route('employees.salary-structures.store', $employee) }}" class="row g-3" x-on:submit.prevent="handleSubmit($event)">
+        @csrf
+
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ __('Structure Details') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="currency" class="form-label">{{ __('Currency') }}</label>
+                            <select id="currency" name="currency" class="form-select @error('currency') is-invalid @enderror" required>
+                                @foreach($currencyOptions as $value => $label)
+                                <option value="{{ $value }}" {{ old('currency', $currentStructure?->currency ?? $defaultCurrency) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            @error('currency')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">{{ __('Currencies come from the payroll configuration to keep parity across modules.') }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="effective_from" class="form-label">{{ __('Effective From') }}</label>
+                            <input type="date" id="effective_from" name="effective_from" value="{{ old('effective_from') }}" class="form-control @error('effective_from') is-invalid @enderror" required>
+                            @error('effective_from')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">{{ __('New structures must start today or later.') }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="effective_to" class="form-label">{{ __('Effective To') }}</label>
+                            <input type="date" id="effective_to" name="effective_to" value="{{ old('effective_to') }}" class="form-control @error('effective_to') is-invalid @enderror">
+                            @error('effective_to')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">{{ __('Leave blank to keep the structure active until replaced.') }}</div>
+                        </div>
+                        <div class="col-12">
+                            <label for="notes" class="form-label">{{ __('Notes') }}</label>
+                            <textarea id="notes" name="notes" rows="3" class="form-control @error('notes') is-invalid @enderror" maxlength="500">{{ old('notes') }}</textarea>
+                            @error('notes')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">{{ __('Optional memo visible to payroll managers only.') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card"
+                x-data="componentRepeater(@js($components), @js(old('components', [])))"
+                x-init="init()"
+                data-salary-structure-repeater>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ __('Components') }}</h5>
+                    <button type="button" class="btn btn-sm btn-outline-primary" x-on:click="addRow()">
+                        <i class="fas fa-plus-circle"></i>
+                        <span class="ms-1">{{ __('Add Component') }}</span>
+                    </button>
+                </div>
+                <div class="card-body">
+                    @error('components')
+                    <div class="alert alert-danger small">{{ $message }}</div>
+                    @enderror
+                    <div class="list-group" x-ref="sortable">
+                        <template x-for="(row, index) in rows" :key="row.uuid ?? `row-${index}`">
+                            <div class="list-group-item border rounded-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div class="drag-handle text-muted" title="{{ __('Drag to reorder') }}">
+                                        <i class="fas fa-grip-vertical"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label small text-muted mb-0">{{ __('Component') }}</label>
+                                            <span class="badge bg-light text-muted">#<span x-text="index + 1"></span></span>
+                                        </div>
+                                        <select class="form-select form-select-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][component_id]`" x-model="row.component" required>
+                                            <option value="" disabled>{{ __('Select component') }}</option>
+                                            <template x-for="group in componentGroups" :key="group.type">
+                                                <optgroup :label="group.label">
+                                                    <template x-for="component in group.items" :key="component.id">
+                                                        <option :value="component.id" x-text="component.label" :selected="component.id === row.component"></option>
+                                                    </template>
+                                                </optgroup>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label small text-muted">{{ __('Amount') }}</label>
+                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][value_numeric]`" x-model="row.amount" placeholder="0.00">
+                                    </div>
+                                    <div>
+                                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                                            <span>{{ __('Formula') }}</span>
+                                            <span class="badge bg-info text-dark" x-show="$root.useConditionalsFlag" x-cloak>IF</span>
+                                        </label>
+                                        <input type="text" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
+                                        <div class="form-text" x-show="$root.useConditionalsFlag" x-cloak>
+                                            {{ __('Use Excel-style IF, e.g. IF(BASIC_SALARY>10000, BASIC_SALARY*0.1, BASIC_SALARY*0.05). Nested IFs are supported when the conditional engine flag is enabled.') }}
+                                        </div>
+                                    </div>
+                                    <input type="hidden" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][priority_order]`" x-model="row.priority">
+                                    <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <input type="hidden" name="components_present" x-bind:value="rows.length">
+                </div>
+                <div class="card-footer">
+                    <div class="form-text">{{ __('Set priority order to control calculation sequencing. Higher numbers run later.') }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="d-flex justify-content-end gap-2">
+                <a href{{ route('employees.salary-structures.index', $employee) }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    <span class="ms-1">{{ __('Create Structure') }}</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+    function salaryStructureForm() {
+        return {
+            useConditionalsFlag: {
+                {
+                    config('payroll.use_safe_engine_conditionals') ? 'true' : 'false'
+                }
+            }
+        };
+    }
+
+    function componentRepeater(componentGroups, oldComponents) {
+        const uuid = () => {
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                return window.crypto.randomUUID();
+            }
+
+            return `uuid-${Math.random().toString(36).slice(2, 11)}`;
+        };
+
+        const newRow = () => ({
+            uuid: uuid(),
+            component: '',
+            amount: '',
+            formula: '',
+            priority: '',
+        });
+
+        const normaliseSeed = (data) => {
+            if (Array.isArray(data)) {
+                return data;
+            }
+
+            if (data && typeof data === 'object') {
+                return Object.values(data);
+            }
+
+            return [];
+        };
+
+        const parsedGroups = typeof componentGroups === 'string' ? JSON.parse(componentGroups) : componentGroups;
+        const normalisedGroups = Object.entries(parsedGroups || {}).map(([type, items]) => ({
+            type,
+            label: type.charAt(0).toUpperCase() + type.slice(1),
+            items: items.map(item => ({
+                id: String(item.id),
+                label: `${item.code} · ${item.name}`,
+            })),
+        }));
+
+        const preparedRows = normaliseSeed(oldComponents).map((component, index) => ({
+            uuid: component.row_key ?? component.uuid ?? `row-${index}`,
+            component: component.component_id !== undefined && component.component_id !== null ?
+                String(component.component_id) : '',
+            amount: component.value_numeric ?? component.amount ?? '',
+            formula: component.formula_expr ?? component.formula ?? '',
+            priority: component.priority_order ?? component.priority ?? '',
+        }));
+
+        if (preparedRows.length === 0) {
+            preparedRows.push(newRow());
+        }
+
+        const reorder = rows => {
+            rows.forEach((row, index) => {
+                row.priority = index + 1;
+            });
+        };
+
+        return {
+            componentGroups: normalisedGroups,
+            rows: preparedRows,
+            init() {
+                this.$nextTick(() => {
+                    if (this.$refs.sortable && window.Sortable) {
+                        window.Sortable.create(this.$refs.sortable, {
+                            handle: '.drag-handle',
+                            animation: 150,
+                            onUpdate: () => reorder(this.rows),
+                        });
+                    }
+                });
+                reorder(this.rows);
+            },
+            handleSubmit(event) {
+                reorder(this.rows);
+                if (this.rows.length === 0 || this.rows.every(row => !row.component)) {
+                    event.preventDefault();
+                    this.addRow();
+                    this.$dispatch('flash', {
+                        type: 'danger',
+                        message: 'Add at least one component before saving.'
+                    });
+                    return;
+                }
+                event.target.submit();
+            },
+            addRow() {
+                this.rows.push(newRow());
+                reorder(this.rows);
+            },
+            removeRow(index) {
+                this.rows.splice(index, 1);
+                if (this.rows.length === 0) {
+                    this.rows.push(newRow());
+                }
+                reorder(this.rows);
+            },
+        };
+    }
+</script>
+@endpush
