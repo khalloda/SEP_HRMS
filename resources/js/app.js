@@ -35,9 +35,6 @@ const normaliseRows = (seededComponents) => {
         priority: component.priority_order ?? '',
     }));
 
-    console.debug('[componentRepeater] seeded components', parsed);
-    console.debug('[componentRepeater] normalised rows', rows);
-
     if (rows.length === 0) {
         rows.push({
             uuid: uuidFallback(),
@@ -79,7 +76,6 @@ Alpine.data('componentRepeater', (componentGroups, seededComponents) => ({
     rows: normaliseRows(seededComponents),
     init() {
         this.$nextTick(() => {
-            console.debug('[componentRepeater] init rows', this.rows);
             if (this.$refs.sortable && window.Sortable) {
                 window.Sortable.create(this.$refs.sortable, {
                     handle: '.drag-handle',
