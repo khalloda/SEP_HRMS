@@ -18,7 +18,7 @@ const normaliseGroups = (componentGroups) => {
         type,
         label: type.charAt(0).toUpperCase() + type.slice(1),
         items: items.map(item => ({
-            id: item.id,
+            id: String(item.id),
             label: `${item.code} · ${item.name}`,
         })),
     }));
@@ -27,13 +27,16 @@ const normaliseGroups = (componentGroups) => {
 const normaliseRows = (seededComponents) => {
     const parsed = typeof seededComponents === 'string' ? JSON.parse(seededComponents) : seededComponents;
 
-    const rows = Object.values(parsed || {}).map(component => ({
-        uuid: uuidFallback(),
-        component: component.component_id ?? '',
+    const rows = Object.values(parsed || {}).map((component, index) => ({
+        uuid: component.row_key ?? component.uuid ?? `row-${index}`,
+        component: component.component_id !== undefined && component.component_id !== null ? String(component.component_id) : '',
         amount: component.value_numeric ?? '',
         formula: component.formula_expr ?? '',
         priority: component.priority_order ?? '',
     }));
+
+    console.debug('[componentRepeater] seeded components', parsed);
+    console.debug('[componentRepeater] normalised rows', rows);
 
     if (rows.length === 0) {
         rows.push({
@@ -76,6 +79,7 @@ Alpine.data('componentRepeater', (componentGroups, seededComponents) => ({
     rows: normaliseRows(seededComponents),
     init() {
         this.$nextTick(() => {
+            console.debug('[componentRepeater] init rows', this.rows);
             if (this.$refs.sortable && window.Sortable) {
                 window.Sortable.create(this.$refs.sortable, {
                     handle: '.drag-handle',

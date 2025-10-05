@@ -104,12 +104,12 @@
                                             <label class="form-label small text-muted mb-0">{{ __('Component') }}</label>
                                             <span class="badge bg-light text-muted">#<span x-text="index + 1"></span></span>
                                         </div>
-                                        <select class="form-select form-select-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][component_id]`" x-model="rows[index].component" required>
+                                        <select class="form-select form-select-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][component_id]`" x-model="row.component" required>
                                             <option value="" disabled>{{ __('Select component') }}</option>
                                             <template x-for="group in componentGroups" :key="group.type">
                                                 <optgroup :label="group.label">
                                                     <template x-for="component in group.items" :key="component.id">
-                                                        <option :value="component.id" x-text="component.label"></option>
+                                                        <option :value="component.id" x-text="component.label" :selected="component.id === row.component"></option>
                                                     </template>
                                                 </optgroup>
                                             </template>
@@ -117,19 +117,19 @@
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted">{{ __('Amount') }}</label>
-                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][value_numeric]`" x-model="rows[index].amount" placeholder="0.00">
+                                        <input type="number" step="0.01" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][value_numeric]`" x-model="row.amount" placeholder="0.00">
                                     </div>
                                     <div>
                                         <label class="form-label small text-muted d-flex align-items-center gap-1">
                                             <span>{{ __('Formula') }}</span>
                                             <span class="badge bg-info text-dark" x-show="$root.useConditionalsFlag" x-cloak>IF</span>
                                         </label>
-                                        <input type="text" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][formula_expr]`" x-model="rows[index].formula" placeholder="{{ __('Optional formula expression') }}">
+                                        <input type="text" class="form-control form-control-sm" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][formula_expr]`" x-model="row.formula" placeholder="{{ __('Optional formula expression') }}">
                                         <div class="form-text" x-show="$root.useConditionalsFlag" x-cloak>
                                             {{ __('Use Excel-style IF, e.g. IF(BASIC_SALARY>10000, BASIC_SALARY*0.1, BASIC_SALARY*0.05). Nested IFs are supported when the conditional engine flag is enabled.') }}
                                         </div>
                                     </div>
-                                    <input type="hidden" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][priority_order]`" x-model="rows[index].priority">
+                                    <input type="hidden" :name="`components[${rows[index]?.uuid ?? 'row-' + index}][priority_order]`" x-model="row.priority">
                                     <button type="button" class="btn btn-sm btn-outline-danger mt-4" x-on:click="removeRow(index)">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -148,7 +148,7 @@
 
         <div class="col-12">
             <div class="d-flex justify-content-end gap-2">
-                <a href="{{ route('employees.salary-structures.index', $employee) }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
+                <a href{{ route('employees.salary-structures.index', $employee) }}" class="btn btn-outline-secondary">{{ __('Cancel') }}</a>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i>
                     <span class="ms-1">{{ __('Create Structure') }}</span>

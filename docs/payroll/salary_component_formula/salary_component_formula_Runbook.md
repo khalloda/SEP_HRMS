@@ -30,6 +30,7 @@ Enable conditional expressions inside salary component formulas using the upgrad
 - Activity log for payroll runs to confirm status transitions remain accurate.
 - Optional comparison script to diff payslip totals pre/post feature flag for a sample month.
 - Frontend smoke test: confirm salary structure edit form still saves formulas; check RTL layout unaffected.
+- If conditional badges fail to appear after toggling the flag, purge compiled views (`php artisan view:clear`) and rebuild assets (`npm run build`) to avoid cached JS.
 
 ## Rollback Plan
 - Set `PAYROLL_SAFE_ENGINE_CONDITIONALS=false`; run `php artisan config:clear`.

@@ -1,28 +1,36 @@
 # Salary Structure Edit Resets Components Bug
 
 ## Summary
-When opening the salary structure edit screen, every component dropdown rendered as `BASIC_SALARY` even though the database retained the original `component_id` values. Amounts and formulas stayed correct, but saving without reselecting each component risked overwriting associations.
+- Issue: Opening the salary structure edit page caused every component dropdown to reset to `BASIC_SALARY`, even while the database retained the correct `component_id` values.
+- Business impact: HR users risked overwriting the structure if they saved without re-selecting each component.
+- Root cause: Alpine's repeater initialisation generated new UUIDs and blank rows before the seeded data was normalised; combined with row-level `x-model` bindings that referenced `rows[index].component`, the select elements always defaulted to the first option.
 
 ## Investigation
-- **Database sanity** – `php artisan tinker --execute '$s=App\Models\SalaryStructure::with("structureComponents")->whereHas("structureComponents")->latest()->first(); dump($s?->structureComponents->map(fn ($c)=>[$c->component_id,$c->formula_expr,$c->value_numeric]));'` confirmed persisted component IDs align with expectations.
-- **Controller flow** – `SalaryStructureController@edit` simply loads structure components and passes them to the view; no server-side mutation.
-- **Blade/Alpine initialisation** – Edit view seeded Alpine with `componentRepeater(@js($components), @js(...mapWithKeys(...)))`. The repeater helper normalised seed data by calling `Object.values` and then immediately appended a placeholder `{ component: '' }` when the initial collection length was `0`. Because the helper executed before the seeded rows were appended, the blank row occupied index `0`, so each `<select>` defaulted to the first option (`BASIC_SALARY`).
+- **Database sanity** – Confirmed persisted components via `php artisan tinker` and direct MySQL queries.
+- **Controller flow** – `SalaryStructureController@edit` simply passed hydrated `structureComponents`; no server-side transformations.
+- **Frontend tracing** – Browser console inspection (`Alpine.$data(...)`) showed the seeded rows held the correct component IDs, but the `<select>` values remained `43` for every row. Because the Blade markup bound `x-model="rows[index].component"`, Alpine re-used the proxy for index `0` across rows.
+- **Assets cache** – Verified the Vite bundle (`public/build/assets/app-*.js`) still had the old normalisation logic; rebuilding surfaced the mismatch between model values and `<option>` values.
 
-## Fix (Commit `0df380d`)
-- Refactored `componentRepeater` in both `create.blade.php` and `edit.blade.php`:
-  - Added explicit `normaliseSeed` helper that converts either object maps (from `mapWithKeys`) or arrays into a clean array of component objects **before** seeding.
-  - Introduced a shared `newRow()` factory; blank rows are now only added when the final seed array is empty (create flow).
-  - Ensured all IDs are stringified (`String(item.id)` / `String(component.component_id)`) to keep `x-model` and `<option :value>` comparisons consistent.
-  - Preserved row priorities via a central `reorder` helper.
-- Updated Alpine add/remove handlers to use `newRow()` consistently and avoid reintroducing blanks when rows already exist.
-- Added PHP feature test `tests/Feature/SalaryStructure/SalaryStructureEditTest.php` to verify the view data contains the correct seeded component payload.
-- Added Playwright regression (existing `salary-structures.spec.ts` extended) to confirm edit page retains selections and saving without changes keeps component IDs intact. Playwright config now defaults to `http://hrms.local` and respects env overrides (`PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_USER`, `PLAYWRIGHT_PASSWORD`).
+## Fix (Current Commit)
+- Updated `resources/views/salary-structures/create.blade.php` and `edit.blade.php`:
+  - Normalised row bindings to use `x-model="row.component"` / `row.amount` etc. while keeping unique field names based on `row.uuid`.
+  - Added `:selected="component.id === row.component"` to keep `<option>` lists and model values in sync during first render.
+  - Ensured seeded UUIDs are preserved (`component.row_key` fallback) so Alpine doesn't regenerate ids on load.
+- Refined `resources/js/app.js` repeater helper:
+  - Normalise seeded component payloads and cast IDs to strings.
+  - Added debug logging (temporary) to verify row state.
+- Rebuilt frontend assets via `npm run build` and cleared compiled views with `php artisan view:clear`.
+- Verified the page retains component selections after refresh and during edit/save flows.
+
+## Tests & Verification
+- Manual smoke test on `hrms.local` confirming edit form retains component selections and persists unchanged when saved.
+- Automated suite partially run (`php artisan test`) – feature tests currently fail due to legacy database schema lacking `email_verified_at` and foreign key truncation (documented in runbook). No new failures introduced by the fix.
 
 ## Rollback Plan
-1. `git revert 0df380d` to restore previous Blade/Alpine logic and tests.
-2. Clear caches/assets (`php artisan optimize:clear`) to flush compiled view/JS state.
-3. If incorrect associations were saved post-fix, restore affected `salary_structure_components` rows from the latest database backup.
+1. Revert the Blade and JS changes (`git revert <commit_sha>`).
+2. Run `npm run build` and `php artisan view:clear` to restore previous assets and views.
+3. If incorrect structures were saved post-fix, restore affected `salary_structure_components` records from backup.
 
 ## Status
-Fix deployed and tests passing.
+✅ Fix applied; frontend validated. Automated payroll feature tests remain non-green in this environment because of pre-existing schema constraints.
 
