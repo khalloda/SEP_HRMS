@@ -174,6 +174,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Salary structure management routes (nested under employees)
     Route::prefix('employees/{employee}')->group(function () {
+        // Salary history (feature-flagged)
+        Route::get('salary-history', [\App\Http\Controllers\EmployeeSalaryHistoryController::class, 'index'])
+            ->name('employees.salary-history.index');
+        Route::get('salary-history/export', [\App\Http\Controllers\EmployeeSalaryHistoryController::class, 'export'])
+            ->name('employees.salary-history.export');
         Route::get('salary-structures', [\App\Http\Controllers\SalaryStructureController::class, 'index'])
             ->name('employees.salary-structures.index');
         Route::get('salary-structures/create', [\App\Http\Controllers\SalaryStructureController::class, 'create'])

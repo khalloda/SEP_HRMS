@@ -25,4 +25,7 @@ return [
         'USD' => 'USD',
         'EUR' => 'EUR',
     ],
+
+    // Feature flags for ancillary payroll features
+    'use_salary_structure_history' => (bool) env('USE_SALARY_STRUCTURE_HISTORY', false),
 ];
