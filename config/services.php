@@ -37,4 +37,8 @@ return [
         'enabled' => env('ZKTECO_ENABLED', true),
     ],
 
+    'employee_photo' => [
+        'signed_url_ttl' => env('EMPLOYEE_PHOTO_SIGNED_URL_TTL', 900),
+    ],
+
 ];

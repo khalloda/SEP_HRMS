@@ -19,7 +19,7 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
         // Check permission
-        Gate::authorize('viewAny', Employee::class);
+        Gate::authorize('view', $employee);
 
         // Start with base query including relations
         $query = Employee::query()->withRelations();
@@ -69,7 +69,7 @@ class EmployeeController extends Controller
         // Apply sorting
         $sortBy = $request->get('sort_by', 'first_name');
         $sortDir = $request->get('sort_dir', 'asc');
-        
+
         if ($sortBy === 'name') {
             $query->ordered();
         } elseif (in_array($sortBy, ['first_name', 'last_name', 'code', 'hire_date', 'status'])) {
@@ -98,8 +98,12 @@ class EmployeeController extends Controller
         ];
 
         return view('employees.index', compact(
-            'employees', 'departments', 'positions', 'employmentTypes', 
-            'managers', 'statusOptions'
+            'employees',
+            'departments',
+            'positions',
+            'employmentTypes',
+            'managers',
+            'statusOptions'
         ));
     }
 
@@ -116,7 +120,10 @@ class EmployeeController extends Controller
         $managers = Employee::active()->ordered()->get(['id', 'first_name', 'last_name']);
 
         return view('employees.create', compact(
-            'departments', 'positions', 'employmentTypes', 'managers'
+            'departments',
+            'positions',
+            'employmentTypes',
+            'managers'
         ));
     }
 
@@ -144,10 +151,10 @@ class EmployeeController extends Controller
 
         // Set defaults
         $validated['status'] = 'active';
-        
+
         DB::transaction(function () use ($validated) {
             $employee = Employee::create($validated);
-            
+
             // Log the creation
             activity('employee')
                 ->performedOn($employee)
@@ -166,10 +173,10 @@ class EmployeeController extends Controller
         Gate::authorize('view', $employee);
 
         $employee->load(['department', 'position', 'employmentType', 'manager', 'directReports', 'user']);
-        
+
         // Get additional statistics
         $stats = $employee->getStats();
-        
+
         // Get recent activity logs
         $activities = \Spatie\Activitylog\Models\Activity::where('subject_type', Employee::class)
             ->where('subject_id', $employee->id)
@@ -190,7 +197,7 @@ class EmployeeController extends Controller
         $departments = Department::ordered()->get();
         $positions = Position::ordered()->get();
         $employmentTypes = EmploymentType::ordered()->get();
-        
+
         // Exclude the employee themselves from the manager list
         $managers = Employee::active()
             ->where('id', '!=', $employee->id)
@@ -198,7 +205,11 @@ class EmployeeController extends Controller
             ->get(['id', 'first_name', 'last_name']);
 
         return view('employees.edit', compact(
-            'employee', 'departments', 'positions', 'employmentTypes', 'managers'
+            'employee',
+            'departments',
+            'positions',
+            'employmentTypes',
+            'managers'
         ));
     }
 
@@ -245,7 +256,7 @@ class EmployeeController extends Controller
 
         DB::transaction(function () use ($employee, $validated) {
             $employee->update($validated);
-            
+
             // Log the update
             activity('employee')
                 ->performedOn($employee)
@@ -279,7 +290,7 @@ class EmployeeController extends Controller
             activity('employee')
                 ->performedOn($employee)
                 ->log('Employee deleted');
-                
+
             $employee->delete();
         });
 
@@ -303,7 +314,7 @@ class EmployeeController extends Controller
             $employee->update([
                 'status' => 'terminated',
             ]);
-            
+
             // Log the termination with reason
             activity('employee')
                 ->performedOn($employee)
@@ -331,7 +342,7 @@ class EmployeeController extends Controller
             $employee->update([
                 'status' => 'active',
             ]);
-            
+
             // Log the reactivation
             activity('employee')
                 ->performedOn($employee)
@@ -350,21 +361,21 @@ class EmployeeController extends Controller
         Gate::authorize('export', Employee::class);
 
         $format = $request->get('format', 'excel');
-        
+
         // Apply same filters as index
         $query = Employee::query()->withRelations();
-        
+
         // Apply filters (similar to index method)
         if ($request->filled('search')) {
             $query->search($request->get('search'));
         }
-        
+
         if ($request->filled('status')) {
             $query->byStatus($request->get('status'));
         }
-        
+
         // Add other filters as needed...
-        
+
         $employees = $query->get();
 
         switch ($format) {
@@ -461,10 +472,10 @@ class EmployeeController extends Controller
 
             $file = $request->file('photo');
             $filename = 'employee_photos/' . $employee->code . '_' . time() . '.' . $file->getClientOriginalExtension();
-            
+
             // Store file in private disk
             $path = $file->storeAs('', $filename, 'private');
-            
+
             // Update employee photo information
             $employee->updatePhoto(
                 $path,
@@ -489,21 +500,38 @@ class EmployeeController extends Controller
      */
     public function servePhoto(Employee $employee)
     {
-        Gate::authorize('view', $employee);
+        if (! request()->hasValidSignature()) {
+            abort(403);
+        }
 
-        if (!$employee->hasPhoto()) {
+        $hash = request()->query('hash');
+        $viewerId = request()->query('viewer');
+
+        if (! $hash || ! $viewerId) {
+            abort(403);
+        }
+
+        if (! auth()->check() || (int) $viewerId !== auth()->id() || ! auth()->user()->can('employees.view')) {
+            abort(403);
+        }
+
+        if (! hash_equals($employee->getPhotoSignatureHash(), $hash)) {
+            abort(403);
+        }
+
+        if (! $employee->hasPhoto()) {
             abort(404);
         }
 
         $path = storage_path('app/private/' . $employee->photo_path);
-        
-        if (!file_exists($path)) {
+
+        if (! file_exists($path)) {
             abort(404);
         }
 
         return response()->file($path, [
             'Content-Type' => $employee->photo_mime_type,
-            'Cache-Control' => 'public, max-age=3600',
+            'Cache-Control' => 'private, max-age=60',
         ]);
     }
 

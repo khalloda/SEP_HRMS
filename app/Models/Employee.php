@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use App\Services\AuditTrailService;
 
 class Employee extends Model
@@ -304,10 +308,10 @@ class Employee extends Model
 
         return $query->where(function ($q) use ($term) {
             $q->where('code', 'LIKE', "%{$term}%")
-              ->orWhere('first_name', 'LIKE', "%{$term}%")
-              ->orWhere('last_name', 'LIKE', "%{$term}%")
-              ->orWhere('arabic_name', 'LIKE', "%{$term}%")
-              ->orWhere('email', 'LIKE', "%{$term}%");
+                ->orWhere('first_name', 'LIKE', "%{$term}%")
+                ->orWhere('last_name', 'LIKE', "%{$term}%")
+                ->orWhere('arabic_name', 'LIKE', "%{$term}%")
+                ->orWhere('email', 'LIKE', "%{$term}%");
         });
     }
 
@@ -390,10 +394,21 @@ class Employee extends Model
     {
         return LogOptions::defaults()
             ->logOnly([
-                'code', 'first_name', 'last_name', 'arabic_name', 'email', 
-                'phone', 'hire_date', 'status', 'department_id', 'position_id', 
-                'employment_type_id', 'manager_id', 'salary_visibility_flag',
-                'photo_original_name', 'photo_uploaded_at'
+                'code',
+                'first_name',
+                'last_name',
+                'arabic_name',
+                'email',
+                'phone',
+                'hire_date',
+                'status',
+                'department_id',
+                'position_id',
+                'employment_type_id',
+                'manager_id',
+                'salary_visibility_flag',
+                'photo_original_name',
+                'photo_uploaded_at'
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
@@ -437,7 +452,33 @@ class Employee extends Model
             return $this->getDefaultPhotoUrl();
         }
 
-        return route('employee.photo', ['employee' => $this->id]);
+        if (!$this->hasPhoto()) {
+            return $this->getDefaultPhotoUrl();
+        }
+
+        $user = Auth::user();
+        if (!$user || !$user->can('employees.view')) {
+            return $this->getDefaultPhotoUrl();
+        }
+
+        $ttl = (int) config('services.employee_photo.signed_url_ttl', 900);
+        $cacheTtl = max($ttl - 60, 60);
+        $hash = $this->getPhotoSignatureHash();
+        $viewerId = $user->id;
+        $employeeId = $this->id;
+        $cacheKey = $this->getPhotoCacheKey($hash, $viewerId);
+
+        return Cache::remember($cacheKey, $cacheTtl, static function () use ($ttl, $hash, $viewerId, $employeeId) {
+            return URL::temporarySignedRoute(
+                'employee.photo',
+                now()->addSeconds($ttl),
+                [
+                    'employee' => $employeeId,
+                    'hash' => $hash,
+                    'viewer' => $viewerId,
+                ]
+            );
+        });
     }
 
     /**
@@ -454,7 +495,7 @@ class Employee extends Model
      */
     public function hasPhoto(): bool
     {
-        return !empty($this->photo_path) && \Storage::disk('private')->exists($this->photo_path);
+        return !empty($this->photo_path) && Storage::disk('private')->exists($this->photo_path);
     }
 
     /**
@@ -468,11 +509,11 @@ class Employee extends Model
 
         $bytes = $this->photo_size;
         $units = ['B', 'KB', 'MB', 'GB'];
-        
+
         for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
             $bytes /= 1024;
         }
-        
+
         return round($bytes, 2) . ' ' . $units[$i];
     }
 
@@ -481,9 +522,9 @@ class Employee extends Model
      */
     public function deletePhoto(): bool
     {
-        if ($this->photo_path && \Storage::disk('private')->exists($this->photo_path)) {
-            $deleted = \Storage::disk('private')->delete($this->photo_path);
-            
+        if ($this->photo_path && Storage::disk('private')->exists($this->photo_path)) {
+            $deleted = Storage::disk('private')->delete($this->photo_path);
+
             if ($deleted) {
                 $this->update([
                     'photo_path' => null,
@@ -492,11 +533,13 @@ class Employee extends Model
                     'photo_mime_type' => null,
                     'photo_uploaded_at' => null,
                 ]);
-                
+
+                $this->forgetPhotoCache();
+
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -505,13 +548,19 @@ class Employee extends Model
      */
     public function updatePhoto($path, $originalName, $size, $mimeType): bool
     {
-        return $this->update([
+        $updated = $this->update([
             'photo_path' => $path,
             'photo_original_name' => $originalName,
             'photo_size' => $size,
             'photo_mime_type' => $mimeType,
             'photo_uploaded_at' => now(),
         ]);
+
+        if ($updated) {
+            $this->forgetPhotoCache();
+        }
+
+        return $updated;
     }
 
     /**
@@ -635,5 +684,31 @@ class Employee extends Model
                 app(AuditTrailService::class)->logEmployeeCriticalChange($employee, $changes, 'updated');
             }
         });
+    }
+
+    protected function getPhotoCacheKey(string $hash, int $viewerId): string
+    {
+        return sprintf('employee_photo_signed_url:%d:%s:%d', $this->id, $hash, $viewerId);
+    }
+
+    protected function forgetPhotoCache(): void
+    {
+        if (!$this->photo_path) {
+            return;
+        }
+
+        $hash = $this->getPhotoSignatureHash();
+
+        // Since signed URLs are generated per viewer, best effort invalidation for the
+        // current authenticated user. Other viewers will receive refreshed URLs on next fetch.
+        $viewerId = Auth::id();
+        if ($viewerId) {
+            Cache::forget($this->getPhotoCacheKey($hash, $viewerId));
+        }
+    }
+
+    public function getPhotoSignatureHash(): string
+    {
+        return sha1($this->photo_path . '|' . optional($this->photo_uploaded_at)->timestamp);
     }
 }
