@@ -12,7 +12,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // Send contract expiry notifications daily at 9:00 AM
+        $schedule->command('hrms:send-contract-notifications')->dailyAt('09:00');
+        
+        // Send urgent notifications twice daily (9 AM and 3 PM)
+        $schedule->command('hrms:send-contract-notifications --type=urgent')->twiceDaily(9, 15);
+        
+        // You can add more scheduled tasks here
         // $schedule->command('inspire')->hourly();
+
+        // Run scheduled saved reports daily at 7:00 AM
+        $schedule->command('reports:run-scheduled')->dailyAt('07:00');
     }
 
     /**
