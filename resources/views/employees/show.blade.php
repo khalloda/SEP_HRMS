@@ -391,6 +391,11 @@
                                 <small class="d-block text-muted">{{ __('hrms.salary_structure.none_active') }}</small>
                             @endif
                         </a>
+                        @if(config('payroll.use_salary_structure_history'))
+                        <a href="{{ route('employees.salary-history.index', $employee) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-history"></i> {{ __('Salary History') }}
+                        </a>
+                        @endif
                     @endcan
 
                     <a href="{{ route('contracts.index', ['employee_id' => $employee->id]) }}" class="btn btn-outline-primary">
