@@ -5,16 +5,65 @@
     <meta charset="utf-8">
     <title>{{ __('Salary History') }} — {{ $employee->display_name }}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 10px; line-height: 1.4; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #c6a44a; padding-bottom: 10px; }
-        .company-name { font-size: 16px; font-weight: bold; color: #2e4029; margin-bottom: 5px; }
-        .report-title { font-size: 14px; color: #c6a44a; margin-bottom: 5px; }
-        .report-date { font-size: 10px; color: #666; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #2e4029; color: #fff; font-weight: bold; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .small { font-size: 10px; color: #666; }
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #c6a44a;
+            padding-bottom: 10px;
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2e4029;
+            margin-bottom: 5px;
+        }
+
+        .report-title {
+            font-size: 14px;
+            color: #c6a44a;
+            margin-bottom: 5px;
+        }
+
+        .report-date {
+            font-size: 10px;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2e4029;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .small {
+            font-size: 10px;
+            color: #666;
+        }
+        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 8px; color: #666; border-top: 1px solid #ddd; padding-top: 5px; }
     </style>
 </head>
 
@@ -37,49 +86,52 @@
         </thead>
         <tbody>
             @foreach($rows as $r)
-                <tr>
-                    <td>{{ $r['Effective From'] }}</td>
-                    <td>{{ $r['Effective To'] }}</td>
-                    <td>{{ $r['Earnings'] }}</td>
-                    <td>{{ $r['Deductions'] }}</td>
-                    <td>{{ $r['Gross'] }}</td>
-                    <td>{{ $r['Net'] }}</td>
-                </tr>
-                @if(isset($r['Details']) && is_array($r['Details']))
-                    <tr>
-                        <td colspan="6">
-                            <table style="width:100%; border: none;">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 50%;">{{ __('Earnings') }}</th>
-                                        <th style="width: 50%;">{{ __('Deductions') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <ul style="margin:0; padding-left:14px;">
-                                                @foreach(($r['Details']['earnings'] ?? []) as $c)
-                                                    <li>{{ $c['name'] }} ({{ $c['code'] }}) — {{ $c['value'] }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </td>
-                                        <td>
-                                            <ul style="margin:0; padding-left:14px;">
-                                                @foreach(($r['Details']['deductions'] ?? []) as $c)
-                                                    <li>{{ $c['name'] }} ({{ $c['code'] }}) — {{ $c['value'] }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                @endif
+            <tr>
+                <td>{{ $r['Effective From'] }}</td>
+                <td>{{ $r['Effective To'] }}</td>
+                <td>{{ $r['Earnings'] }}</td>
+                <td>{{ $r['Deductions'] }}</td>
+                <td>{{ $r['Gross'] }}</td>
+                <td>{{ $r['Net'] }}</td>
+            </tr>
+            @if(isset($r['Details']) && is_array($r['Details']))
+            <tr>
+                <td colspan="6">
+                    <table style="width:100%; border: none;">
+                        <thead>
+                            <tr>
+                                <th style="width: 50%;">{{ __('Earnings') }}</th>
+                                <th style="width: 50%;">{{ __('Deductions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <ul style="margin:0; padding-left:14px;">
+                                        @foreach(($r['Details']['earnings'] ?? []) as $c)
+                                        <li>{{ $c['name'] }} ({{ $c['code'] }}) — {{ $c['value'] }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul style="margin:0; padding-left:14px;">
+                                        @foreach(($r['Details']['deductions'] ?? []) as $c)
+                                        <li>{{ $c['name'] }} ({{ $c['code'] }}) — {{ $c['value'] }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            @endif
             @endforeach
         </tbody>
     </table>
+    <div class="footer">
+        {{ __('Salary History') }} — {{ $employee->display_name }} | {{ __('Generated by HRMS') }} | {{ __('Page') }} {PAGENO} {{ __('of') }} {nbpg}
+    </div>
 </body>
 
 </html>
