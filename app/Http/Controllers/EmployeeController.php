@@ -18,8 +18,8 @@ class EmployeeController extends Controller
      */
     public function index(Request $request)
     {
-        // Check permission
-        Gate::authorize('view', $employee);
+        // Check permission (class-level policy)
+        Gate::authorize('viewAny', Employee::class);
 
         // Start with base query including relations
         $query = Employee::query()->withRelations();
