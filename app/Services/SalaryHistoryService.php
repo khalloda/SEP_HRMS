@@ -59,6 +59,11 @@ class SalaryHistoryService
                     'earnings' => $canViewNet ? $earnings : null,
                     'deductions' => $canViewNet ? $deductions : null,
                 ],
+                // Flattened for PDF export convenience
+                'details_for_export' => [
+                    'earnings' => $components['earnings'],
+                    'deductions' => $components['deductions'],
+                ],
             ];
         }
 
@@ -84,14 +89,22 @@ class SalaryHistoryService
                 'Deductions' => $row['totals']['deductions'],
                 'Gross' => $row['totals']['gross'],
                 'Net' => $row['totals']['net'],
+                'Details' => $row['details_for_export'] ?? null,
             ];
         });
 
         if ($format === 'xlsx' || $format === 'excel') {
             $export = new \App\Exports\GenericReportExport(function () use ($rows) {
-                foreach ($rows as $r) { yield array_values($r); }
+                foreach ($rows as $r) {
+                    yield array_values($r);
+                }
             }, array_keys($rows->first() ?? [
-                'Effective From' => null, 'Effective To' => null, 'Earnings' => null, 'Deductions' => null, 'Gross' => null, 'Net' => null,
+                'Effective From' => null,
+                'Effective To' => null,
+                'Earnings' => null,
+                'Deductions' => null,
+                'Gross' => null,
+                'Net' => null,
             ]));
 
             $filename = 'salary-history-' . $employee->code . '-' . now()->format('Ymd_His') . '.xlsx';
