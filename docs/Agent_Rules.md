@@ -7,6 +7,8 @@ Load and follow all rules below for this session. Keep this document open as the
 - Do not refactor code outside the agreed scope without explicit approval.
 - Do not modify migrations or seeders unless the user explicitly requests it.
 - Do not overwrite documentation owned by other modules or teams.
+- Do not use Codacy at all.
+- Do not use **Codacy** at all (no CLI commands, no configuration, no references).
 
 ## 1. Commit & Documentation Rules
 - **Commit messages**
@@ -46,6 +48,18 @@ Load and follow all rules below for this session. Keep this document open as the
 - Align environment variable usage with Laravel conventions (`APP_ENV`, `DB_HOST`, `DB_USERNAME`, etc.) and document new vars.
 - Describe required `.env` changes rather than committing secrets.
 - Config files must read from env values to stay deployable.
+
+#### System Access Configuration
+- System URL: hrms.local
+- Username: hr@sarieldin.com
+- Password: password123
+
+#### Database Configuration
+- Host: localadmin
+- Port: 3306
+- Username: root
+- Password: 1234
+- Database Name: sep_hrms
 
 ## 5. Documentation & File Outputs
 - Store docs beneath `docs/` with domain subfolders (`docs/payroll/...`, `docs/payroll/bugs/...`, etc.).
