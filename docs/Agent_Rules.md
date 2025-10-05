@@ -55,7 +55,7 @@ Load and follow all rules below for this session. Keep this document open as the
 - Password: password123
 
 #### Database Configuration
-- Host: localadmin
+- Host: localhost
 - Port: 3306
 - Username: root
 - Password: 1234
