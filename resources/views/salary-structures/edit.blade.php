@@ -221,8 +221,7 @@
         const seedRows = normaliseSeed(seededComponents).map(component => ({
             uuid: uuid(),
             component: component.component_id !== undefined && component.component_id !== null ?
-                String(component.component_id) :
-                '',
+                String(component.component_id) : '',
             amount: component.value_numeric ?? component.amount ?? '',
             formula: component.formula_expr ?? component.formula ?? '',
             priority: component.priority_order ?? component.priority ?? '',
