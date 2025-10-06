@@ -153,7 +153,7 @@
                         <!-- Dashboard -->
                         <li class="nav-item">
                             <a class="nav-link text-white" href="{{ route('dashboard') }}">
-                                <i class="fas fa-tachometer-alt"></i> {{ __('Dashboard') }}
+                                <i class="fas fa-tachometer-alt"></i> {{ __('common.dashboard') }}
                             </a>
                         </li>
 
@@ -199,24 +199,24 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('salary-components.index') }}">
-                                        <i class="fas fa-list"></i> {{ __('Salary Components') }}
+                                        <i class="fas fa-list"></i> {{ __('common.salary_components') }}
                                     </a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 @if(payrollEnabled())
                                 <li><a class="dropdown-item" href="{{ route('payroll.index') }}">
-                                        <i class="fas fa-play-circle"></i> {{ __('Payroll Runs') }}
+                                        <i class="fas fa-play-circle"></i> {{ __('common.payroll_runs') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="{{ route('payslips.index') }}">
-                                        <i class="fas fa-file-invoice-dollar"></i> {{ __('Payslips') }}
+                                        <i class="fas fa-file-invoice-dollar"></i> {{ __('common.payslips') }}
                                     </a></li>
                                 @else
                                 <li><span class="dropdown-item text-muted" role="presentation">
-                                        <i class="fas fa-play-circle me-2"></i>{{ __('Payroll Runs') }}
+                                        <i class="fas fa-play-circle me-2"></i>{{ __('common.payroll_runs') }}
                                     </span></li>
                                 <li><span class="dropdown-item text-muted" role="presentation">
-                                        <i class="fas fa-file-invoice-dollar me-2"></i>{{ __('Payslips') }}
+                                        <i class="fas fa-file-invoice-dollar me-2"></i>{{ __('common.payslips') }}
                                     </span></li>
                                 @endif
                             </ul>
@@ -233,15 +233,15 @@
                         @canany(['letters.view','letters.generate','letters.manage'])
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" href="{{ route('letters.index') }}" id="lettersDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-file-alt"></i> {{ __('HR Letters') }}
+                                <i class="fas fa-file-alt"></i> {{ __('common.hr_letters') }}
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('letters.index') }}">
-                                        <i class="fas fa-list"></i> {{ __('Generated Letters') }}
+                                        <i class="fas fa-list"></i> {{ __('common.generated_letters') }}
                                     </a></li>
                                 @can('letters.generate')
                                 <li><a class="dropdown-item" href="{{ route('letters.generate') }}">
-                                        <i class="fas fa-plus"></i> {{ __('Generate Letter') }}
+                                        <i class="fas fa-plus"></i> {{ __('common.generate_letter') }}
                                     </a></li>
                                 @endcan
                                 <li>
@@ -249,7 +249,7 @@
                                 </li>
                                 @can('letters.manage')
                                 <li><a class="dropdown-item" href="{{ route('letters.templates.index') }}">
-                                        <i class="fas fa-file-alt"></i> {{ __('Manage Templates') }}
+                                        <i class="fas fa-file-alt"></i> {{ __('common.manage_templates') }}
                                     </a></li>
                                 @endcan
                             </ul>
@@ -260,29 +260,29 @@
                         @can('reports.view')
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" href="{{ route('reports.index') }}" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-chart-bar"></i> {{ __('Reports') }}
+                                <i class="fas fa-chart-bar"></i> {{ __('common.reports') }}
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('reports.index') }}">
-                                        <i class="fas fa-tachometer-alt"></i> {{ __('Reports Dashboard') }}
+                                        <i class="fas fa-tachometer-alt"></i> {{ __('common.reports_dashboard') }}
                                     </a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item" href="{{ route('reports.employee.list') }}">
-                                        <i class="fas fa-users"></i> {{ __('Employee Directory') }}
+                                        <i class="fas fa-users"></i> {{ __('common.employee_directory') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="{{ route('reports.contract.status') }}">
-                                        <i class="fas fa-file-contract"></i> {{ __('Contract Status') }}
+                                        <i class="fas fa-file-contract"></i> {{ __('common.contract_status') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="{{ route('reports.payroll.summary') }}">
-                                        <i class="fas fa-file-invoice-dollar"></i> {{ __('Payroll Summary') }}
+                                        <i class="fas fa-file-invoice-dollar"></i> {{ __('common.payroll_summary') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="{{ route('reports.document.inventory') }}">
-                                        <i class="fas fa-folder-open"></i> {{ __('Document Inventory') }}
+                                        <i class="fas fa-folder-open"></i> {{ __('common.document_inventory') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="{{ route('reports.attendance.summary') }}">
-                                        <i class="fas fa-clock"></i> {{ __('Attendance Summary') }}
+                                        <i class="fas fa-clock"></i> {{ __('common.attendance_summary') }}
                                     </a></li>
                             </ul>
                         </li>
@@ -293,40 +293,40 @@
                         @if(Auth::user()->hasAnyRole(['HR_Admin_Manager', 'IT_Admin']))
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" href="{{ route('audit-trail.index') }}" id="adminDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-cogs"></i> {{ __('Administration') }}
+                                <i class="fas fa-cogs"></i> {{ __('common.administration') }}
                             </a>
                             <ul class="dropdown-menu">
                                 @can('viewAny', \Spatie\Activitylog\Models\Activity::class)
                                 <li><a class="dropdown-item" href="{{ route('audit-trail.index') }}">
-                                        <i class="fas fa-history"></i> {{ __('Audit Trail') }}
+                                        <i class="fas fa-history"></i> {{ __('common.audit_trail') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="{{ route('weekly-digest.index') }}">
-                                        <i class="fas fa-envelope-open-text"></i> {{ __('Weekly Digest') }}
+                                        <i class="fas fa-envelope-open-text"></i> {{ __('common.weekly_digest') }}
                                     </a></li>
                                 @endcan
                                 @can('users.manage')
                                 <li><a class="dropdown-item" href="{{ route('admin.users.index') }}">
-                                        <i class="fas fa-users-cog"></i> {{ __('User Management') }}
+                                        <i class="fas fa-users-cog"></i> {{ __('common.user_management') }}
                                     </a></li>
                                 @endcan
                                 @can('roles.manage')
                                 <li><a class="dropdown-item" href="{{ route('admin.roles.index') }}">
-                                        <i class="fas fa-user-shield"></i> {{ __('Roles') }}
+                                        <i class="fas fa-user-shield"></i> {{ __('common.roles') }}
                                     </a></li>
                                 @endcan
                                 @can('permissions.manage')
                                 <li><a class="dropdown-item" href="{{ route('admin.permissions.index') }}">
-                                        <i class="fas fa-key"></i> {{ __('Permissions') }}
+                                        <i class="fas fa-key"></i> {{ __('common.permissions') }}
                                     </a></li>
                                 @endcan
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item" href="#" onclick="alert('User management coming soon!')">
-                                        <i class="fas fa-users-cog"></i> {{ __('User Management') }}
+                                        <i class="fas fa-users-cog"></i> {{ __('common.user_management') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="#" onclick="alert('System settings coming soon!')">
-                                        <i class="fas fa-sliders-h"></i> {{ __('System Settings') }}
+                                        <i class="fas fa-sliders-h"></i> {{ __('common.system_settings') }}
                                     </a></li>
                             </ul>
                         </li>
@@ -374,27 +374,27 @@
                                 </li>
                                 @if(Auth::user()->employee)
                                 <li><a class="dropdown-item" href="{{ route('employee-portal.dashboard') }}">
-                                        <i class="fas fa-tachometer-alt"></i> {{ __('My Dashboard') }}
+                                        <i class="fas fa-tachometer-alt"></i> {{ __('common.my_dashboard') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="{{ route('employee-portal.profile') }}">
-                                        <i class="fas fa-user-edit"></i> {{ __('My Profile') }}
+                                        <i class="fas fa-user-edit"></i> {{ __('common.my_profile') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="{{ route('employee-portal.documents') }}">
-                                        <i class="fas fa-folder-open"></i> {{ __('My Documents') }}
+                                        <i class="fas fa-folder-open"></i> {{ __('common.my_documents') }}
                                     </a></li>
                                 <li><a class="dropdown-item" href="{{ route('employee-portal.payslips') }}">
-                                        <i class="fas fa-file-invoice-dollar"></i> {{ __('My Payslips') }}
+                                        <i class="fas fa-file-invoice-dollar"></i> {{ __('common.my_payslips') }}
                                     </a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 @endif
                                 <li><a class="dropdown-item" href="{{ route('profile') }}">
-                                        <i class="fas fa-user-circle"></i> {{ __('Account Settings') }}
+                                        <i class="fas fa-user-circle"></i> {{ __('common.account_settings') }}
                                     </a></li>
                                 @if(Auth::user()->employee && Auth::user()->hasAnyRole(['HR_Admin_Manager', 'HR_Coordinator', 'IT_Admin']))
                                 <li><a class="dropdown-item" href="{{ route('employees.show', Auth::user()->employee) }}">
-                                        <i class="fas fa-id-card"></i> {{ __('Employee Record') }}
+                                        <i class="fas fa-id-card"></i> {{ __('common.employee_record') }}
                                     </a></li>
                                 @endif
                                 <li>
@@ -404,7 +404,7 @@
                                     <form method="POST" action="{{ route('logout') }}" class="d-inline">
                                         @csrf
                                         <button type="submit" class="dropdown-item">
-                                            <i class="fas fa-sign-out-alt"></i> {{ __('Logout') }}
+                                            <i class="fas fa-sign-out-alt"></i> {{ __('common.logout') }}
                                         </button>
                                     </form>
                                 </li>
@@ -413,12 +413,12 @@
                         @else
                         <li class="nav-item">
                             <a class="nav-link text-white" href="{{ route('login') }}">
-                                <i class="fas fa-sign-in-alt"></i> {{ __('Login') }}
+                                <i class="fas fa-sign-in-alt"></i> {{ __('common.login') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-white" href="{{ route('register') }}">
-                                <i class="fas fa-user-plus"></i> {{ __('Register') }}
+                                <i class="fas fa-user-plus"></i> {{ __('common.register') }}
                             </a>
                         </li>
                         @endauth
@@ -468,7 +468,7 @@
             <div class="container text-center">
                 <p class="mb-0">
                     &copy; {{ date('Y') }} {{ config('app.name', 'Sarie Eldin & Partners') }}.
-                    {{ __('All rights reserved.') }}
+                    {{ __('common.all_rights_reserved') }}
                 </p>
             </div>
         </footer>

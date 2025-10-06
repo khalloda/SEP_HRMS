@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 mb-0 brand-dark-green">{{ __('hrms.dashboard.title') }}</h1>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-success">{{ __('System Active') }}</span>
+            <span class="badge bg-success">{{ __('common.system_active') }}</span>
         </div>
     </div>
 @endsection
@@ -17,10 +17,10 @@
         <div class="col-12">
             <div class="card bg-gradient" style="background: linear-gradient(135deg, var(--color-dark-green) 0%, var(--color-gold) 100%);">
                 <div class="card-body text-white text-center py-5">
-                    <h2 class="card-title mb-3">{{ __('Welcome to HRMS') }}</h2>
+                    <h2 class="card-title mb-3">{{ __('common.welcome_to_hrms') }}</h2>
                     <p class="card-text fs-5 mb-4">
-                        {{ __('Sarie Eldin & Partners - Legal Advisors') }}<br>
-                        {{ __('Human Resource Management System') }}
+                        {{ __('common.org_full_name') }}<br>
+                        {{ __('common.hrms_full') }}
                     </p>
                     <div class="d-flex justify-content-center gap-3">
                         <a href="{{ route('employees.index') }}" class="btn btn-light btn-lg">
@@ -80,7 +80,7 @@
                         <i class="fas fa-file-contract"></i>
                     </div>
                     <h3 class="card-title text-warning" id="expiring-contracts">{{ $expiryAlerts['urgent']->count() + $expiryAlerts['critical']->count() }}</h3>
-                    <p class="card-text text-muted">{{ __('Expiring Contracts') }}</p>
+                    <p class="card-text text-muted">{{ __('common.expiring_contracts') }}</p>
                 </div>
             </div>
         </div>
@@ -113,7 +113,7 @@
                                             <div class="flex-grow-1">
                                                 <strong>{{ $contract->employee->display_name }}</strong><br>
                                                 <small class="text-muted">{{ $contract->employee->code }} • {{ $contract->type_name }}</small><br>
-                                                <small class="text-danger">{{ $contract->days_until_expiry }} days remaining</small>
+                                                <small class="text-danger">{{ $contract->days_until_expiry }} {{ __('common.days_remaining') }}</small>
                                             </div>
                                             <a href="{{ route('contracts.show', $contract) }}" class="btn btn-outline-danger btn-sm">
                                                 <i class="fas fa-eye"></i>
@@ -138,7 +138,7 @@
                                             <div class="flex-grow-1">
                                                 <strong>{{ $contract->employee->display_name }}</strong><br>
                                                 <small class="text-muted">{{ $contract->employee->code }} • {{ $contract->type_name }}</small><br>
-                                                <small class="text-warning">{{ $contract->days_until_expiry }} days remaining</small>
+                                                <small class="text-warning">{{ $contract->days_until_expiry }} {{ __('common.days_remaining') }}</small>
                                             </div>
                                             <a href="{{ route('contracts.show', $contract) }}" class="btn btn-outline-warning btn-sm">
                                                 <i class="fas fa-eye"></i>
@@ -163,7 +163,7 @@
                                             <div class="flex-grow-1">
                                                 <strong>{{ $contract->employee->display_name }}</strong><br>
                                                 <small class="text-muted">{{ $contract->employee->code }} • {{ $contract->type_name }}</small><br>
-                                                <small class="text-info">{{ $contract->days_until_expiry }} days remaining</small>
+                                                <small class="text-info">{{ $contract->days_until_expiry }} {{ __('common.days_remaining') }}</small>
                                             </div>
                                             <a href="{{ route('contracts.show', $contract) }}" class="btn btn-outline-info btn-sm">
                                                 <i class="fas fa-eye"></i>
@@ -184,7 +184,7 @@
 
                     <div class="text-center">
                         <a href="{{ route('contracts.index') }}" class="btn btn-brand-primary">
-                            <i class="fas fa-file-contract"></i> {{ __('Manage All Contracts') }}
+                            <i class="fas fa-file-contract"></i> {{ __('common.manage_all_contracts') }}
                         </a>
                     </div>
                 </div>
@@ -199,7 +199,7 @@
             <div class="card">
                 <div class="card-header card-header-custom">
                     <h5 class="mb-0">
-                        <i class="fas fa-bolt"></i> {{ __('Quick Actions') }}
+                        <i class="fas fa-bolt"></i> {{ __('common.quick_actions') }}
                     </h5>
                 </div>
                 <div class="card-body">
@@ -208,14 +208,14 @@
                             <i class="fas fa-user-plus"></i> {{ __('hrms.add_employee') }}
                         </a>
                         <a href="{{ route('employees.index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-list"></i> {{ __('View All Employees') }}
+                            <i class="fas fa-list"></i> {{ __('common.view_all_employees') }}
                         </a>
                         <a href="{{ route('contracts.create') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-file-contract"></i> {{ __('New Contract') }}
+                            <i class="fas fa-file-contract"></i> {{ __('common.new_contract') }}
                         </a>
                         <button class="btn btn-outline-secondary" disabled>
-                            <i class="fas fa-file-upload"></i> {{ __('Upload Documents') }}
-                            <small class="text-muted d-block">{{ __('Coming Soon') }}</small>
+                            <i class="fas fa-file-upload"></i> {{ __('common.upload_documents') }}
+                            <small class="text-muted d-block">{{ __('common.coming_soon') }}</small>
                         </button>
                     </div>
                 </div>
@@ -226,34 +226,34 @@
             <div class="card">
                 <div class="card-header card-header-custom">
                     <h5 class="mb-0">
-                        <i class="fas fa-info-circle"></i> {{ __('System Information') }}
+                        <i class="fas fa-info-circle"></i> {{ __('common.system_information') }}
                     </h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless">
                         <tr>
-                            <th class="w-50">{{ __('Application') }}:</th>
+                            <th class="w-50">{{ __('common.application') }}:</th>
                             <td>{{ config('app.name', 'HRMS') }}</td>
                         </tr>
                         <tr>
-                            <th>{{ __('Version') }}:</th>
+                            <th>{{ __('common.version') }}:</th>
                             <td>Phase 1 - Foundation</td>
                         </tr>
                         <tr>
-                            <th>{{ __('Laravel') }}:</th>
+                            <th>{{ __('common.laravel') }}:</th>
                             <td>{{ app()->version() }}</td>
                         </tr>
                         <tr>
-                            <th>{{ __('PHP') }}:</th>
+                            <th>{{ __('common.php') }}:</th>
                             <td>{{ phpversion() }}</td>
                         </tr>
                         <tr>
-                            <th>{{ __('Language') }}:</th>
+                            <th>{{ __('common.language') }}:</th>
                             <td>
                                 {{ app()->getLocale() === 'ar' ? __('hrms.arabic') : __('hrms.english') }}
                                 <a href="{{ route('language.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" 
                                    class="btn btn-outline-secondary btn-sm ms-2">
-                                    {{ __('Switch') }}
+                                    {{ __('common.switch') }}
                                 </a>
                             </td>
                         </tr>
@@ -434,7 +434,7 @@
                                                     <div>
                                                         <h6 class="mb-1">{{ $activity['description'] }}</h6>
                                                         <p class="text-muted mb-0">
-                                                            <small>{{ __('by') }} {{ $activity['causer_name'] }}</small>
+                                                            <small>{{ __('common.by') }} {{ $activity['causer_name'] }}</small>
                                                         </p>
                                                     </div>
                                                     <small class="text-muted">{{ $activity['time_ago'] }}</small>
@@ -462,13 +462,13 @@
             <div class="card">
                 <div class="card-header card-header-custom">
                     <h5 class="mb-0">
-                        <i class="fas fa-history"></i> {{ __('Recent System Activity') }}
+                        <i class="fas fa-history"></i> {{ __('common.recent_system_activity') }}
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="text-center text-muted py-4">
                         <i class="fas fa-clock fa-2x mb-3"></i>
-                        <p>{{ __('Activity logging will appear here once employees start using the system.') }}</p>
+                        <p>{{ __('common.activity_logging_placeholder') }}</p>
                     </div>
                 </div>
             </div>
