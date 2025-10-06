@@ -128,7 +128,7 @@ class DashboardService
             case 'employee_stats':
                 return [
                     'type' => 'employee_stats',
-                    'title' => __('Employee Overview'),
+                    'title' => __('hrms.dashboard.employee_analytics'),
                     'icon' => 'fas fa-users',
                     'color' => 'primary',
                     'data' => $this->getEmployeeStatsWidget($user),
@@ -138,7 +138,7 @@ class DashboardService
             case 'contract_expiry':
                 return [
                     'type' => 'contract_expiry',
-                    'title' => __('Contract Expiry Alerts'),
+                    'title' => __('hrms.notifications.expiry_alerts'),
                     'icon' => 'fas fa-exclamation-triangle',
                     'color' => 'warning',
                     'data' => $this->getContractExpiryWidget($user),
@@ -148,7 +148,7 @@ class DashboardService
             case 'payroll_summary':
                 return [
                     'type' => 'payroll_summary',
-                    'title' => __('Payroll Summary'),
+                    'title' => __('common.payroll_summary'),
                     'icon' => 'fas fa-file-invoice-dollar',
                     'color' => 'success',
                     'data' => $this->getPayrollSummaryWidget($user),
@@ -158,7 +158,7 @@ class DashboardService
             case 'document_expiry':
                 return [
                     'type' => 'document_expiry',
-                    'title' => __('Document Expiry Alerts'),
+                    'title' => __('hrms.dashboard.documents_expiring'),
                     'icon' => 'fas fa-folder-open',
                     'color' => 'info',
                     'data' => $this->getDocumentExpiryWidget($user),
@@ -168,7 +168,7 @@ class DashboardService
             case 'profile_completion':
                 return [
                     'type' => 'profile_completion',
-                    'title' => __('Profile Completion'),
+                    'title' => __('common.my_profile'),
                     'icon' => 'fas fa-user-check',
                     'color' => 'info',
                     'data' => $this->getProfileCompletionWidget($user),
@@ -178,7 +178,7 @@ class DashboardService
             case 'system_health':
                 return [
                     'type' => 'system_health',
-                    'title' => __('System Health'),
+                    'title' => __('common.system_information'),
                     'icon' => 'fas fa-heartbeat',
                     'color' => 'success',
                     'data' => $this->getSystemHealthWidget($user),
@@ -188,7 +188,7 @@ class DashboardService
             case 'audit_logs':
                 return [
                     'type' => 'audit_logs',
-                    'title' => __('Recent Audit Logs'),
+                    'title' => __('common.audit_trail'),
                     'icon' => 'fas fa-history',
                     'color' => 'secondary',
                     'data' => $this->getAuditLogsWidget($user),
@@ -198,7 +198,7 @@ class DashboardService
             default:
                 return [
                     'type' => 'default',
-                    'title' => __('Information'),
+                    'title' => __('common.information'),
                     'icon' => 'fas fa-info-circle',
                     'color' => 'light',
                     'data' => ['message' => __('Widget not configured')],
