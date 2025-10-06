@@ -117,7 +117,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-light">
                 <h5 class="mb-0">
-                    <i class="fas fa-bolt text-warning"></i> {{ __('Quick Actions') }}
+                    <i class="fas fa-bolt text-warning"></i> {{ __('common.quick_actions') }}
                 </h5>
             </div>
             <div class="card-body">

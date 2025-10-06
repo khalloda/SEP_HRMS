@@ -20,7 +20,7 @@ class DashboardService
      */
     public function getDashboardAnalytics($user): array
     {
-        $cacheKey = "dashboard_analytics_" . $user->id . "_" . now()->format('Y-m-d-H');
+        $cacheKey = "dashboard_analytics_" . $user->id . "_" . app()->getLocale() . "_" . now()->format('Y-m-d-H');
 
         return Cache::remember($cacheKey, 3600, function () use ($user) {
             return [

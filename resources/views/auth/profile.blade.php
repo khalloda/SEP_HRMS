@@ -273,7 +273,7 @@
             <div class="card">
                 <div class="card-header card-header-custom">
                     <h5 class="mb-0">
-                        <i class="fas fa-bolt"></i> {{ __('Quick Actions') }}
+                        <i class="fas fa-bolt"></i> {{ __('common.quick_actions') }}
                     </h5>
                 </div>
                 <div class="card-body d-grid gap-2">
