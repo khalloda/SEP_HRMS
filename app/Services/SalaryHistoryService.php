@@ -127,12 +127,16 @@ class SalaryHistoryService
                     $sheetName = 'Period_' . $i++;
                     $detailRows = [];
                     $detailRows[] = ['Earnings'];
-                    foreach ($details['earnings'] as $c) { $detailRows[] = [$c['code'], $c['name'], $c['value']]; }
+                    foreach ($details['earnings'] as $c) {
+                        $detailRows[] = [$c['code'], $c['name'], $c['value']];
+                    }
                     $detailRows[] = [];
                     $detailRows[] = ['Deductions'];
-                    foreach ($details['deductions'] as $c) { $detailRows[] = [$c['code'], $c['name'], $c['value']]; }
+                    foreach ($details['deductions'] as $c) {
+                        $detailRows[] = [$c['code'], $c['name'], $c['value']];
+                    }
                     $sheets[$sheetName] = [
-                        'headings' => ['Code','Name','Value'],
+                        'headings' => ['Code', 'Name', 'Value'],
                         'rows' => $detailRows,
                     ];
                 }
@@ -147,7 +151,14 @@ class SalaryHistoryService
                     $earningStr = collect($r['Details']['earnings'] ?? [])->map(fn($c) => $c['code'] . ':' . $c['value'])->implode(', ');
                     $deductionStr = collect($r['Details']['deductions'] ?? [])->map(fn($c) => $c['code'] . ':' . $c['value'])->implode(', ');
                     yield [
-                        $r['Effective From'],$r['Effective To'],$r['Earnings'],$r['Deductions'],$r['Gross'],$r['Net'],$earningStr,$deductionStr
+                        $r['Effective From'],
+                        $r['Effective To'],
+                        $r['Earnings'],
+                        $r['Deductions'],
+                        $r['Gross'],
+                        $r['Net'],
+                        $earningStr,
+                        $deductionStr
                     ];
                 }
             }, array_merge($headings, ['Earnings Breakdown', 'Deductions Breakdown']));

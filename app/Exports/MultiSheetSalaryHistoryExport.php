@@ -28,11 +28,12 @@ class MultiSheetSalaryHistoryExport implements WithMultipleSheets
                     parent::__construct($headings, $rows);
                     $this->title = $title;
                 }
-                public function title(): string { return $this->title; }
+                public function title(): string
+                {
+                    return $this->title;
+                }
             };
         }
         return $sheets;
     }
 }
-
-
