@@ -6,11 +6,11 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h2 class="h3 brand-dark-green mb-1">{{ __('common.weekly_digest') }}</h2>
-            <p class="text-muted mb-0">{{ __('Manage and preview weekly digest emails') }}</p>
+            <p class="text-muted mb-0">{{ __('common.manage_preview_weekly_digest') }}</p>
         </div>
         <div>
             <a href="{{ route('weekly-digest.preview') }}" class="btn btn-outline-secondary me-2" target="_blank">
-                <i class="fas fa-eye"></i> {{ __('Preview Email') }}
+                <i class="fas fa-eye"></i> {{ __('common.preview_email') }}
             </a>
             <button type="button" class="btn btn-brand-secondary" onclick="sendTestDigest()">
                 <i class="fas fa-paper-plane"></i> {{ __('weekly.buttons.send_test') }}
@@ -25,15 +25,15 @@
     <div class="col-md-8">
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header card-header-custom">
-                <h5 class="mb-0">{{ __('This Week\'s Digest Content') }}</h5>
+                <h5 class="mb-0">{{ __('common.this_weeks_digest_content') }}</h5>
             </div>
             <div class="card-body">
                 <!-- Send Status -->
                 <div class="alert {{ $preview['should_send'] ? 'alert-success' : 'alert-warning' }} mb-4">
                     @if($preview['should_send'])
-                        <i class="fas fa-check-circle"></i> {{ __('Weekly digest will be sent automatically (criteria met)') }}
+                        <i class="fas fa-check-circle"></i> {{ __('common.weekly_will_send') }}
                     @else
-                        <i class="fas fa-exclamation-triangle"></i> {{ __('Weekly digest will not be sent automatically (criteria not met)') }}
+                        <i class="fas fa-exclamation-triangle"></i> {{ __('common.weekly_will_not_send') }}
                     @endif
                 </div>
 
@@ -43,7 +43,7 @@
                         <div class="card border-start border-danger border-3 bg-light">
                             <div class="card-body text-center p-3">
                                 <h4 class="text-danger mb-1">{{ $preview['summary']['expiring_contracts_total'] }}</h4>
-                                <small class="text-muted">{{ __('Expiring Contracts') }}</small>
+                                <small class="text-muted">{{ __('common.expiring_contracts') }}</small>
                             </div>
                         </div>
                     </div>
@@ -51,7 +51,7 @@
                         <div class="card border-start border-warning border-3 bg-light">
                             <div class="card-body text-center p-3">
                                 <h4 class="text-warning mb-1">{{ $preview['summary']['expiring_documents_total'] }}</h4>
-                                <small class="text-muted">{{ __('Expiring Documents') }}</small>
+                                <small class="text-muted">{{ __('common.expiring_documents') }}</small>
                             </div>
                         </div>
                     </div>
@@ -59,7 +59,7 @@
                         <div class="card border-start border-info border-3 bg-light">
                             <div class="card-body text-center p-3">
                                 <h4 class="text-info mb-1">{{ $preview['summary']['birthdays_total'] }}</h4>
-                                <small class="text-muted">{{ __('Upcoming Birthdays') }}</small>
+                                <small class="text-muted">{{ __('common.upcoming_birthdays') }}</small>
                             </div>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
                         <div class="card border-start border-success border-3 bg-light">
                             <div class="card-body text-center p-3">
                                 <h4 class="text-success mb-1">{{ $preview['summary']['activity_total'] }}</h4>
-                                <small class="text-muted">{{ __('Weekly Activities') }}</small>
+                                <small class="text-muted">{{ __('common.weekly_activities') }}</small>
                             </div>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                     @if($preview['summary']['expiring_contracts_total'] > 0)
                     <div class="col-md-6 mb-4">
                         <h6 class="text-danger">
-                            <i class="fas fa-file-contract"></i> {{ __('Contract Expiries') }}
+                            <i class="fas fa-file-contract"></i> {{ __('common.contract_expiries') }}
                             <span class="badge bg-danger">{{ $preview['summary']['expiring_contracts_total'] }}</span>
                         </h6>
                         <ul class="list-group list-group-flush">
@@ -90,7 +90,7 @@
                                         <strong>{{ $contract->employee->display_name }}</strong>
                                         <br><small class="text-muted">{{ $contract->type_name }}</small>
                                     </div>
-                                    <span class="badge bg-danger">{{ now()->diffInDays($contract->end_date, false) }} {{ __('days') }}</span>
+                                    <span class="badge bg-danger">{{ now()->diffInDays($contract->end_date, false) }} {{ __('common.days') }}</span>
                                 </div>
                             </li>
                             @endforeach
@@ -101,7 +101,7 @@
                                         <strong>{{ $contract->employee->display_name }}</strong>
                                         <br><small class="text-muted">{{ $contract->type_name }}</small>
                                     </div>
-                                    <span class="badge bg-warning">{{ now()->diffInDays($contract->end_date, false) }} {{ __('days') }}</span>
+                                    <span class="badge bg-warning">{{ now()->diffInDays($contract->end_date, false) }} {{ __('common.days') }}</span>
                                 </div>
                             </li>
                             @endforeach
@@ -113,7 +113,7 @@
                     @if($preview['summary']['expiring_documents_total'] > 0)
                     <div class="col-md-6 mb-4">
                         <h6 class="text-warning">
-                            <i class="fas fa-folder-open"></i> {{ __('Document Expiries') }}
+                            <i class="fas fa-folder-open"></i> {{ __('common.document_expiries') }}
                             <span class="badge bg-warning">{{ $preview['summary']['expiring_documents_total'] }}</span>
                         </h6>
                         <ul class="list-group list-group-flush">
@@ -125,7 +125,7 @@
                                         <br><small class="text-muted">{{ $document->type_display_name }}</small>
                                     </div>
                                     <span class="badge bg-warning">
-                                        {{ $document->expires_at ? now()->diffInDays($document->expires_at, false) : 0 }} {{ __('days') }}
+                                        {{ $document->expires_at ? now()->diffInDays($document->expires_at, false) : 0 }} {{ __('common.days') }}
                                     </span>
                                 </div>
                             </li>
@@ -138,7 +138,7 @@
                     @if($preview['summary']['birthdays_total'] > 0)
                     <div class="col-md-6 mb-4">
                         <h6 class="text-info">
-                            <i class="fas fa-birthday-cake"></i> {{ __('Upcoming Birthdays') }}
+                            <i class="fas fa-birthday-cake"></i> {{ __('common.upcoming_birthdays') }}
                             <span class="badge bg-info">{{ $preview['summary']['birthdays_total'] }}</span>
                         </h6>
                         <ul class="list-group list-group-flush">
@@ -147,7 +147,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <strong>{{ $employee->display_name }}</strong>
-                                        <br><small class="text-muted">{{ $employee->department->name ?? 'N/A' }}</small>
+                                    <br><small class="text-muted">{{ $employee->department->name ?? __('common.n_a') }}</small>
                                     </div>
                                     <span class="badge bg-info">{{ $employee->birth_date->format('M j') }}</span>
                                 </div>
@@ -161,7 +161,7 @@
                     @if($preview['summary']['new_hires_total'] > 0)
                     <div class="col-md-6 mb-4">
                         <h6 class="text-success">
-                            <i class="fas fa-user-plus"></i> {{ __('New Hires This Week') }}
+                            <i class="fas fa-user-plus"></i> {{ __('common.new_hires_this_week') }}
                             <span class="badge bg-success">{{ $preview['summary']['new_hires_total'] }}</span>
                         </h6>
                         <ul class="list-group list-group-flush">
@@ -188,8 +188,8 @@
                     $preview['summary']['new_hires_total'] == 0)
                 <div class="text-center py-4">
                     <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">{{ __('No significant activities this week') }}</h5>
-                    <p class="text-muted">{{ __('The weekly digest will not be sent automatically.') }}</p>
+                    <h5 class="text-muted">{{ __('common.no_significant_activities') }}</h5>
+                    <p class="text-muted">{{ __('common.weekly_not_sent_auto') }}</p>
                 </div>
                 @endif
             </div>
@@ -201,7 +201,7 @@
         <!-- Send Actions -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header card-header-custom">
-                <h5 class="mb-0">{{ __('Send Actions') }}</h5>
+                <h5 class="mb-0">{{ __('common.send_actions') }}</h5>
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
@@ -209,7 +209,7 @@
                         <i class="fas fa-paper-plane"></i> {{ __('weekly.buttons.send_now') }}
                     </button>
                     <button type="button" class="btn btn-outline-primary" onclick="sendDigest(true)">
-                        <i class="fas fa-paper-plane"></i> {{ __('Force Send') }}
+                        <i class="fas fa-paper-plane"></i> {{ __('common.force_send') }}
                     </button>
                     <hr>
                     <button type="button" class="btn btn-outline-secondary" onclick="sendTestDigest()">
@@ -218,9 +218,9 @@
                 </div>
                 <div class="mt-3">
                     <small class="text-muted">
-                        <strong>{{ __('weekly.buttons.send_now') }}:</strong> {{ __('Only sends if criteria are met') }}<br>
-                        <strong>{{ __('Force Send') }}:</strong> {{ __('Sends regardless of criteria') }}<br>
-                        <strong>{{ __('weekly.buttons.send_test') }}:</strong> {{ __('Sends test digest to your email only') }}
+                        <strong>{{ __('weekly.buttons.send_now') }}:</strong> {{ __('common.only_sends_if_criteria') }}<br>
+                        <strong>{{ __('common.force_send') }}:</strong> {{ __('common.sends_regardless_criteria') }}<br>
+                        <strong>{{ __('weekly.buttons.send_test') }}:</strong> {{ __('common.sends_test_to_you') }}
                     </small>
                 </div>
             </div>
@@ -229,7 +229,7 @@
         <!-- Recipients -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header card-header-custom">
-                <h5 class="mb-0">{{ __('Recipients') }} ({{ $preview['recipients']->count() }})</h5>
+                <h5 class="mb-0">{{ __('common.recipients') }} ({{ $preview['recipients']->count() }})</h5>
             </div>
             <div class="card-body">
                 @if($preview['recipients']->count() > 0)
@@ -247,7 +247,7 @@
                 @else
                     <div class="text-center py-3">
                         <i class="fas fa-users-slash fa-2x text-muted mb-2"></i>
-                        <p class="text-muted mb-0">{{ __('No recipients configured') }}</p>
+                        <p class="text-muted mb-0">{{ __('common.no_recipients_configured') }}</p>
                     </div>
                 @endif
             </div>
@@ -256,20 +256,20 @@
         <!-- Schedule Information -->
         <div class="card border-0 shadow-sm">
             <div class="card-header card-header-custom">
-                <h5 class="mb-0">{{ __('Schedule') }}</h5>
+                <h5 class="mb-0">{{ __('common.schedule') }}</h5>
             </div>
             <div class="card-body">
                 <p class="mb-2">
                     <i class="fas fa-clock text-muted me-2"></i>
-                    {{ __('Weekly digest is sent automatically every') }} <strong>{{ __('Monday at 9:00 AM') }}</strong>
+                    {{ __('common.weekly_sent_every') }} <strong>{{ __('common.monday_9am') }}</strong>
                 </p>
                 <p class="mb-2">
                     <i class="fas fa-calendar text-muted me-2"></i>
-                    {{ __('Next scheduled send') }}: <strong>{{ now()->next('Monday')->setTime(9, 0)->format('M j, Y \a\t g:i A') }}</strong>
+                    {{ __('common.next_scheduled_send') }}: <strong>{{ now()->next('Monday')->setTime(9, 0)->format('M j, Y \a\t g:i A') }}</strong>
                 </p>
                 <hr>
                 <small class="text-muted">
-                    {{ __('The digest is only sent when there are expiring contracts, documents, birthdays, new hires, or significant system activity.') }}
+                    {{ __('common.digest_sent_only_when') }}
                 </small>
             </div>
         </div>
@@ -282,9 +282,9 @@
         <div class="modal-content">
             <div class="modal-body text-center py-4">
                 <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">{{ __('Loading...') }}</span>
+                    <span class="visually-hidden">{{ __('common.loading') }}</span>
                 </div>
-                <p class="mt-3 mb-0">{{ __('Sending digest...') }}</p>
+                <p class="mt-3 mb-0">{{ __('common.sending_digest') }}</p>
             </div>
         </div>
     </div>

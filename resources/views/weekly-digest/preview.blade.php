@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('Weekly Digest Email Preview') }}</title>
+    <title>{{ __('common.weekly_digest_email_preview') }}</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -129,13 +129,13 @@
 </head>
 <body>
     <div class="preview-note">
-        <strong>📧 {{ __('Email Preview') }}</strong> - {{ __('This is how the weekly digest email will appear to recipients') }}
+        <strong>📧 {{ __('common.email_preview') }}</strong> - {{ __('common.preview_notice') }}
     </div>
 
     <div class="email-container">
         <!-- Email Header -->
         <div class="header">
-            <h1 style="margin: 0; font-size: 28px;">{{ __('Weekly HRMS Digest') }}</h1>
+            <h1 style="margin: 0; font-size: 28px;">{{ __('common.weekly_hrms_digest') }}</h1>
             <p style="margin: 10px 0 0 0; opacity: 0.9;">
                 {{ now()->startOfWeek()->format('M j') }} to {{ now()->endOfWeek()->format('M j, Y') }}
             </p>
@@ -143,27 +143,27 @@
 
         <!-- Email Content -->
         <div class="content">
-            <div class="greeting">{{ __('Weekly HRMS Digest') }}</div>
+            <div class="greeting">{{ __('common.weekly_hrms_digest') }}</div>
 
-            <p>{{ __('Here\'s your weekly summary of important HRMS activities and upcoming items that require attention.') }}</p>
+            <p>{{ __('common.weekly_summary_intro') }}</p>
 
             <!-- Summary Statistics -->
             <div class="summary-stats">
                 <div class="stat">
                     <div class="stat-number">{{ count($digestData['contracts']['expiring_urgently']) + count($digestData['contracts']['expiring_critically']) + count($digestData['contracts']['expiring_soon']) }}</div>
-                    <div class="stat-label">{{ __('Contracts') }}</div>
+                    <div class="stat-label">{{ __('common.contracts') }}</div>
                 </div>
                 <div class="stat">
                     <div class="stat-number">{{ count($digestData['documents']['expiring']) }}</div>
-                    <div class="stat-label">{{ __('Documents') }}</div>
+                    <div class="stat-label">{{ __('common.documents') }}</div>
                 </div>
                 <div class="stat">
                     <div class="stat-number">{{ count($digestData['birthdays']) }}</div>
-                    <div class="stat-label">{{ __('Birthdays') }}</div>
+                    <div class="stat-label">{{ __('common.birthdays') }}</div>
                 </div>
                 <div class="stat">
                     <div class="stat-number">{{ array_sum($digestData['activity_summary']) }}</div>
-                    <div class="stat-label">{{ __('Activities') }}</div>
+                    <div class="stat-label">{{ __('common.activities') }}</div>
                 </div>
             </div>
 
@@ -172,16 +172,16 @@
                 !empty($digestData['contracts']['expiring_critically']) ||
                 !empty($digestData['contracts']['expiring_soon']))
             <div class="section">
-                <h2>{{ __('Contract Expiries') }}</h2>
+                <h2>{{ __('common.contract_expiries') }}</h2>
 
                 @if(!empty($digestData['contracts']['expiring_urgently']))
                 <div class="urgent">
-                    <strong>🔴 {{ __('Urgent (≤7 days):') }}</strong>
+                    <strong>🔴 {{ __('common.urgent_days') }}</strong>
                     <ul>
                         @foreach($digestData['contracts']['expiring_urgently'] as $contract)
                         <li class="item">
                             {{ $contract->employee->display_name }} - {{ $contract->type_name }}
-                            ({{ now()->diffInDays($contract->end_date, false) }} {{ __('days') }})
+                            ({{ now()->diffInDays($contract->end_date, false) }} {{ __('common.days') }})
                         </li>
                         @endforeach
                     </ul>
@@ -190,12 +190,12 @@
 
                 @if(!empty($digestData['contracts']['expiring_critically']))
                 <div class="critical">
-                    <strong>🟠 {{ __('Critical (8-15 days):') }}</strong>
+                    <strong>🟠 {{ __('common.critical_days') }}</strong>
                     <ul>
                         @foreach($digestData['contracts']['expiring_critically'] as $contract)
                         <li class="item">
                             {{ $contract->employee->display_name }} - {{ $contract->type_name }}
-                            ({{ now()->diffInDays($contract->end_date, false) }} {{ __('days') }})
+                            ({{ now()->diffInDays($contract->end_date, false) }} {{ __('common.days') }})
                         </li>
                         @endforeach
                     </ul>
@@ -204,42 +204,42 @@
 
                 @if(!empty($digestData['contracts']['expiring_soon']))
                 <div class="soon">
-                    <strong>🟡 {{ __('Soon (16-30 days):') }}</strong>
+                    <strong>🟡 {{ __('common.soon_days') }}</strong>
                     <ul>
                         @foreach($digestData['contracts']['expiring_soon'] as $contract)
                         <li class="item">
                             {{ $contract->employee->display_name }} - {{ $contract->type_name }}
-                            ({{ now()->diffInDays($contract->end_date, false) }} {{ __('days') }})
+                            ({{ now()->diffInDays($contract->end_date, false) }} {{ __('common.days') }})
                         </li>
                         @endforeach
                     </ul>
                 </div>
                 @endif
 
-                <a href="{{ route('contracts.index') }}" class="action-button">{{ __('View Contract Management') }}</a>
+                <a href="{{ route('contracts.index') }}" class="action-button">{{ __('common.view_contract_management') }}</a>
             </div>
             @endif
 
             <!-- Document Expiries Section -->
             @if(!empty($digestData['documents']['expiring']))
             <div class="section">
-                <h2>{{ __('Document Expiries') }}</h2>
+                <h2>{{ __('common.document_expiries') }}</h2>
                 <ul>
                     @foreach($digestData['documents']['expiring'] as $document)
                     <li class="item">
                         {{ $document->owner_name }} - {{ $document->type_display_name }}
-                        ({{ $document->expires_at ? now()->diffInDays($document->expires_at, false) : 0 }} {{ __('days') }})
+                        ({{ $document->expires_at ? now()->diffInDays($document->expires_at, false) : 0 }} {{ __('common.days') }})
                     </li>
                     @endforeach
                 </ul>
-                <a href="{{ route('documents.index') }}" class="action-button">{{ __('View Document Management') }}</a>
+                <a href="{{ route('documents.index') }}" class="action-button">{{ __('common.view_document_management') }}</a>
             </div>
             @endif
 
             <!-- Birthdays Section -->
             @if(!empty($digestData['birthdays']))
             <div class="section">
-                <h2>{{ __('Upcoming Birthdays') }} 🎂</h2>
+                <h2>{{ __('common.upcoming_birthdays') }} 🎂</h2>
                 <ul>
                     @foreach($digestData['birthdays'] as $employee)
                     @php
@@ -250,7 +250,7 @@
                         $daysUntil = now()->diffInDays($birthdayDate, false);
                     @endphp
                     <li class="item">
-                        {{ $employee->display_name }} - {{ $birthdayDate->format('M j') }} ({{ $daysUntil }} {{ __('days') }})
+                        {{ $employee->display_name }} - {{ $birthdayDate->format('M j') }} ({{ $daysUntil }} {{ __('common.days') }})
                     </li>
                     @endforeach
                 </ul>
@@ -260,7 +260,7 @@
             <!-- New Hires Section -->
             @if(!empty($digestData['new_hires']))
             <div class="section">
-                <h2>{{ __('New Hires This Week') }} 👋</h2>
+                <h2>{{ __('common.new_hires_this_week') }} 👋</h2>
                 <ul>
                     @foreach($digestData['new_hires'] as $employee)
                     <li class="item">
@@ -274,7 +274,7 @@
             <!-- Activity Summary -->
             @if(array_sum($digestData['activity_summary']) > 0)
             <div class="section">
-                <h2>{{ __('Weekly Activity Summary') }}</h2>
+                <h2>{{ __('common.weekly_activity_summary') }}</h2>
                 <ul>
                     @foreach($digestData['activity_summary'] as $type => $count)
                         @if($count > 0)
@@ -285,17 +285,17 @@
             </div>
             @endif
 
-            <p>{{ __('Thank you for using our HRMS system!') }}</p>
+            <p>{{ __('common.thanks_for_using') }}</p>
         </div>
 
         <!-- Email Footer -->
         <div class="footer">
-            <p style="margin: 0;">{{ __('Best regards,') }}<br>{{ config('app.name') }}</p>
+            <p style="margin: 0;">{{ __('common.best_regards') }}<br>{{ config('app.name') }}</p>
         </div>
     </div>
 
     <div class="preview-note" style="margin-top: 20px;">
-        <strong>ℹ️ {{ __('Note') }}:</strong> {{ __('This preview shows the actual email content. Recipients will receive this in their email client.') }}
+        <strong>ℹ️ {{ __('common.note') }}:</strong> {{ __('common.preview_notice') }}
     </div>
 </body>
 </html>
