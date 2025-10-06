@@ -92,7 +92,7 @@
                                         <li>
                                             {{ $c['name'] }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}
                                             @if(!empty($c['formula']))
-                                                <i class="fas fa-info-circle text-muted" title="{{ $c['formula'] }}"></i>
+                                            <i class="fas fa-info-circle text-muted" title="{{ $c['formula'] }}"></i>
                                             @endif
                                         </li>
                                         @endforeach
@@ -105,7 +105,7 @@
                                         <li>
                                             {{ $c['name'] }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}
                                             @if(!empty($c['formula']))
-                                                <i class="fas fa-info-circle text-muted" title="{{ $c['formula'] }}"></i>
+                                            <i class="fas fa-info-circle text-muted" title="{{ $c['formula'] }}"></i>
                                             @endif
                                         </li>
                                         @endforeach

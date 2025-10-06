@@ -39,8 +39,12 @@ class SalaryHistoryService
             $evaluated = $this->evaluatePeriodAmounts($structure);
             foreach ($evaluated['components'] as $bucket => $list) {
                 foreach ($list as $c) {
-                    if ($bucket === 'earnings') { $earnings += (float) $c['value']; }
-                    if ($bucket === 'deductions') { $deductions += (float) $c['value']; }
+                    if ($bucket === 'earnings') {
+                        $earnings += (float) $c['value'];
+                    }
+                    if ($bucket === 'deductions') {
+                        $deductions += (float) $c['value'];
+                    }
                 }
             }
             $components = $evaluated['components'];
@@ -87,7 +91,10 @@ class SalaryHistoryService
             // Fallback to numeric values only
             $components = ['earnings' => [], 'deductions' => []];
             foreach ($structure->structureComponents as $pivot) {
-                $comp = $pivot->component; if (!$comp) { continue; }
+                $comp = $pivot->component;
+                if (!$comp) {
+                    continue;
+                }
                 $value = (float) ($pivot->value_numeric ?? 0.0);
                 $bucket = $comp->comp_type === 'deduction' ? 'deductions' : 'earnings';
                 $components[$bucket][] = ['code' => $comp->code, 'name' => $comp->name, 'value' => round($value, 2)];
@@ -106,7 +113,10 @@ class SalaryHistoryService
 
             $ordered = $structure->structureComponents->sortBy('priority_order');
             foreach ($ordered as $pivot) {
-                $comp = $pivot->component; if (!$comp) { continue; }
+                $comp = $pivot->component;
+                if (!$comp) {
+                    continue;
+                }
                 $value = null;
                 if ($pivot->value_numeric !== null) {
                     $value = (float) $pivot->value_numeric;
