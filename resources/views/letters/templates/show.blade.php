@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', __('Letter Template'))
+@section('title', __('letters.templates.label'))
 
 @section('header')
   <div class="d-flex justify-content-between align-items-center">
     <h1 class="h4 m-0">{{ $template->name }}</h1>
     <div class="d-flex gap-2">
-      <a href="{{ route('letters.templates.index') }}" class="btn btn-outline-secondary">{{ __('Back') }}</a>
+      <a href="{{ route('letters.templates.index') }}" class="btn btn-outline-secondary">{{ __('common.back') }}</a>
       @can('update', $template)
-        <a href="{{ route('letters.templates.edit', $template) }}" class="btn btn-warning">{{ __('Edit') }}</a>
+        <a href="{{ route('letters.templates.edit', $template) }}" class="btn btn-warning">{{ __('common.edit') }}</a>
       @endcan
     </div>
   </div>
@@ -18,22 +18,22 @@
   <div class="row g-3">
     <div class="col-12 col-lg-7">
       <div class="card shadow-sm">
-        <div class="card-header card-header-custom">{{ __('Template Details') }}</div>
+        <div class="card-header card-header-custom">{{ __('letters.templates.details_title') }}</div>
         <div class="card-body">
           <dl class="row mb-0">
-            <dt class="col-sm-4">{{ __('Name') }}</dt>
+            <dt class="col-sm-4">{{ __('common.name') }}</dt>
             <dd class="col-sm-8">{{ $template->name }}</dd>
-            <dt class="col-sm-4">{{ __('Type') }}</dt>
+            <dt class="col-sm-4">{{ __('common.type') }}</dt>
             <dd class="col-sm-8">{{ $template->type }}</dd>
-            <dt class="col-sm-4">{{ __('Category') }}</dt>
+            <dt class="col-sm-4">{{ __('common.category') }}</dt>
             <dd class="col-sm-8">{{ $template->category }}</dd>
-            <dt class="col-sm-4">{{ __('Language') }}</dt>
+            <dt class="col-sm-4">{{ __('common.language') }}</dt>
             <dd class="col-sm-8">{{ strtoupper($template->language) }}</dd>
-            <dt class="col-sm-4">{{ __('Subject') }}</dt>
+            <dt class="col-sm-4">{{ __('common.subject') }}</dt>
             <dd class="col-sm-8">{{ $template->subject }}</dd>
           </dl>
           <hr>
-          <h6 class="fw-semibold">{{ __('Content') }}</h6>
+          <h6 class="fw-semibold">{{ __('common.content') }}</h6>
           <div class="border rounded p-3 bg-white" style="white-space:pre-wrap">{!! nl2br(e($template->content)) !!}</div>
         </div>
       </div>

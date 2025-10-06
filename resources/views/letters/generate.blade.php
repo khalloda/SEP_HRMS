@@ -46,9 +46,9 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label required">{{ __('Letter Template') }}</label>
+                            <label class="form-label required">{{ __('letters.templates.label') }}</label>
                             <select name="template_id" class="form-select" required>
-                                <option value="">{{ __('Select Template') }}</option>
+                                <option value="">{{ __('letters.templates.select') }}</option>
                                 @foreach($templates as $category => $categoryTemplates)
                                     <optgroup label="{{ ucfirst(str_replace('_', ' ', $category)) }}">
                                         @foreach($categoryTemplates as $template)
@@ -56,7 +56,7 @@
                                                 data-type="{{ $template->type }}"
                                                 data-language="{{ $template->language }}"
                                                 data-variables="{{ json_encode($template->getAllAvailableVariables()) }}">
-                                            {{ $template->name }} ({{ $template->language === 'ar' ? 'العربية' : 'English' }})
+                                            {{ $template->name }} ({{ $template->language === 'ar' ? __('common.language_name.ar') : __('common.language_name.en') }})
                                         </option>
                                         @endforeach
                                     </optgroup>
@@ -67,7 +67,7 @@
 
                     <!-- Additional Variables Section -->
                     <div id="additionalVariables" class="mb-4" style="display: none;">
-                        <h6 class="fw-bold mb-3">{{ __('Additional Variables') }}</h6>
+                        <h6 class="fw-bold mb-3">{{ __('letters.templates.additional_variables') }}</h6>
                         <div id="variablesContainer" class="row">
                             <!-- Dynamic variables will be added here -->
                         </div>
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const details = document.getElementById('templateDetails');
         details.innerHTML = `
             <p class="mb-2"><strong>Type:</strong> ${option.dataset.type}</p>
-            <p class="mb-0"><strong>Language:</strong> ${option.dataset.language === 'ar' ? 'العربية' : 'English'}</p>
+            <p class="mb-0"><strong>Language:</strong> ${option.dataset.language === 'ar' ? __('common.language_name.ar') : __('common.language_name.en')}</p>
         `;
         templateInfo.style.display = 'block';
     }
