@@ -90,7 +90,7 @@
                                     <ul class="mb-0 small">
                                         @foreach(($row['components']['earnings'] ?? []) as $c)
                                         <li>
-                                            {{ $c['name'] }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}
+                                            {{ \App\Support\Payroll\ComponentName::display(['name_en'=>$c['name'] ?? null,'name_ar'=>$c['name'] ?? null,'code'=>$c['code']]) }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}
                                             @if(!empty($c['formula']))
                                             <i class="fas fa-info-circle text-muted" title="{{ $c['formula'] }}"></i>
                                             @endif
@@ -103,7 +103,7 @@
                                     <ul class="mb-0 small">
                                         @foreach(($row['components']['deductions'] ?? []) as $c)
                                         <li>
-                                            {{ $c['name'] }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}
+                                            {{ \App\Support\Payroll\ComponentName::display(['name_en'=>$c['name'] ?? null,'name_ar'=>$c['name'] ?? null,'code'=>$c['code']]) }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}
                                             @if(!empty($c['formula']))
                                             <i class="fas fa-info-circle text-muted" title="{{ $c['formula'] }}"></i>
                                             @endif

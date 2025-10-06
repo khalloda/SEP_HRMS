@@ -70,7 +70,7 @@
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <strong>{{ $item->component->name ?? __('Unknown Component') }}</strong>
+                                        <strong>{{ \App\Support\Payroll\ComponentName::display($item->component) }}</strong>
                                         <div class="text-muted small">{{ $item->component->code ?? '—' }}</div>
                                         @if($item->formula_expr)
                                         <div class="small fst-italic text-primary">{{ __('Formula: :expr', ['expr' => $item->formula_expr]) }}</div>

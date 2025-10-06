@@ -142,7 +142,7 @@ class SalaryHistoryService
                 $bucket = $comp->comp_type === 'deduction' ? 'deductions' : 'earnings';
                 $components[$bucket][] = [
                     'code' => $comp->code,
-                    'name' => $comp->name,
+                    'name' => \App\Support\Payroll\ComponentName::display($comp),
                     'value' => $value,
                     'formula' => $pivot->formula_expr,
                 ];
