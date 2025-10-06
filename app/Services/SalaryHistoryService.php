@@ -3,6 +3,11 @@
 namespace App\Services;
 
 use App\Models\Employee;
+use App\Models\SalaryStructure;
+use App\Models\SalaryStructureComponent;
+use App\Services\Payroll\ExpressionEvaluator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SalaryHistoryService
 {
@@ -31,20 +36,14 @@ class SalaryHistoryService
             $earnings = 0.0;
             $deductions = 0.0;
             $components = ['earnings' => [], 'deductions' => []];
-            foreach ($structure->structureComponents as $pivot) {
-                $component = $pivot->component;
-                if (!$component) {
-                    continue;
-                }
-                $value = $pivot->value_numeric ?? 0.0; // basic fixed value; formulas handled later
-                if ($component->comp_type === 'earning') {
-                    $earnings += (float) $value;
-                    $components['earnings'][] = ['code' => $component->code, 'name' => $component->name, 'value' => (float) $value];
-                } elseif ($component->comp_type === 'deduction') {
-                    $deductions += (float) $value;
-                    $components['deductions'][] = ['code' => $component->code, 'name' => $component->name, 'value' => (float) $value];
+            $evaluated = $this->evaluatePeriodAmounts($structure);
+            foreach ($evaluated['components'] as $bucket => $list) {
+                foreach ($list as $c) {
+                    if ($bucket === 'earnings') { $earnings += (float) $c['value']; }
+                    if ($bucket === 'deductions') { $deductions += (float) $c['value']; }
                 }
             }
+            $components = $evaluated['components'];
             $gross = $earnings;
             $net = $gross - $deductions;
 
@@ -76,6 +75,80 @@ class SalaryHistoryService
             ],
             'can_view_net' => $canViewNet,
         ];
+    }
+
+    /**
+     * Evaluate amounts for a salary structure period with caching.
+     * Returns array{components: array{earnings: array<int,array{code:string,name:string,value:float,formula?:string}>, deductions: array<int,array{code:string,name:string,value:float,formula?:string}>}}
+     */
+    public function evaluatePeriodAmounts(SalaryStructure $structure): array
+    {
+        if (!config('payroll.use_salary_history_runtime_eval')) {
+            // Fallback to numeric values only
+            $components = ['earnings' => [], 'deductions' => []];
+            foreach ($structure->structureComponents as $pivot) {
+                $comp = $pivot->component; if (!$comp) { continue; }
+                $value = (float) ($pivot->value_numeric ?? 0.0);
+                $bucket = $comp->comp_type === 'deduction' ? 'deductions' : 'earnings';
+                $components[$bucket][] = ['code' => $comp->code, 'name' => $comp->name, 'value' => round($value, 2)];
+            }
+            return ['components' => $components];
+        }
+
+        $ttl = (int) config('payroll.salary_history_eval_ttl', 1800);
+        $hashSource = $structure->updated_at?->timestamp . '|' . $structure->structureComponents->max('updated_at');
+        $key = 'salary_history_eval:' . $structure->employee_id . ':' . $structure->id . ':' . sha1((string) $hashSource);
+
+        return Cache::remember($key, $ttl, function () use ($structure) {
+            $components = ['earnings' => [], 'deductions' => []];
+            $context = [];
+            $evaluator = app(ExpressionEvaluator::class);
+
+            $ordered = $structure->structureComponents->sortBy('priority_order');
+            foreach ($ordered as $pivot) {
+                $comp = $pivot->component; if (!$comp) { continue; }
+                $value = null;
+                if ($pivot->value_numeric !== null) {
+                    $value = (float) $pivot->value_numeric;
+                } elseif (!empty($pivot->formula_expr)) {
+                    try {
+                        // Replace codes in formula with current context values
+                        $expr = $this->substituteVariables((string) $pivot->formula_expr, $context);
+                        $value = $evaluator->evaluate($expr, config('payroll.expression_engine'));
+                    } catch (\Throwable $e) {
+                        Log::warning('Salary history eval error', [
+                            'structure_id' => $structure->id,
+                            'component_code' => $comp->code,
+                            'message' => $e->getMessage(),
+                        ]);
+                        $value = 0.0;
+                    }
+                } else {
+                    $value = 0.0;
+                }
+
+                $value = round((float) $value, 2);
+                $context[$comp->code] = $value;
+                $bucket = $comp->comp_type === 'deduction' ? 'deductions' : 'earnings';
+                $components[$bucket][] = [
+                    'code' => $comp->code,
+                    'name' => $comp->name,
+                    'value' => $value,
+                    'formula' => $pivot->formula_expr,
+                ];
+            }
+
+            return ['components' => $components];
+        });
+    }
+
+    protected function substituteVariables(string $expr, array $context): string
+    {
+        // Replace tokens like BASIC_SALARY with numeric values from context
+        return preg_replace_callback('/\b[A-Z_][A-Z0-9_]*\b/', function ($m) use ($context) {
+            $code = $m[0];
+            return array_key_exists($code, $context) ? (string) ($context[$code] ?? 0) : '0';
+        }, $expr) ?? $expr;
     }
 
     public function export(Employee $employee, array $filters, string $format)

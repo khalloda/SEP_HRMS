@@ -89,7 +89,12 @@
                                     <strong>{{ __('Earnings') }}</strong>
                                     <ul class="mb-0 small">
                                         @foreach(($row['components']['earnings'] ?? []) as $c)
-                                        <li>{{ $c['name'] }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}</li>
+                                        <li>
+                                            {{ $c['name'] }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}
+                                            @if(!empty($c['formula']))
+                                                <i class="fas fa-info-circle text-muted" title="{{ $c['formula'] }}"></i>
+                                            @endif
+                                        </li>
                                         @endforeach
                                     </ul>
                                 </div>
@@ -97,7 +102,12 @@
                                     <strong>{{ __('Deductions') }}</strong>
                                     <ul class="mb-0 small">
                                         @foreach(($row['components']['deductions'] ?? []) as $c)
-                                        <li>{{ $c['name'] }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}</li>
+                                        <li>
+                                            {{ $c['name'] }} <span class="text-muted">({{ $c['code'] }})</span> — {{ $c['value'] }}
+                                            @if(!empty($c['formula']))
+                                                <i class="fas fa-info-circle text-muted" title="{{ $c['formula'] }}"></i>
+                                            @endif
+                                        </li>
                                         @endforeach
                                     </ul>
                                 </div>

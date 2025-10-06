@@ -28,4 +28,8 @@ return [
 
     // Feature flags for ancillary payroll features
     'use_salary_structure_history' => (bool) env('USE_SALARY_STRUCTURE_HISTORY', false),
+
+    // Runtime evaluation for Salary History (do not persist results)
+    'use_salary_history_runtime_eval' => (bool) env('USE_SALARY_HISTORY_RUNTIME_EVAL', true),
+    'salary_history_eval_ttl' => (int) env('SALARY_HISTORY_EVAL_TTL', 1800),
 ];
