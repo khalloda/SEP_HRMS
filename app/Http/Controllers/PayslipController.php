@@ -444,18 +444,18 @@ public function export(Request $request, PayrollRun $payrollRun = null)
     private function payslipExportHeadings(): array
     {
         return [
-            __('Employee Code'),
-            __('Employee Name'),
-            __('Department'),
-            __('Position'),
-            __('Pay Period Start'),
-            __('Pay Period End'),
-            __('Pay Date'),
-            __('Gross Pay'),
-            __('Total Deductions'),
-            __('Net Pay'),
-            __('Currency'),
-            __('Status'),
+            __('payroll.exports.employee_code'),
+            __('payroll.exports.employee_name'),
+            __('payroll.exports.department'),
+            __('payroll.exports.position'),
+            __('payroll.exports.pay_period_start'),
+            __('payroll.exports.pay_period_end'),
+            __('payroll.exports.pay_date'),
+            __('payroll.exports.gross_pay'),
+            __('payroll.exports.total_deductions'),
+            __('payroll.exports.net_pay'),
+            __('payroll.exports.currency'),
+            __('payroll.exports.status'),
         ];
     }
 

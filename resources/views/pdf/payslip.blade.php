@@ -196,8 +196,8 @@
     <!-- Header Section -->
     <div class="header-section">
         <div class="company-logo">⚖️</div>
-        <div class="company-name">{{ __('Sarie Eldin & Partners Legal Advisors') }}</div>
-        <div class="company-subtitle">{{ __('Human Resource Management System') }}</div>
+        <div class="company-name">{{ __('common.org_full_name') }}</div>
+        <div class="company-subtitle">{{ __('common.hrms_full') }}</div>
         <div class="document-title">{{ __('hrms.payslip.title') }}</div>
     </div>
 
@@ -217,9 +217,9 @@
         </div>
         <div class="info-row">
             <div class="info-cell info-label">{{ __('hrms.department') }}:</div>
-            <div class="info-cell info-value">{{ $payslip->department_name ?? __('N/A') }}</div>
+            <div class="info-cell info-value">{{ $payslip->department_name ?? __('common.n_a') }}</div>
             <div class="info-cell info-label">{{ __('hrms.position') }}:</div>
-            <div class="info-cell info-value">{{ $payslip->position_name ?? __('N/A') }}</div>
+            <div class="info-cell info-value">{{ $payslip->position_name ?? __('common.n_a') }}</div>
         </div>
     </div>
 
