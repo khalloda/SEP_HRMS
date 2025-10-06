@@ -63,7 +63,17 @@
             font-size: 10px;
             color: #666;
         }
-        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 8px; color: #666; border-top: 1px solid #ddd; padding-top: 5px; }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 5px;
+        }
     </style>
 </head>
 

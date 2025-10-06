@@ -74,10 +74,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('permissions', [\App\Http\Controllers\Admin\PermissionsAdminController::class, 'store'])->name('permissions.store');
         Route::delete('permissions/{permission}', [\App\Http\Controllers\Admin\PermissionsAdminController::class, 'destroy'])->name('permissions.destroy');
     });
-    
+
     // Employee management routes
     Route::resource('employees', EmployeeController::class)->middleware('can:employees.view');
-    
+
     // Additional employee routes
     Route::post('employees/{employee}/terminate', [EmployeeController::class, 'terminate'])
         ->middleware('can:employees.manage')
@@ -91,7 +91,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('employees.statistics');
     Route::get('employees-search', [EmployeeController::class, 'search'])
         ->name('employees.search');
-    
+
     // Employee photo management routes
     Route::post('employees/{employee}/upload-photo', [EmployeeController::class, 'uploadPhoto'])
         ->middleware('can:employees.manage')
@@ -101,7 +101,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('employees/{employee}/photo', [EmployeeController::class, 'deletePhoto'])
         ->middleware('can:employees.manage')
         ->name('employees.delete-photo');
-        
+
     // Contract management routes
     Route::resource('contracts', ContractController::class)->middleware('can:contracts.view');
     Route::post('contracts/{contract}/renew', [ContractController::class, 'renew'])
@@ -126,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('contracts.export');
     Route::post('contracts-bulk-operation', [ContractController::class, 'bulkOperation'])
         ->name('contracts.bulk-operation');
-        
+
     // Document management routes
     Route::resource('documents', \App\Http\Controllers\DocumentController::class);
     Route::get('documents/{document}/download', [\App\Http\Controllers\DocumentController::class, 'download'])
@@ -135,40 +135,40 @@ Route::middleware(['auth'])->group(function () {
         ->name('documents.upload-version');
     Route::get('documents/employee-contracts', [\App\Http\Controllers\DocumentController::class, 'getEmployeeContracts'])
         ->name('documents.employee-contracts');
-        
+
     // Payroll management routes
     Route::resource('salary-components', \App\Http\Controllers\SalaryComponentController::class);
     Route::post('salary-components/seed-predefined', [\App\Http\Controllers\SalaryComponentController::class, 'seedPredefined'])
         ->name('salary-components.seed-predefined');
 
     // Leave & Attendance
-    Route::prefix('leave')->name('leave.')->group(function(){
+    Route::prefix('leave')->name('leave.')->group(function () {
         // Policies (HR manage)
-        Route::get('policies', [\App\Http\Controllers\LeavePolicyController::class,'index'])
+        Route::get('policies', [\App\Http\Controllers\LeavePolicyController::class, 'index'])
             ->middleware('can:attendance.view')->name('policies.index');
-        Route::get('policies/create', [\App\Http\Controllers\LeavePolicyController::class,'create'])
+        Route::get('policies/create', [\App\Http\Controllers\LeavePolicyController::class, 'create'])
             ->middleware('can:attendance.manage')->name('policies.create');
-        Route::post('policies', [\App\Http\Controllers\LeavePolicyController::class,'store'])
+        Route::post('policies', [\App\Http\Controllers\LeavePolicyController::class, 'store'])
             ->middleware('can:attendance.manage')->name('policies.store');
-        Route::get('policies/{id}/edit', [\App\Http\Controllers\LeavePolicyController::class,'edit'])
+        Route::get('policies/{id}/edit', [\App\Http\Controllers\LeavePolicyController::class, 'edit'])
             ->middleware('can:attendance.manage')->name('policies.edit');
-        Route::put('policies/{id}', [\App\Http\Controllers\LeavePolicyController::class,'update'])
+        Route::put('policies/{id}', [\App\Http\Controllers\LeavePolicyController::class, 'update'])
             ->middleware('can:attendance.manage')->name('policies.update');
-        Route::delete('policies/{id}', [\App\Http\Controllers\LeavePolicyController::class,'destroy'])
+        Route::delete('policies/{id}', [\App\Http\Controllers\LeavePolicyController::class, 'destroy'])
             ->middleware('can:attendance.manage')->name('policies.destroy');
 
         // Requests
-        Route::get('requests', [\App\Http\Controllers\LeaveRequestController::class,'index'])
+        Route::get('requests', [\App\Http\Controllers\LeaveRequestController::class, 'index'])
             ->middleware('can:attendance.view')->name('requests.index');
-        Route::post('requests', [\App\Http\Controllers\LeaveRequestController::class,'store'])
+        Route::post('requests', [\App\Http\Controllers\LeaveRequestController::class, 'store'])
             ->middleware('can:attendance.view')->name('requests.store');
-        Route::post('requests/{id}/approve', [\App\Http\Controllers\LeaveRequestController::class,'approve'])
+        Route::post('requests/{id}/approve', [\App\Http\Controllers\LeaveRequestController::class, 'approve'])
             ->middleware('can:attendance.manage')->name('requests.approve');
-        Route::post('requests/{id}/reject', [\App\Http\Controllers\LeaveRequestController::class,'reject'])
+        Route::post('requests/{id}/reject', [\App\Http\Controllers\LeaveRequestController::class, 'reject'])
             ->middleware('can:attendance.manage')->name('requests.reject');
 
         // Calendar events
-        Route::get('events', [\App\Http\Controllers\LeaveRequestController::class,'events'])
+        Route::get('events', [\App\Http\Controllers\LeaveRequestController::class, 'events'])
             ->middleware('can:attendance.view')->name('events');
     });
 
@@ -417,4 +417,3 @@ Route::middleware(['auth'])->group(function () {
         Route::get('{correlation}/download', [ReportExportsController::class, 'download'])->name('download');
     });
 });
-

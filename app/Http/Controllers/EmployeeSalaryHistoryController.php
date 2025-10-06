@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class EmployeeSalaryHistoryController extends Controller
 {
-    public function __construct(private SalaryHistoryService $historyService)
-    {
-    }
+    public function __construct(private SalaryHistoryService $historyService) {}
 
     public function index(Request $request, Employee $employee)
     {
@@ -47,5 +45,3 @@ class EmployeeSalaryHistoryController extends Controller
         return $this->historyService->export($employee, $filters, $format);
     }
 }
-
-
