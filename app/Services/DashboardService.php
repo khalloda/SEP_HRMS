@@ -56,7 +56,7 @@ class DashboardService
                 'visible_sections' => ['employees', 'contracts', 'payroll', 'documents', 'compliance', 'reports'],
                 'priority_widgets' => ['employee_stats', 'contract_expiry', 'payroll_summary', 'compliance_alerts'],
                 'restricted_data' => [],
-                'custom_title' => __('HR Administration Dashboard'),
+                'custom_title' => __('hrms.dashboard.title'),
                 'theme_color' => 'success',
             ];
         } elseif ($user->hasRole('Accounting_Manager')) {
@@ -64,7 +64,7 @@ class DashboardService
                 'visible_sections' => ['payroll', 'contracts', 'employees', 'reports'],
                 'priority_widgets' => ['payroll_summary', 'salary_analysis', 'contract_costs', 'financial_reports'],
                 'restricted_data' => [],
-                'custom_title' => __('Accounting Management Dashboard'),
+                'custom_title' => __('hrms.dashboard.title'),
                 'theme_color' => 'warning',
             ];
         } elseif ($user->hasRole('HR_Coordinator')) {
@@ -72,7 +72,7 @@ class DashboardService
                 'visible_sections' => ['employees', 'contracts', 'documents', 'reports'],
                 'priority_widgets' => ['employee_stats', 'document_expiry', 'new_hires', 'contract_renewals'],
                 'restricted_data' => ['net_salary', 'gross_salary'],
-                'custom_title' => __('HR Coordination Dashboard'),
+                'custom_title' => __('hrms.dashboard.title'),
                 'theme_color' => 'info',
             ];
         } elseif ($user->hasRole('Accountant')) {
@@ -80,7 +80,7 @@ class DashboardService
                 'visible_sections' => ['payroll', 'reports'],
                 'priority_widgets' => ['payroll_processing', 'expense_tracking'],
                 'restricted_data' => ['net_salary', 'gross_salary'],
-                'custom_title' => __('Accounting Dashboard'),
+                'custom_title' => __('hrms.dashboard.title'),
                 'theme_color' => 'secondary',
             ];
         } elseif ($user->hasRole('Employee')) {
@@ -88,7 +88,7 @@ class DashboardService
                 'visible_sections' => ['profile', 'documents', 'payslips', 'attendance'],
                 'priority_widgets' => ['profile_completion', 'recent_payslips', 'document_expiry'],
                 'restricted_data' => ['all_employee_data', 'other_salaries'],
-                'custom_title' => __('Employee Portal'),
+                'custom_title' => __('hrms.dashboard.title'),
                 'theme_color' => 'primary',
             ];
         } elseif ($user->hasRole('IT_Admin')) {
@@ -96,7 +96,7 @@ class DashboardService
                 'visible_sections' => ['system', 'audit', 'reports'],
                 'priority_widgets' => ['system_health', 'audit_logs', 'user_activities'],
                 'restricted_data' => ['salary_details'],
-                'custom_title' => __('System Administration Dashboard'),
+                'custom_title' => __('hrms.dashboard.title'),
                 'theme_color' => 'dark',
             ];
         }
@@ -214,35 +214,35 @@ class DashboardService
     {
         if ($user->hasRole('HR_Admin_Manager')) {
             return [
-                ['title' => __('Add Employee'), 'url' => route('employees.create'), 'icon' => 'fas fa-user-plus', 'color' => 'primary'],
-                ['title' => __('New Contract'), 'url' => route('contracts.create'), 'icon' => 'fas fa-file-plus', 'color' => 'success'],
-                ['title' => __('Upload Document'), 'url' => route('documents.create'), 'icon' => 'fas fa-upload', 'color' => 'info'],
-                ['title' => __('Generate Report'), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-bar', 'color' => 'warning'],
+                ['title' => __('hrms.add_employee'), 'url' => route('employees.create'), 'icon' => 'fas fa-user-plus', 'color' => 'primary'],
+                ['title' => __('common.new_contract'), 'url' => route('contracts.create'), 'icon' => 'fas fa-file-circle-plus', 'color' => 'success'],
+                ['title' => __('common.upload_documents'), 'url' => route('documents.create'), 'icon' => 'fas fa-upload', 'color' => 'info'],
+                ['title' => __('reports.title') ?? __('common.reports'), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-bar', 'color' => 'warning'],
             ];
         } elseif ($user->hasRole('Accounting_Manager')) {
             return [
-                ['title' => __('Payroll Summary'), 'url' => route('reports.payroll.summary'), 'icon' => 'fas fa-calculator', 'color' => 'success'],
-                ['title' => __('Salary Components'), 'url' => route('salary-components.index'), 'icon' => 'fas fa-cogs', 'color' => 'primary'],
-                ['title' => __('Financial Reports'), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-line', 'color' => 'warning'],
+                ['title' => __('common.payroll_summary'), 'url' => route('reports.payroll.summary'), 'icon' => 'fas fa-calculator', 'color' => 'success'],
+                ['title' => __('hrms.salary', [], app()->getLocale()), 'url' => route('salary-components.index'), 'icon' => 'fas fa-cogs', 'color' => 'primary'],
+                ['title' => __('reports.title') ?? __('common.reports'), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-line', 'color' => 'warning'],
             ];
         } elseif ($user->hasRole('HR_Coordinator')) {
             return [
-                ['title' => __('Employee List'), 'url' => route('employees.index'), 'icon' => 'fas fa-users', 'color' => 'primary'],
-                ['title' => __('Document Management'), 'url' => route('documents.index'), 'icon' => 'fas fa-folder', 'color' => 'info'],
-                ['title' => __('Contract Renewals'), 'url' => route('contracts.index') . '?filter=expiring', 'icon' => 'fas fa-clock', 'color' => 'warning'],
+                ['title' => __('hrms.employees'), 'url' => route('employees.index'), 'icon' => 'fas fa-users', 'color' => 'primary'],
+                ['title' => __('hrms.documents'), 'url' => route('documents.index'), 'icon' => 'fas fa-folder', 'color' => 'info'],
+                ['title' => __('hrms.renew'), 'url' => route('contracts.index') . '?filter=expiring', 'icon' => 'fas fa-clock', 'color' => 'warning'],
             ];
         } elseif ($user->hasRole('Employee')) {
             return [
-                ['title' => __('My Profile'), 'url' => route('employee-portal.profile'), 'icon' => 'fas fa-user', 'color' => 'primary'],
-                ['title' => __('My Documents'), 'url' => route('employee-portal.documents'), 'icon' => 'fas fa-folder', 'color' => 'info'],
-                ['title' => __('My Payslips'), 'url' => route('employee-portal.payslips'), 'icon' => 'fas fa-file-invoice', 'color' => 'success'],
-                ['title' => __('Request Letter'), 'url' => route('employee-portal.request-letter'), 'icon' => 'fas fa-envelope', 'color' => 'warning'],
+                ['title' => __('common.my_profile'), 'url' => route('employee-portal.profile'), 'icon' => 'fas fa-user', 'color' => 'primary'],
+                ['title' => __('common.my_documents'), 'url' => route('employee-portal.documents'), 'icon' => 'fas fa-folder', 'color' => 'info'],
+                ['title' => __('common.my_payslips'), 'url' => route('employee-portal.payslips'), 'icon' => 'fas fa-file-invoice', 'color' => 'success'],
+                ['title' => __('hrms.hr_letter') ?? __('common.generate_letter'), 'url' => route('employee-portal.request-letter'), 'icon' => 'fas fa-envelope', 'color' => 'warning'],
             ];
         } elseif ($user->hasRole('IT_Admin')) {
             return [
-                ['title' => __('Audit Trail'), 'url' => route('audit-trail.index'), 'icon' => 'fas fa-history', 'color' => 'secondary'],
-                ['title' => __('System Reports'), 'url' => route('reports.index'), 'icon' => 'fas fa-server', 'color' => 'dark'],
-                ['title' => __('Weekly Digest'), 'url' => route('weekly-digest.index'), 'icon' => 'fas fa-envelope-open', 'color' => 'info'],
+                ['title' => __('common.audit_trail'), 'url' => route('audit-trail.index'), 'icon' => 'fas fa-history', 'color' => 'secondary'],
+                ['title' => __('common.reports'), 'url' => route('reports.index'), 'icon' => 'fas fa-server', 'color' => 'dark'],
+                ['title' => __('common.weekly_digest'), 'url' => route('weekly-digest.index'), 'icon' => 'fas fa-envelope-open', 'color' => 'info'],
             ];
         }
 

@@ -432,7 +432,7 @@
                             <div class="timeline-content">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <h6 class="mb-1">{{ $activity['description'] }}</h6>
+                                        <h6 class="mb-1">{{ __($activity['description']) }}</h6>
                                         <p class="text-muted mb-0">
                                             <small>{{ __('common.by') }} {{ $activity['causer_name'] }}</small>
                                         </p>
