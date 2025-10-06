@@ -69,5 +69,9 @@ return [
         'delete' => 'Delete',
         'empty' => 'No saved reports yet.',
         'recipients' => 'Recipients (comma emails)',
+        'params_json' => 'Params (JSON)',
+        'xlsx' => 'XLSX',
+        'csv' => 'CSV',
+        'pdf' => 'PDF',
     ],
 ];

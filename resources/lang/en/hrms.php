@@ -591,10 +591,26 @@ return [
         'total_net_pay' => 'Total Net Pay',
     ],
 
+    // Salary structure helpers
+    'new_structures_start_today_or_later' => 'New structures must start today or later.',
+    'leave_blank_structure_active' => 'Leave blank to keep the structure active until replaced.',
+    'drag_to_reorder' => 'Drag to reorder',
+    'optional_formula_expression' => 'Optional formula expression',
+    'priority_order_help' => 'Drag rows to set the calculation priority. Earlier rows calculate first.',
+    'add_at_least_one_component' => 'Add at least one component to keep this structure active.',
+
     // PDF and Documents
     'confidential' => 'CONFIDENTIAL',
     'confidential_hr_use_only' => 'CONFIDENTIAL - HR USE ONLY',
     'page' => 'Page',
     'of' => 'of',
+    'system' => 'System',
+
+    // Employee Portal - Documents
+    'my_documents' => 'My Documents',
+    'view_download_personal_documents' => 'View and download your personal documents',
+    'view_versions' => 'View Versions',
+    'please_select_at_least_one_document' => 'Please select at least one document to download.',
+    'download_selected_documents_confirm' => 'Download :count selected documents?',
 
 ];

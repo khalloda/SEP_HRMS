@@ -81,11 +81,11 @@
                             <tr>
                                 <td>
                                     <a href="{{ route('employees.show', $structure->employee) }}">
-                                        {{ $structure->employee?->full_name ?? __('N/A') }}
+                                        {{ $structure->employee?->full_name ?? __('common.n_a') }}
                                     </a>
                                 </td>
                                 <td>{{ optional($structure->effective_from)->format('Y-m-d') }}</td>
-                                <td>{{ optional($structure->effective_to)->format('Y-m-d') ?? __('—') }}</td>
+                                <td>{{ optional($structure->effective_to)->format('Y-m-d') ?? '—' }}</td>
                                 <td>{{ $structure->pivot->priority_order ?? '—' }}</td>
                             </tr>
                             @endforeach

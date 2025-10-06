@@ -152,7 +152,7 @@ return [
     'loading' => 'جاري التحميل...',
     'confirm_delete' => 'هل أنت متأكد من حذف هذا العنصر؟',
     'recent_activity' => 'النشاط الأخير',
-    
+
     // Employee Management
     'add_employee' => 'إضافة موظف',
     'employee_created' => 'تم إنشاء الموظف بنجاح',
@@ -269,7 +269,7 @@ return [
         'hourly_rate' => 'معدل الساعة',
         'invoice_required' => 'فاتورة مطلوبة',
     ],
-    
+
     // Contract types
     'contract_types' => [
         'permanent' => 'دائم',
@@ -278,7 +278,7 @@ return [
         'internship' => 'تدريب',
         'consultancy' => 'استشاري',
     ],
-    
+
     // Contract status
     'contract_status' => [
         'active' => 'نشط',
@@ -550,10 +550,26 @@ return [
         'total_net_pay' => 'إجمالي الراتب الصافي',
     ],
 
+    // مساعدات هيكل الراتب
+    'new_structures_start_today_or_later' => 'يجب أن تبدأ الهياكل الجديدة اليوم أو بعده.',
+    'leave_blank_structure_active' => 'اتركه فارغًا لإبقاء الهيكل نشطًا حتى يتم استبداله.',
+    'drag_to_reorder' => 'اسحب لإعادة الترتيب',
+    'optional_formula_expression' => 'صيغة حساب اختيارية',
+    'priority_order_help' => 'اسحب الصفوف لتحديد أولوية الحساب. يتم الحساب للأعلى أولاً.',
+    'add_at_least_one_component' => 'أضف مكونًا واحدًا على الأقل للإبقاء على هذا الهيكل نشطًا.',
+
     // PDF والمستندات
     'confidential' => 'سري',
     'confidential_hr_use_only' => 'سري - لاستخدام الموارد البشرية فقط',
     'page' => 'صفحة',
     'of' => 'من',
+    'system' => 'النظام',
+
+    // بوابة الموظف - المستندات
+    'my_documents' => 'مستنداتي',
+    'view_download_personal_documents' => 'عرض وتنزيل مستنداتك الشخصية',
+    'view_versions' => 'عرض الإصدارات',
+    'please_select_at_least_one_document' => 'يرجى اختيار مستند واحد على الأقل للتنزيل.',
+    'download_selected_documents_confirm' => 'تنزيل :count مستندات محددة؟',
 
 ];

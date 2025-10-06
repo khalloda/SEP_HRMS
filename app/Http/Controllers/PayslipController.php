@@ -63,8 +63,8 @@ class PayslipController extends Controller
             $search = $request->get('search');
             $query->where(function ($q) use ($search) {
                 $q->where('employee_name', 'like', "%{$search}%")
-                  ->orWhere('employee_code', 'like', "%{$search}%")
-                  ->orWhere('employee_arabic_name', 'like', "%{$search}%");
+                    ->orWhere('employee_code', 'like', "%{$search}%")
+                    ->orWhere('employee_arabic_name', 'like', "%{$search}%");
             });
         }
 
@@ -75,13 +75,27 @@ class PayslipController extends Controller
         $statusOptions = Payslip::STATUSES;
         $yearOptions = range(date('Y') - 2, date('Y') + 1);
         $monthOptions = [
-            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
-            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
-            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+            1 => 'January',
+            2 => 'February',
+            3 => 'March',
+            4 => 'April',
+            5 => 'May',
+            6 => 'June',
+            7 => 'July',
+            8 => 'August',
+            9 => 'September',
+            10 => 'October',
+            11 => 'November',
+            12 => 'December'
         ];
 
         return view('payslips.index', compact(
-            'payslips', 'employee', 'payrollRuns', 'statusOptions', 'yearOptions', 'monthOptions'
+            'payslips',
+            'employee',
+            'payrollRuns',
+            'statusOptions',
+            'yearOptions',
+            'monthOptions'
         ));
     }
 
@@ -109,13 +123,19 @@ class PayslipController extends Controller
         $canViewNetGross = Gate::allows('viewNetGross', $payslip);
 
         // Mark as viewed if employee is viewing their own payslip
-        if (auth()->user()->employee &&
-            auth()->user()->employee->id === $payslip->employee_id) {
+        if (
+            auth()->user()->employee &&
+            auth()->user()->employee->id === $payslip->employee_id
+        ) {
             $payslip->markAsViewed();
         }
 
         return view('payslips.show', compact(
-            'payslip', 'earnings', 'deductions', 'infoComponents', 'canViewNetGross'
+            'payslip',
+            'earnings',
+            'deductions',
+            'infoComponents',
+            'canViewNetGross'
         ));
     }
 
@@ -148,8 +168,10 @@ class PayslipController extends Controller
         }
 
         // Mark as viewed if employee is downloading their own payslip
-        if (auth()->user()->employee &&
-            auth()->user()->employee->id === $payslip->employee_id) {
+        if (
+            auth()->user()->employee &&
+            auth()->user()->employee->id === $payslip->employee_id
+        ) {
             $payslip->markAsViewed();
         }
 
@@ -289,46 +311,46 @@ class PayslipController extends Controller
     }
 
 
-/**
- * Export payslips data.
- */
-public function export(Request $request, PayrollRun $payrollRun = null)
-{
-    Gate::authorize('export', Payslip::class);
+    /**
+     * Export payslips data.
+     */
+    public function export(Request $request, PayrollRun $payrollRun = null)
+    {
+        Gate::authorize('export', Payslip::class);
 
-    $format = strtolower($request->get('format', 'excel'));
+        $format = strtolower($request->get('format', 'excel'));
 
-    if ($payrollRun) {
-        $payslips = $payrollRun->payslips()
-            ->with(['employee.department', 'employee.position', 'payrollRun'])
-            ->get();
-        $baseFilename = Str::slug($payrollRun->title ?: 'payroll-run-' . $payrollRun->id) . '-' . now()->format('Y-m-d');
-    } else {
-        $query = Payslip::query()->with(['employee.department', 'employee.position', 'payrollRun']);
+        if ($payrollRun) {
+            $payslips = $payrollRun->payslips()
+                ->with(['employee.department', 'employee.position', 'payrollRun'])
+                ->get();
+            $baseFilename = Str::slug($payrollRun->title ?: 'payroll-run-' . $payrollRun->id) . '-' . now()->format('Y-m-d');
+        } else {
+            $query = Payslip::query()->with(['employee.department', 'employee.position', 'payrollRun']);
 
-        if ($request->filled('payroll_run_id')) {
-            $query->where('payroll_run_id', $request->get('payroll_run_id'));
+            if ($request->filled('payroll_run_id')) {
+                $query->where('payroll_run_id', $request->get('payroll_run_id'));
+            }
+
+            if ($request->filled('status')) {
+                $query->byStatus($request->get('status'));
+            }
+
+            $payslips = $query->get();
+            $baseFilename = 'payslips-' . now()->format('Y-m-d');
         }
 
-        if ($request->filled('status')) {
-            $query->byStatus($request->get('status'));
+        if ($payslips->isEmpty()) {
+            return back()->with('warning', __('No payslips found for export.'));
         }
 
-        $payslips = $query->get();
-        $baseFilename = 'payslips-' . now()->format('Y-m-d');
+        return match ($format) {
+            'excel' => $this->exportToExcel($payslips, $baseFilename),
+            'csv' => $this->exportToCsv($payslips, $baseFilename),
+            'pdf' => $this->exportToPdf($payslips, $baseFilename),
+            default => back()->with('warning', __('Unsupported export format.')),
+        };
     }
-
-    if ($payslips->isEmpty()) {
-        return back()->with('warning', __('No payslips found for export.'));
-    }
-
-    return match ($format) {
-        'excel' => $this->exportToExcel($payslips, $baseFilename),
-        'csv' => $this->exportToCsv($payslips, $baseFilename),
-        'pdf' => $this->exportToPdf($payslips, $baseFilename),
-        default => back()->with('warning', __('Unsupported export format.')),
-    };
-}
     /**
      * Get payslip statistics.
      */
@@ -368,7 +390,7 @@ public function export(Request $request, PayrollRun $payrollRun = null)
     protected function isPdfOutdated(Payslip $payslip): bool
     {
         return $payslip->pdf_generated_at &&
-               $payslip->updated_at > $payslip->pdf_generated_at;
+            $payslip->updated_at > $payslip->pdf_generated_at;
     }
 
     /**
@@ -390,7 +412,7 @@ public function export(Request $request, PayrollRun $payrollRun = null)
     private function exportToExcel($payslips, string $baseFilename)
     {
         $headings = $this->payslipExportHeadings();
-        $rows = $payslips->map(fn (Payslip $payslip) => array_values($this->mapPayslipRow($payslip)))->all();
+        $rows = $payslips->map(fn(Payslip $payslip) => array_values($this->mapPayslipRow($payslip)))->all();
 
         return Excel::download(new ArrayExport($headings, $rows), $baseFilename . '.xlsx');
     }
@@ -398,7 +420,7 @@ public function export(Request $request, PayrollRun $payrollRun = null)
     private function exportToCsv($payslips, string $baseFilename)
     {
         $headings = $this->payslipExportHeadings();
-        $rows = $payslips->map(fn (Payslip $payslip) => $this->mapPayslipRow($payslip))->all();
+        $rows = $payslips->map(fn(Payslip $payslip) => $this->mapPayslipRow($payslip))->all();
 
         return PayslipCsvExport::download($headings, $rows, $baseFilename . '.csv');
     }
@@ -488,4 +510,3 @@ public function export(Request $request, PayrollRun $payrollRun = null)
         return $code . '_' . $period . '.pdf';
     }
 }
-

@@ -22,6 +22,7 @@ return [
     'subject' => 'Subject',
     'content' => 'Content',
     'n_a' => 'N/A',
+    'optional' => 'Optional',
     'results_per_page' => '{0} 0 per page|{1} 1 per page|[2,*] :count per page',
 
     // Status/toggles
@@ -72,6 +73,9 @@ return [
     'register' => 'Register',
     'all_rights_reserved' => 'All rights reserved.',
 
+    // Generic messages for JS alerts
+    'error_generic' => 'An error occurred. Please try again.',
+
     // Dashboard strings
     'system_active' => 'System Active',
     'welcome_to_hrms' => 'Welcome to HRMS',
@@ -94,4 +98,25 @@ return [
     'by' => 'by',
     'recent_system_activity' => 'Recent System Activity',
     'activity_logging_placeholder' => 'Activity logging will appear here once employees start using the system.',
+
+    // Documents
+    'ongoing' => 'Ongoing',
+    'document_file' => 'Document File',
+    'max_file_size_and_types' => 'Maximum file size: 10MB. Supported formats: PDF, DOC, DOCX, JPG, PNG',
+    'expires_on' => 'Expires On',
+    'set_expiry_hint' => 'Set an expiry date for documents that need renewal (e.g., licenses, certificates)',
+    'watermark_note' => 'Watermark Note',
+    'watermark_placeholder' => 'e.g., Confidential - HR Use Only',
+    'watermark_hint' => 'Optional watermark text to appear on downloaded documents',
+    'tags' => 'Tags',
+    'no_tags_available' => 'No tags available. Create tags first to organize your documents.',
+    'upload_document' => 'Upload Document',
+    'visibility' => 'Visibility',
+    'private' => 'Private',
+    'shared' => 'Shared',
+    'visibility_hint' => 'Private documents are visible only to authorized personnel. Shared documents can be viewed by relevant departments.',
+    'document_type' => 'Document Type',
+    'select_type' => 'Select Type',
+    'file_too_large' => 'File size exceeds 10MB limit.',
+    'invalid_file_type' => 'Please select a valid file type (PDF, DOC, DOCX, JPG, PNG).',
 ];

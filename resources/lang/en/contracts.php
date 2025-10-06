@@ -1,7 +1,7 @@
 <?php
 
 return [
-	'common' => [
-		'contracts' => 'contracts',
-	],
+    'common' => [
+        'contracts' => 'contracts',
+    ],
 ];

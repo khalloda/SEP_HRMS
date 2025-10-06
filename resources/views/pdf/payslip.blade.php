@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html {{ $isRtl ? 'dir=rtl' : 'dir=ltr' }} lang="{{ app()->getLocale() }}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +12,12 @@
             margin: 0;
             padding: 20px;
             color: #333;
-            {{ $isRtl ? 'direction: rtl;' : 'direction: ltr;' }}
+
+                {
+                    {
+                    $isRtl ? 'direction: rtl;': 'direction: ltr;'
+                }
+            }
         }
 
         .header-section {
@@ -99,14 +105,28 @@
             background-color: #2e4029;
             color: white;
             padding: 12px;
-            text-align: {{ $isRtl ? 'right' : 'left' }};
+
+            text-align: {
+                    {
+                    $isRtl ? 'right': 'left'
+                }
+            }
+
+            ;
             font-weight: bold;
         }
 
         .salary-table td {
             padding: 10px 12px;
             border-bottom: 1px solid #ddd;
-            text-align: {{ $isRtl ? 'right' : 'left' }};
+
+            text-align: {
+                    {
+                    $isRtl ? 'right': 'left'
+                }
+            }
+
+            ;
         }
 
         .salary-table tr:nth-child(even) {
@@ -114,7 +134,13 @@
         }
 
         .amount-cell {
-            text-align: {{ $isRtl ? 'left' : 'right' }};
+            text-align: {
+                    {
+                    $isRtl ? 'left': 'right'
+                }
+            }
+
+            ;
             font-weight: bold;
             color: #2e4029;
         }
@@ -192,6 +218,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Header Section -->
     <div class="header-section">
@@ -241,18 +268,18 @@
                     <td>{{ $earning->component_display_name }}</td>
                     <td>
                         @switch($earning->calculation_mode)
-                            @case('fixed')
-                                {{ __('hrms.salary_component.calc_mode.fixed') }}
-                                @break
-                            @case('formula')
-                                {{ __('hrms.salary_component.calc_mode.formula') }}
-                                @if($earning->formula_used)
-                                    <br><small style="color: #666;">({{ $earning->formula_used }})</small>
-                                @endif
-                                @break
-                            @case('variable_net_based')
-                                {{ __('hrms.salary_component.calc_mode.variable') }}
-                                @break
+                        @case('fixed')
+                        {{ __('hrms.salary_component.calc_mode.fixed') }}
+                        @break
+                        @case('formula')
+                        {{ __('hrms.salary_component.calc_mode.formula') }}
+                        @if($earning->formula_used)
+                        <br><small style="color: #666;">({{ $earning->formula_used }})</small>
+                        @endif
+                        @break
+                        @case('variable_net_based')
+                        {{ __('hrms.salary_component.calc_mode.variable') }}
+                        @break
                         @endswitch
                     </td>
                     <td class="amount-cell">{{ number_format($earning->amount, 2) }} {{ $payslip->currency }}</td>
@@ -281,18 +308,18 @@
                     <td>{{ $deduction->component_display_name }}</td>
                     <td>
                         @switch($deduction->calculation_mode)
-                            @case('fixed')
-                                {{ __('hrms.salary_component.calc_mode.fixed') }}
-                                @break
-                            @case('formula')
-                                {{ __('hrms.salary_component.calc_mode.formula') }}
-                                @if($deduction->formula_used)
-                                    <br><small style="color: #666;">({{ $deduction->formula_used }})</small>
-                                @endif
-                                @break
-                            @case('variable_net_based')
-                                {{ __('hrms.salary_component.calc_mode.variable') }}
-                                @break
+                        @case('fixed')
+                        {{ __('hrms.salary_component.calc_mode.fixed') }}
+                        @break
+                        @case('formula')
+                        {{ __('hrms.salary_component.calc_mode.formula') }}
+                        @if($deduction->formula_used)
+                        <br><small style="color: #666;">({{ $deduction->formula_used }})</small>
+                        @endif
+                        @break
+                        @case('variable_net_based')
+                        {{ __('hrms.salary_component.calc_mode.variable') }}
+                        @break
                         @endswitch
                     </td>
                     <td class="amount-cell">{{ number_format($deduction->amount, 2) }} {{ $payslip->currency }}</td>
@@ -358,4 +385,5 @@
         <strong>{{ __('hrms.confidential') }}</strong> - {{ __('hrms.payslip.confidential_notice') }}
     </div>
 </body>
+
 </html>

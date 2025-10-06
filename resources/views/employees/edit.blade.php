@@ -282,7 +282,7 @@
                                 {{ old('salary_visibility_flag', $employee->salary_visibility_flag) ? 'checked' : '' }}>
                             <label class="form-check-label" for="salary_visibility_flag">
                                 {{ __('hrms.employee.salary_visibility') }}
-                                <small class="text-muted d-block">{{ __('Allow employee to view their own salary information') }}</small>
+                                <small class="text-muted d-block">{{ __('hrms.employee.salary_visibility_help') }}</small>
                             </label>
                             @error('salary_visibility_flag')
                             <div class="invalid-feedback">{{ $message }}</div>
