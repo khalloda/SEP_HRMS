@@ -114,20 +114,40 @@ class SalaryHistoryService
                 return \Maatwebsite\Excel\Facades\Excel::download($export, $filename);
             }
 
-            // Detailed: keep consolidated but include a simple second pass as CSV columns appended
+            // Detailed: choose single-sheet (default) or multi-sheet via ?multisheet=1
+            if (($filters['multisheet'] ?? false)) {
+                $sheets = [];
+                $sheets['Summary'] = [
+                    'headings' => $headings,
+                    'rows' => $rows->map(fn($r) => array_values($r))->all(),
+                ];
+                $i = 1;
+                foreach ($rows as $r) {
+                    $details = $r['Details'] ?? ['earnings' => [], 'deductions' => []];
+                    $sheetName = 'Period_' . $i++;
+                    $detailRows = [];
+                    $detailRows[] = ['Earnings'];
+                    foreach ($details['earnings'] as $c) { $detailRows[] = [$c['code'], $c['name'], $c['value']]; }
+                    $detailRows[] = [];
+                    $detailRows[] = ['Deductions'];
+                    foreach ($details['deductions'] as $c) { $detailRows[] = [$c['code'], $c['name'], $c['value']]; }
+                    $sheets[$sheetName] = [
+                        'headings' => ['Code','Name','Value'],
+                        'rows' => $detailRows,
+                    ];
+                }
+                $export = new \App\Exports\MultiSheetSalaryHistoryExport($sheets);
+                $filename = 'salary-history-' . $employee->code . '-' . now()->format('Ymd_His') . '.xlsx';
+                return \Maatwebsite\Excel\Facades\Excel::download($export, $filename);
+            }
+
+            // Detailed single-sheet with breakdown columns
             $export = new \App\Exports\GenericReportExport(function () use ($rows) {
                 foreach ($rows as $r) {
                     $earningStr = collect($r['Details']['earnings'] ?? [])->map(fn($c) => $c['code'] . ':' . $c['value'])->implode(', ');
                     $deductionStr = collect($r['Details']['deductions'] ?? [])->map(fn($c) => $c['code'] . ':' . $c['value'])->implode(', ');
                     yield [
-                        $r['Effective From'],
-                        $r['Effective To'],
-                        $r['Earnings'],
-                        $r['Deductions'],
-                        $r['Gross'],
-                        $r['Net'],
-                        $earningStr,
-                        $deductionStr
+                        $r['Effective From'],$r['Effective To'],$r['Earnings'],$r['Deductions'],$r['Gross'],$r['Net'],$earningStr,$deductionStr
                     ];
                 }
             }, array_merge($headings, ['Earnings Breakdown', 'Deductions Breakdown']));

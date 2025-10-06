@@ -25,6 +25,13 @@
                 </select>
             </div>
             <div class="col-md-3">
+                <label class="form-label">{{ __('Excel Sheets') }}</label>
+                <select name="multisheet" class="form-select">
+                    <option value="0" {{ request('multisheet','0')=='0' ? 'selected' : '' }}>{{ __('Single Sheet') }}</option>
+                    <option value="1" {{ request('multisheet')==='1' ? 'selected' : '' }}>{{ __('Multi-sheet (per period)') }}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">&nbsp;</label>
                 <div>
                     <button class="btn btn-brand-primary me-2"><i class="fas fa-filter"></i> {{ __('Filter') }}</button>
@@ -33,7 +40,7 @@
             </div>
             <div class="col-md-3 align-self-end text-end">
                 <div class="btn-group" role="group">
-                    <a class="btn btn-outline-secondary" href="{{ route('employees.salary-history.export', $employee) }}?format=xlsx&detail={{ request('detail','1') }}"><i class="fas fa-file-excel"></i> {{ __('Excel') }}</a>
+                    <a class="btn btn-outline-secondary" href="{{ route('employees.salary-history.export', $employee) }}?format=xlsx&detail={{ request('detail','1') }}&multisheet={{ request('multisheet','0') }}"><i class="fas fa-file-excel"></i> {{ __('Excel') }}</a>
                     <a class="btn btn-outline-secondary" href="{{ route('employees.salary-history.export', $employee) }}?format=pdf&detail={{ request('detail','1') }}"><i class="fas fa-file-pdf"></i> {{ __('PDF') }}</a>
                 </div>
             </div>
