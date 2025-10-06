@@ -22,6 +22,7 @@ class EmployeeSalaryHistoryController extends Controller
             'contract_id' => $request->input('contract_id'),
             'preset' => $request->input('preset'),
             'page' => (int) $request->input('page', 1),
+            'detail' => $request->boolean('detail', true),
         ];
 
         $history = $this->historyService->fetch($employee, $filters);
@@ -40,6 +41,7 @@ class EmployeeSalaryHistoryController extends Controller
             'to' => $request->date('to'),
             'contract_id' => $request->input('contract_id'),
             'preset' => $request->input('preset'),
+            'detail' => $request->boolean('detail', true),
         ];
 
         return $this->historyService->export($employee, $filters, $format);

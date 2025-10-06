@@ -18,6 +18,13 @@
                 <input type="date" name="to" value="{{ request('to') }}" class="form-control">
             </div>
             <div class="col-md-3">
+                <label class="form-label">{{ __('Detail Level') }}</label>
+                <select name="detail" class="form-select">
+                    <option value="1" {{ request('detail','1')=='1' ? 'selected' : '' }}>{{ __('Detailed') }}</option>
+                    <option value="0" {{ request('detail')==='0' ? 'selected' : '' }}>{{ __('Consolidated') }}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">&nbsp;</label>
                 <div>
                     <button class="btn btn-brand-primary me-2"><i class="fas fa-filter"></i> {{ __('Filter') }}</button>
@@ -26,8 +33,8 @@
             </div>
             <div class="col-md-3 align-self-end text-end">
                 <div class="btn-group" role="group">
-                    <a class="btn btn-outline-secondary" href="{{ route('employees.salary-history.export', $employee) }}?format=xlsx"><i class="fas fa-file-excel"></i> {{ __('Excel') }}</a>
-                    <a class="btn btn-outline-secondary" href="{{ route('employees.salary-history.export', $employee) }}?format=pdf"><i class="fas fa-file-pdf"></i> {{ __('PDF') }}</a>
+                    <a class="btn btn-outline-secondary" href="{{ route('employees.salary-history.export', $employee) }}?format=xlsx&detail={{ request('detail','1') }}"><i class="fas fa-file-excel"></i> {{ __('Excel') }}</a>
+                    <a class="btn btn-outline-secondary" href="{{ route('employees.salary-history.export', $employee) }}?format=pdf&detail={{ request('detail','1') }}"><i class="fas fa-file-pdf"></i> {{ __('PDF') }}</a>
                 </div>
             </div>
         </form>
@@ -67,6 +74,7 @@
                         <td>{{ $row['totals']['gross'] ?? '—' }}</td>
                         <td>{{ $row['totals']['net'] ?? '—' }}</td>
                     </tr>
+                    @if(request('detail','1')=='1')
                     <tr>
                         <td colspan="6">
                             <div class="row">
@@ -89,6 +97,7 @@
                             </div>
                         </td>
                     </tr>
+                    @endif
                     @endforeach
                 </tbody>
             </table>

@@ -94,18 +94,43 @@ class SalaryHistoryService
         });
 
         if ($format === 'xlsx' || $format === 'excel') {
-            $export = new \App\Exports\GenericReportExport(function () use ($rows) {
-                foreach ($rows as $r) {
-                    yield array_values($r);
-                }
-            }, array_keys($rows->first() ?? [
+            $headings = array_keys($rows->first() ?? [
                 'Effective From' => null,
                 'Effective To' => null,
                 'Earnings' => null,
                 'Deductions' => null,
                 'Gross' => null,
                 'Net' => null,
-            ]));
+            ]);
+
+            // Consolidated or detailed via query param ?detail=true|false
+            if (!($filters['detail'] ?? true)) {
+                $export = new \App\Exports\GenericReportExport(function () use ($rows) {
+                    foreach ($rows as $r) {
+                        yield array_values($r);
+                    }
+                }, $headings);
+                $filename = 'salary-history-' . $employee->code . '-' . now()->format('Ymd_His') . '.xlsx';
+                return \Maatwebsite\Excel\Facades\Excel::download($export, $filename);
+            }
+
+            // Detailed: keep consolidated but include a simple second pass as CSV columns appended
+            $export = new \App\Exports\GenericReportExport(function () use ($rows) {
+                foreach ($rows as $r) {
+                    $earningStr = collect($r['Details']['earnings'] ?? [])->map(fn($c) => $c['code'] . ':' . $c['value'])->implode(', ');
+                    $deductionStr = collect($r['Details']['deductions'] ?? [])->map(fn($c) => $c['code'] . ':' . $c['value'])->implode(', ');
+                    yield [
+                        $r['Effective From'],
+                        $r['Effective To'],
+                        $r['Earnings'],
+                        $r['Deductions'],
+                        $r['Gross'],
+                        $r['Net'],
+                        $earningStr,
+                        $deductionStr
+                    ];
+                }
+            }, array_merge($headings, ['Earnings Breakdown', 'Deductions Breakdown']));
 
             $filename = 'salary-history-' . $employee->code . '-' . now()->format('Ymd_His') . '.xlsx';
             return \Maatwebsite\Excel\Facades\Excel::download($export, $filename);
@@ -125,6 +150,7 @@ class SalaryHistoryService
             'employee' => $employee,
             'rows' => $rows,
             'generatedAt' => now(),
+            'detail' => (bool) ($filters['detail'] ?? true),
         ])->render();
 
         $mpdf->WriteHTML($html);

@@ -104,7 +104,7 @@
                 <td>{{ $r['Gross'] }}</td>
                 <td>{{ $r['Net'] }}</td>
             </tr>
-            @if(isset($r['Details']) && is_array($r['Details']))
+            @if(($detail ?? true) && isset($r['Details']) && is_array($r['Details']))
             <tr>
                 <td colspan="6">
                     <table style="width:100%; border: none;">
