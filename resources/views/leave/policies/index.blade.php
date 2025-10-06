@@ -1,25 +1,26 @@
 @extends('layouts.app')
-@section('title','Leave Policies')
+
+@section('title', __('leave.policies.title'))
+
 @section('header')
   <div class="d-flex justify-content-between align-items-center">
-    <h1 class="h4 m-0">Leave Policies</h1>
-    @can('attendance.manage')
-      <a class="btn btn-brand-primary" href="{{ route('leave.policies.create') }}">New Policy</a>
-    @endcan
+    <h1 class="h3 m-0 brand-dark-green">{{ __('leave.policies.title') }}</h1>
+    <a href="{{ route('leave.policies.create') }}" class="btn btn-brand-primary">{{ __('leave.policies.new') }}</a>
   </div>
 @endsection
+
 @section('content')
-  <div class="card shadow-sm">
-    <div class="table-responsive">
-      <table class="table table-striped mb-0">
-        <thead class="table-header-custom">
+  <div class="card">
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
           <tr>
-            <th class="text-white">Code</th>
-            <th class="text-white">Name</th>
-            <th class="text-white">Accrual</th>
-            <th class="text-white">Days/Year</th>
-            <th class="text-white">Carry Over</th>
-            <th class="text-white">Actions</th>
+            <th>{{ __('leave.policies.code') }}</th>
+            <th>{{ __('leave.policies.name') }}</th>
+            <th>{{ __('leave.policies.accrual') }}</th>
+            <th>{{ __('leave.policies.days_per_year') }}</th>
+            <th>{{ __('leave.policies.carry_over') }}</th>
+            <th>{{ __('leave.policies.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -29,22 +30,17 @@
               <td>{{ $p->name }}</td>
               <td>{{ ucfirst($p->accrual_rule) }}</td>
               <td>{{ $p->days_per_year }}</td>
-              <td>{{ $p->carry_over ? 'Yes' : 'No' }} @if($p->carry_over && $p->max_carry_over) (max {{ $p->max_carry_over }}) @endif</td>
+              <td>{{ $p->carry_over ? __('common.yes') : __('common.no') }}</td>
               <td>
-                @can('attendance.manage')
-                <a class="btn btn-sm btn-outline-secondary" href="{{ route('leave.policies.edit', $p->id) }}">Edit</a>
-                <form class="d-inline" method="POST" action="{{ route('leave.policies.destroy', $p->id) }}" onsubmit="return confirm('Delete this policy?');">
+                <a href="{{ route('leave.policies.edit', $p->id) }}" class="btn btn-sm btn-outline-primary">{{ __('leave.policies.edit') }}</a>
+                <form action="{{ route('leave.policies.destroy', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('leave.policies.confirm_delete') }}');">
                   @csrf @method('DELETE')
-                  <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                  <button class="btn btn-sm btn-outline-danger">{{ __('leave.policies.delete') }}</button>
                 </form>
-                @endcan
-                @if(!empty($balances[$p->id]))
-                  <span class="badge bg-light text-dark ms-2">You: {{ $balances[$p->id]['closing'] }} days</span>
-                @endif
               </td>
             </tr>
           @empty
-            <tr><td colspan="6" class="text-center p-3">No policies.</td></tr>
+            <tr><td colspan="6" class="text-center text-muted">{{ __('leave.policies.none') }}</td></tr>
           @endforelse
         </tbody>
       </table>
