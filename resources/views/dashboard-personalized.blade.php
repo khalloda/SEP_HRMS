@@ -9,16 +9,16 @@
                 {{ isset($analytics['role_config']['custom_title']) ? $analytics['role_config']['custom_title'] : __('hrms.dashboard.title') }}
             </h1>
             <p class="text-muted mb-0">
-                {{ __('Welcome back, :name', ['name' => Auth::user()->name]) }} -
+                {{ __('hrms.dashboard.welcome_message') }} -
                 <span class="badge bg-{{ isset($analytics['role_config']['theme_color']) ? $analytics['role_config']['theme_color'] : 'primary' }}">
-                    {{ Auth::user()->getRoleNames()->first() ?? __('User') }}
+                    {{ Auth::user()->getRoleNames()->first() ?? __('hrms.employee.title') }}
                 </span>
             </p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-success">{{ __('System Active') }}</span>
+            <span class="badge bg-success">{{ __('common.system_active') }}</span>
             <button class="btn btn-outline-secondary btn-sm" onclick="refreshDashboard()">
-                <i class="fas fa-sync-alt"></i> {{ __('Refresh') }}
+                <i class="fas fa-sync-alt"></i> {{ __('hrms.dashboard.refresh') }}
             </button>
         </div>
     </div>
@@ -31,7 +31,7 @@
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header card-header-custom">
-                <h5 class="mb-0"><i class="fas fa-bolt"></i> {{ __('Quick Actions') }}</h5>
+                <h5 class="mb-0"><i class="fas fa-bolt"></i> {{ __('common.quick_actions') }}</h5>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -86,7 +86,7 @@
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header card-header-custom">
-                <h5 class="mb-0"><i class="fas fa-chart-line"></i> {{ __('Analytics Overview') }}</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> {{ __('hrms.dashboard.employee_analytics') }}</h5>
             </div>
             <div class="card-body">
                 <canvas id="dashboardChart" width="400" height="100"></canvas>
@@ -102,9 +102,9 @@
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-history"></i> {{ __('Recent Activities') }}</h5>
+                <h5 class="mb-0"><i class="fas fa-history"></i> {{ __('hrms.dashboard.recent_activities') }}</h5>
                 <a href="{{ route('audit-trail.index') }}" class="btn btn-sm btn-outline-light">
-                    {{ __('View All') }}
+                    {{ __('hrms.dashboard.view_all') }}
                 </a>
             </div>
             <div class="card-body p-0">
@@ -138,7 +138,7 @@
                 @else
                     <div class="text-center py-4">
                         <i class="fas fa-history fa-2x text-muted mb-2"></i>
-                        <p class="text-muted">{{ __('No recent activities') }}</p>
+                        <p class="text-muted">{{ __('hrms.dashboard.no_recent_activities') }}</p>
                     </div>
                 @endif
             </div>

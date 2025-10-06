@@ -180,6 +180,9 @@ return [
     'best_regards' => 'Best regards,',
     'note' => 'Note',
     'preview_notice' => 'This preview shows the actual email content. Recipients will receive this in their email client.',
+
+    // Misc helpers
+    'more_count' => '(:count more)',
     'search_documents' => 'Search documents...',
     'total_documents' => 'Total Documents',
     'expiring_soon' => 'Expiring Soon',

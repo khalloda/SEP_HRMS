@@ -175,7 +175,7 @@
                     @if ($expiryAlerts['soon']->count() > 6)
                     <div class="text-center mt-3">
                         <a href="{{ route('contracts.index', ['expiry_filter' => 'soon']) }}" class="btn btn-outline-info">
-                            {{ __('hrms.notifications.view_all') }} ({{ $expiryAlerts['soon']->count() - 6 }} more)
+                            {{ __('hrms.notifications.view_all') }} {{ __('common.more_count', ['count' => $expiryAlerts['soon']->count() - 6]) }}
                         </a>
                     </div>
                     @endif
@@ -419,7 +419,7 @@
                     <i class="fas fa-history"></i> {{ __('hrms.dashboard.recent_activities') }}
                 </h5>
                 <button class="btn btn-outline-secondary btn-sm" onclick="refreshActivities()">
-                    <i class="fas fa-refresh"></i> {{ __('hrms.refresh') }}
+                    <i class="fas fa-sync-alt"></i> {{ __('hrms.dashboard.refresh') }}
                 </button>
             </div>
             <div class="card-body">
