@@ -591,6 +591,28 @@ return [
         'total_net_pay' => 'Total Net Pay',
     ],
 
+    // Salary Component
+    'salary_component' => [
+        'view_usage_help' => 'View component usage and activity history.',
+        'details' => 'Component Details',
+        'code' => 'Code',
+        'type' => 'Type',
+        'calculation' => 'Calculation',
+        'taxable' => 'Taxable',
+        'priority' => 'Priority',
+        'visible_to' => 'Visible To',
+        'all_roles' => 'All roles',
+        'recent_usage' => 'Recent Usage in Salary Structures',
+        'employee' => 'Employee',
+        'effective_from' => 'Effective From',
+        'effective_to' => 'Effective To',
+        'no_usage' => 'No salary structures currently use this component.',
+        'recent_activity' => 'Recent Activity',
+        'updated' => 'Updated',
+        'system' => 'System',
+        'no_recent_activity' => 'No recent activity recorded for this component.',
+    ],
+
     // Salary structure helpers
     'new_structures_start_today_or_later' => 'New structures must start today or later.',
     'leave_blank_structure_active' => 'Leave blank to keep the structure active until replaced.',
@@ -598,6 +620,14 @@ return [
     'optional_formula_expression' => 'Optional formula expression',
     'priority_order_help' => 'Drag rows to set the calculation priority. Earlier rows calculate first.',
     'add_at_least_one_component' => 'Add at least one component to keep this structure active.',
+    'salary_structure_details' => 'Salary Structure Details',
+    'currencies_from_config_hint' => 'Currencies are loaded from payroll configuration.',
+    'optional_memo_payroll_only' => 'Optional memo visible to payroll only',
+    'select_component' => 'Select a component',
+    'formula_if_help' => 'Use IF(condition, value_if_true, value_if_false) for conditional formulas.',
+    'conditional_if_help' => 'Conditional IF hints for the formula engine.',
+    'reorder_priority_help' => 'Reorder rows to change calculation priority.',
+    'salary_structure_edit_help' => 'Editing dates may affect history and calculations.',
 
     // PDF and Documents
     'confidential' => 'CONFIDENTIAL',

@@ -550,6 +550,28 @@ return [
         'total_net_pay' => 'إجمالي الراتب الصافي',
     ],
 
+    // مكون الراتب
+    'salary_component' => [
+        'view_usage_help' => 'عرض استخدام المكون وسجل النشاط.',
+        'details' => 'تفاصيل المكون',
+        'code' => 'الكود',
+        'type' => 'النوع',
+        'calculation' => 'طريقة الحساب',
+        'taxable' => 'خاضع للضريبة',
+        'priority' => 'الأولوية',
+        'visible_to' => 'مرئي لـ',
+        'all_roles' => 'جميع الأدوار',
+        'recent_usage' => 'الاستخدام الحديث في هياكل الرواتب',
+        'employee' => 'الموظف',
+        'effective_from' => 'ساري من',
+        'effective_to' => 'ساري حتى',
+        'no_usage' => 'لا توجد هياكل رواتب تستخدم هذا المكون حالياً.',
+        'recent_activity' => 'النشاط الأخير',
+        'updated' => 'تم التحديث',
+        'system' => 'النظام',
+        'no_recent_activity' => 'لا يوجد نشاط حديث مسجل لهذا المكون.',
+    ],
+
     // مساعدات هيكل الراتب
     'new_structures_start_today_or_later' => 'يجب أن تبدأ الهياكل الجديدة اليوم أو بعده.',
     'leave_blank_structure_active' => 'اتركه فارغًا لإبقاء الهيكل نشطًا حتى يتم استبداله.',
@@ -557,6 +579,15 @@ return [
     'optional_formula_expression' => 'صيغة حساب اختيارية',
     'priority_order_help' => 'اسحب الصفوف لتحديد أولوية الحساب. يتم الحساب للأعلى أولاً.',
     'add_at_least_one_component' => 'أضف مكونًا واحدًا على الأقل للإبقاء على هذا الهيكل نشطًا.',
+    'salary_structure_details' => 'تفاصيل هيكل الراتب',
+    'currencies_from_config_hint' => 'يتم تحميل العملات من إعدادات الرواتب.',
+    'optional_memo_payroll_only' => 'ملاحظة اختيارية مرئية لقسم الرواتب فقط',
+    'select_component' => 'اختر المكون',
+    'formula_if_help' => 'استخدم IF(شرط، قيمة_إذا_صحيح، قيمة_إذا_خاطئ) للمعادلات الشرطية.',
+    'conditional_if_help' => 'تلميحات IF الشرطية لمحرك المعادلات.',
+    'reorder_priority_help' => 'أعد ترتيب الصفوف لتغيير أولوية الحساب.',
+    'salary_structure_edit_help' => 'قد يؤثر تعديل التواريخ على السجل والحسابات.',
+    'currencies_from_config' => 'العملات من الإعدادات',
 
     // PDF والمستندات
     'confidential' => 'سري',
