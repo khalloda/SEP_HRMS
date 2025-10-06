@@ -1,7 +1,17 @@
-# i18n Guidelines
+### i18n Guidelines
 
-- Use namespaced keys (auth.*, employees.*, payroll.*, reports.*, common.*).
-- Prefer `__('common.save')` etc. for common UI terms.
-- Arabic files: `resources/lang/ar/*.php`. English: `resources/lang/en/*.php`.
-- Switch locale via `/language/{locale}`. Fallback per `config('app.fallback_locale')`.
-- For model labels with `name_en`/`name_ar`, use `ComponentName::display()`.
+- Use namespaced keys by domain (e.g., `employees.show.title`, `payroll.exports.employee_code`).
+- Put generic UI labels under `resources/lang/{locale}/common.php`.
+- Prefer placeholders for variables: `__('employees.show.title', ['name' => $employee->display_name])`.
+- For front-end/Blade, use `__('key')` or `@lang('key')`.
+- For exports, centralize headers in lang files and reference keys from controllers/services.
+- For PDFs, ensure RTL via `dir="rtl"` and use DejaVu Sans (mPDF autoLangToFont is enabled).
+
+Linting
+- Detect hard-coded English: `php artisan i18n:lint-hardcoded`
+- Exit code non-zero if any violations found.
+
+Adding new keys
+- English in `resources/lang/en/*.php`.
+- Arabic in `resources/lang/ar/*.php`.
+- Keep keys short and reusable; avoid embedding HTML in translations.
