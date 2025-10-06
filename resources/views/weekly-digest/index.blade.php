@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', __('Weekly Digest'))
+@section('title', __('common.weekly_digest'))
 
 @section('header')
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h2 class="h3 brand-dark-green mb-1">{{ __('Weekly Digest') }}</h2>
+            <h2 class="h3 brand-dark-green mb-1">{{ __('common.weekly_digest') }}</h2>
             <p class="text-muted mb-0">{{ __('Manage and preview weekly digest emails') }}</p>
         </div>
         <div>
@@ -13,7 +13,7 @@
                 <i class="fas fa-eye"></i> {{ __('Preview Email') }}
             </a>
             <button type="button" class="btn btn-brand-secondary" onclick="sendTestDigest()">
-                <i class="fas fa-paper-plane"></i> {{ __('Send Test') }}
+                <i class="fas fa-paper-plane"></i> {{ __('weekly.buttons.send_test') }}
             </button>
         </div>
     </div>
@@ -206,21 +206,21 @@
             <div class="card-body">
                 <div class="d-grid gap-2">
                     <button type="button" class="btn btn-brand-primary" onclick="sendDigest(false)">
-                        <i class="fas fa-paper-plane"></i> {{ __('Send Now') }}
+                        <i class="fas fa-paper-plane"></i> {{ __('weekly.buttons.send_now') }}
                     </button>
                     <button type="button" class="btn btn-outline-primary" onclick="sendDigest(true)">
                         <i class="fas fa-paper-plane"></i> {{ __('Force Send') }}
                     </button>
                     <hr>
                     <button type="button" class="btn btn-outline-secondary" onclick="sendTestDigest()">
-                        <i class="fas fa-vial"></i> {{ __('Send Test to Me') }}
+                        <i class="fas fa-vial"></i> {{ __('weekly.buttons.send_test') }}
                     </button>
                 </div>
                 <div class="mt-3">
                     <small class="text-muted">
-                        <strong>{{ __('Send Now') }}:</strong> {{ __('Only sends if criteria are met') }}<br>
+                        <strong>{{ __('weekly.buttons.send_now') }}:</strong> {{ __('Only sends if criteria are met') }}<br>
                         <strong>{{ __('Force Send') }}:</strong> {{ __('Sends regardless of criteria') }}<br>
-                        <strong>{{ __('Send Test') }}:</strong> {{ __('Sends test digest to your email only') }}
+                        <strong>{{ __('weekly.buttons.send_test') }}:</strong> {{ __('Sends test digest to your email only') }}
                     </small>
                 </div>
             </div>
@@ -309,14 +309,14 @@ function sendDigest(force = false) {
     .then(data => {
         modal.hide();
         if (data.success) {
-            alert('✅ ' + data.message);
+            alert('✅ ' + (data.message || '{{ __('weekly.messages.success') }}'));
         } else {
-            alert('❌ ' + data.message);
+            alert('❌ ' + (data.message || '{{ __('weekly.messages.error') }}'));
         }
     })
     .catch(error => {
         modal.hide();
-        alert('❌ Error: ' + error.message);
+        alert('❌ {{ __('weekly.messages.error_prefix') }} ' + (error.message || ''));
     });
 }
 
@@ -335,14 +335,14 @@ function sendTestDigest() {
     .then(data => {
         modal.hide();
         if (data.success) {
-            alert('✅ ' + data.message);
+            alert('✅ ' + (data.message || '{{ __('weekly.messages.success') }}'));
         } else {
-            alert('❌ ' + data.message);
+            alert('❌ ' + (data.message || '{{ __('weekly.messages.error') }}'));
         }
     })
     .catch(error => {
         modal.hide();
-        alert('❌ Error: ' + error.message);
+        alert('❌ {{ __('weekly.messages.error_prefix') }} ' + (error.message || ''));
     });
 }
 </script>

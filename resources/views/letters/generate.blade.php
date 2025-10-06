@@ -276,7 +276,8 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('{{ __('letters.js.error_preview') }}');
+                    alert('{{ __('
+                        letters.js.error_preview ') }}');
                 });
         });
 
@@ -307,7 +308,8 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('{{ __('letters.js.error_generate') }}');
+                    alert('{{ __('
+                        letters.js.error_generate ') }}');
                 });
         }
 

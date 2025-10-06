@@ -22,6 +22,7 @@ return [
     'subject' => 'Subject',
     'content' => 'Content',
     'n_a' => 'N/A',
+    'results_per_page' => '{0} 0 per page|{1} 1 per page|[2,*] :count per page',
 
     // Status/toggles
     'yes' => 'Yes',
