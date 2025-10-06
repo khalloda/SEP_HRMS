@@ -378,7 +378,7 @@
             <div class="card-body d-grid gap-2">
                 @can('update', $employee)
                 <a href="{{ route('employees.edit', $employee) }}" class="btn btn-brand-primary">
-                    <i class="fas fa-edit"></i> {{ __('hrms.edit') }} {{ __('hrms.employee') }}
+                    <i class="fas fa-edit"></i> {{ __('hrms.edit') }} {{ __('hrms.employee.title') }}
                 </a>
                 @endcan
 
