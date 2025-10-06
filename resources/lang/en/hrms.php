@@ -438,6 +438,11 @@ return [
         ],
     ],
 
+    // Salary structure contextual help
+    'salary_structure_help' => [
+        'define_currency_components' => 'Define the currency and add salary components below.',
+    ],
+
     // Salary Components
     'salary_component' => [
         'calc_mode' => [

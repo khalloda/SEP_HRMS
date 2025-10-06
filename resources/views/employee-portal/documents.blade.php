@@ -10,7 +10,7 @@
     </div>
     <div>
         <a href="{{ route('employee-portal.dashboard') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> {{ __('Back to Dashboard') }}
+            <i class="fas fa-arrow-left"></i> {{ __('common.back_to_dashboard') }}
         </a>
     </div>
 </div>
@@ -26,7 +26,7 @@
                     <i class="fas fa-folder-open fa-2x"></i>
                 </div>
                 <h4 class="card-title">{{ $documentStats['total'] }}</h4>
-                <p class="card-text text-muted small">{{ __('Total') }}</p>
+                <p class="card-text text-muted small">{{ __('common.total') }}</p>
             </div>
         </div>
     </div>
@@ -38,7 +38,7 @@
                     <i class="fas fa-exclamation-triangle fa-2x"></i>
                 </div>
                 <h4 class="card-title">{{ $documentStats['expiring_soon'] }}</h4>
-                <p class="card-text text-muted small">{{ __('Expiring Soon') }}</p>
+                <p class="card-text text-muted small">{{ __('common.expiring_soon') }}</p>
             </div>
         </div>
     </div>
@@ -50,7 +50,7 @@
                     <i class="fas fa-times-circle fa-2x"></i>
                 </div>
                 <h4 class="card-title">{{ $documentStats['expired'] }}</h4>
-                <p class="card-text text-muted small">{{ __('Expired') }}</p>
+                <p class="card-text text-muted small">{{ __('common.expired') }}</p>
             </div>
         </div>
     </div>
@@ -62,7 +62,7 @@
                     <i class="fas fa-calendar fa-2x"></i>
                 </div>
                 <h4 class="card-title">{{ $documentStats['this_month'] }}</h4>
-                <p class="card-text text-muted small">{{ __('This Month') }}</p>
+                <p class="card-text text-muted small">{{ __('common.this_month') }}</p>
             </div>
         </div>
     </div>
@@ -70,7 +70,7 @@
     <div class="col-md-4 mb-4">
         <div class="card border-0 shadow-sm">
             <div class="card-header card-header-custom">
-                <h6 class="mb-0">{{ __('Documents by Type') }}</h6>
+                <h6 class="mb-0">{{ __('common.documents_by_type') }}</h6>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -100,7 +100,7 @@
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-            <i class="fas fa-file-alt"></i> {{ __('My HR Letters') }}
+            <i class="fas fa-file-alt"></i> {{ __('common.my_hr_letters') }}
         </h5>
         <span class="badge bg-light text-dark">{{ $hrLetters->count() }}</span>
     </div>
@@ -121,7 +121,7 @@
                     </div>
                     <a href="{{ route('letters.download-pdf', $letter) }}"
                         class="btn btn-sm btn-outline-success"
-                        title="{{ __('Download Letter') }}">
+                        title="{{ __('common.download_letter') }}">
                         <i class="fas fa-download"></i>
                     </a>
                 </div>
@@ -135,21 +135,21 @@
 <!-- Search and Filter Section -->
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-light">
-        <h6 class="mb-0">{{ __('Search & Filter Documents') }}</h6>
+        <h6 class="mb-0">{{ __('common.search_filter_documents') }}</h6>
     </div>
     <div class="card-body">
         <form method="GET" action="{{ route('employee-portal.documents') }}">
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">{{ __('Search') }}</label>
+                    <label class="form-label">{{ __('common.search') }}</label>
                     <input type="text" name="search" class="form-control"
                         value="{{ request('search') }}"
-                        placeholder="{{ __('Search documents...') }}">
+                        placeholder="{{ __('common.search_documents') }}">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">{{ __('Document Type') }}</label>
+                    <label class="form-label">{{ __('common.document_type') }}</label>
                     <select name="type" class="form-select">
-                        <option value="">{{ __('All Types') }}</option>
+                        <option value="">{{ __('common.all_types') }}</option>
                         @foreach($documentTypes as $typeKey => $typeInfo)
                         @php
                         $typeName = app()->getLocale() === 'ar' ? ($typeInfo['name_ar'] ?? $typeInfo['name_en']) : $typeInfo['name_en'];
@@ -161,12 +161,12 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">{{ __('Status') }}</label>
+                    <label class="form-label">{{ __('common.status') }}</label>
                     <select name="status" class="form-select">
-                        <option value="">{{ __('All Status') }}</option>
-                        <option value="valid" {{ request('status') === 'valid' ? 'selected' : '' }}>{{ __('Valid') }}</option>
-                        <option value="expiring_soon" {{ request('status') === 'expiring_soon' ? 'selected' : '' }}>{{ __('Expiring Soon') }}</option>
-                        <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>{{ __('Expired') }}</option>
+                        <option value="">{{ __('common.all_status') }}</option>
+                        <option value="valid" {{ request('status') === 'valid' ? 'selected' : '' }}>{{ __('common.valid') }}</option>
+                        <option value="expiring_soon" {{ request('status') === 'expiring_soon' ? 'selected' : '' }}>{{ __('common.expiring_soon') }}</option>
+                        <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>{{ __('common.expired') }}</option>
                     </select>
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
@@ -189,17 +189,17 @@
     <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
             <h5 class="mb-0">{{ __('hrms.my_documents') }}</h5>
-            <small class="text-white ms-3">{{ $documents->total() }} {{ __('documents') }}</small>
+            <small class="text-white ms-3">{{ $documents->total() }} {{ __('common.documents_label') }}</small>
         </div>
         <div class="d-flex align-items-center gap-2">
             <button type="button" class="btn btn-sm btn-outline-light"
                 id="bulkDownloadBtn" style="display: none;"
                 onclick="bulkDownload()">
-                <i class="fas fa-download"></i> {{ __('Download Selected') }}
+                <i class="fas fa-download"></i> {{ __('common.download_selected') }}
             </button>
             <button type="button" class="btn btn-sm btn-outline-light"
                 data-bs-toggle="modal" data-bs-target="#requestUpdateModal">
-                <i class="fas fa-edit"></i> {{ __('Request Update') }}
+                <i class="fas fa-edit"></i> {{ __('common.request_update') }}
             </button>
         </div>
     </div>
@@ -214,12 +214,12 @@
                             <th width="40">
                                 <input type="checkbox" class="form-check-input" id="selectAll">
                             </th>
-                            <th>{{ __('Document') }}</th>
-                            <th>{{ __('Type') }}</th>
-                            <th>{{ __('Upload Date') }}</th>
-                            <th>{{ __('Expiry') }}</th>
-                            <th>{{ __('Status') }}</th>
-                            <th>{{ __('Actions') }}</th>
+                            <th>{{ __('common.document') }}</th>
+                            <th>{{ __('common.type') }}</th>
+                            <th>{{ __('common.upload_date') }}</th>
+                            <th>{{ __('common.expiry') }}</th>
+                            <th>{{ __('common.status') }}</th>
+                            <th>{{ __('common.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -255,16 +255,16 @@
                                 {{ $document->expires_at->format('M j, Y') }}
                                 <br><small class="text-muted">{{ $document->expires_at->diffForHumans() }}</small>
                                 @else
-                                <span class="text-muted">{{ __('No expiry') }}</span>
+                                <span class="text-muted">{{ __('common.no_expiry') }}</span>
                                 @endif
                             </td>
                             <td>
                                 @if($document->is_expired)
-                                <span class="badge bg-danger">{{ __('Expired') }}</span>
+                                <span class="badge bg-danger">{{ __('common.expired') }}</span>
                                 @elseif($document->is_expiring_soon)
-                                <span class="badge bg-warning">{{ __('Expiring Soon') }}</span>
+                                <span class="badge bg-warning">{{ __('common.expiring_soon') }}</span>
                                 @else
-                                <span class="badge bg-success">{{ __('Valid') }}</span>
+                                <span class="badge bg-success">{{ __('common.valid') }}</span>
                                 @endif
 
                                 @if($document->versions->count() > 1)
@@ -305,8 +305,8 @@
         @else
         <div class="text-center py-5">
             <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-            <h5 class="text-muted">{{ __('No documents found') }}</h5>
-            <p class="text-muted">{{ __('Your documents will appear here once they are uploaded by HR.') }}</p>
+            <h5 class="text-muted">{{ __('common.no_documents_found') }}</h5>
+            <p class="text-muted">{{ __('common.empty_documents_hint') }}</p>
         </div>
         @endif
     </div>
@@ -319,7 +319,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{{ __('Document Versions') }}</h5>
+                <h5 class="modal-title">{{ __('common.document_versions') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -328,9 +328,9 @@
                     @foreach($document->versions as $version)
                     <div class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>{{ __('Version') }} {{ $version->version_no }}</strong>
+                            <strong>{{ __('common.version') }} {{ $version->version_no }}</strong>
                             @if($version->is_current)
-                            <span class="badge bg-primary ms-2">{{ __('Current') }}</span>
+                            <span class="badge bg-primary ms-2">{{ __('common.current') }}</span>
                             @endif
                             <br><small class="text-muted">{{ $version->created_at->format('M j, Y \a\t g:i A') }}</small>
                         </div>
@@ -338,7 +338,7 @@
                             <span class="badge bg-secondary">{{ $version->file_size }}</span>
                             @can('view', $document)
                             <a href="{{ route('documents.download', ['document' => $document, 'version' => $version->id]) }}"
-                                class="btn btn-sm btn-outline-primary ms-2">
+                                class="btn btn-sm btn-outline-primary ms-2" title="{{ __('common.download') }}">
                                 <i class="fas fa-download"></i>
                             </a>
                             @endcan
@@ -360,47 +360,47 @@
             <form method="POST" action="{{ route('employee-portal.documents.request-update') }}">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ __('Request Document Update') }}</h5>
+                    <h5 class="modal-title">{{ __('common.request_document_update') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label required">{{ __('Document Type') }}</label>
+                        <label class="form-label required">{{ __('common.document_type') }}</label>
                         <select name="document_type" class="form-select" required>
-                            <option value="">{{ __('Select document type') }}</option>
+                            <option value="">{{ __('common.select_document_type') }}</option>
                             @foreach($documentTypes as $typeKey => $typeInfo)
                             @php
                             $typeName = app()->getLocale() === 'ar' ? ($typeInfo['name_ar'] ?? $typeInfo['name_en']) : $typeInfo['name_en'];
                             @endphp
                             <option value="{{ $typeKey }}">{{ $typeName }}</option>
                             @endforeach
-                            <option value="other">{{ __('Other') }}</option>
+                            <option value="other">{{ __('common.other') }}</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label required">{{ __('Reason for Update') }}</label>
+                        <label class="form-label required">{{ __('common.reason_for_update') }}</label>
                         <select name="reason" class="form-select" required>
-                            <option value="">{{ __('Select reason') }}</option>
-                            <option value="expired">{{ __('Document has expired') }}</option>
-                            <option value="incorrect_info">{{ __('Incorrect information') }}</option>
-                            <option value="new_version">{{ __('New version available') }}</option>
-                            <option value="missing_document">{{ __('Missing document') }}</option>
-                            <option value="other">{{ __('Other') }}</option>
+                            <option value="">{{ __('common.select_reason') }}</option>
+                            <option value="expired">{{ __('hrms.expired') }}</option>
+                            <option value="incorrect_info">{{ __('hrms.incorrect_information') }}</option>
+                            <option value="new_version">{{ __('hrms.new_version_available') }}</option>
+                            <option value="missing_document">{{ __('hrms.missing_document') }}</option>
+                            <option value="other">{{ __('common.other') }}</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">{{ __('Additional Notes') }}</label>
+                        <label class="form-label">{{ __('common.additional_notes') }}</label>
                         <textarea name="notes" class="form-control" rows="4"
-                            placeholder="{{ __('Please provide additional details about your request...') }}"></textarea>
+                            placeholder="{{ __('common.please_provide_details') }}"></textarea>
                     </div>
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
-                        {{ __('Your request will be reviewed by HR and you will be contacted within 2-3 business days.') }}
+                        {{ __('common.request_review_notice') }}
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('Submit Request') }}</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('common.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('common.submit_request') }}</button>
                 </div>
             </form>
         </div>

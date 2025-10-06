@@ -171,11 +171,7 @@
 <script>
     function salaryStructureForm() {
         return {
-            useConditionalsFlag: {
-                {
-                    config('payroll.use_safe_engine_conditionals') ? 'true' : 'false'
-                }
-            }
+            useConditionalsFlag: @json(config('payroll.use_safe_engine_conditionals'))
         };
     }
 
@@ -260,7 +256,8 @@
                     this.addRow();
                     this.$dispatch('flash', {
                         type: 'danger',
-                        message: '{{ __('hrms.add_at_least_one_component') }}'
+                        message: '{{ __('
+                        hrms.add_at_least_one_component ') }}'
                     });
                     return;
                 }

@@ -397,6 +397,11 @@ return [
         ],
     ],
 
+    // مساعدات سياقية لهيكل الراتب
+    'salary_structure_help' => [
+        'define_currency_components' => 'حدد العملة وأضف مكونات الراتب أدناه.',
+    ],
+
     // مكونات الراتب
     'salary_component' => [
         'calc_mode' => [

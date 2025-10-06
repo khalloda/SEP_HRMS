@@ -148,7 +148,7 @@
 
         <div class="col-12">
             <div class="d-flex justify-content-end gap-2">
-                <a href{{ route('employees.salary-structures.index', $employee) }}" class="btn btn-outline-secondary">{{ __('common.cancel') }}</a>
+                <a href="{{ route('employees.salary-structures.index', $employee) }}" class="btn btn-outline-secondary">{{ __('common.cancel') }}</a>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i>
                     <span class="ms-1">{{ __('hrms.salary_structure.create') }}</span>
@@ -163,11 +163,7 @@
 <script>
     function salaryStructureForm() {
         return {
-            useConditionalsFlag: {
-                {
-                    config('payroll.use_safe_engine_conditionals') ? 'true' : 'false'
-                }
-            }
+            useConditionalsFlag: @json(config('payroll.use_safe_engine_conditionals'))
         };
     }
 
@@ -251,7 +247,8 @@
                     this.addRow();
                     this.$dispatch('flash', {
                         type: 'danger',
-                        message: '{{ __('hrms.add_at_least_one_component') }}'
+                        message: '{{ __('
+                        hrms.add_at_least_one_component ') }}'
                     });
                     return;
                 }

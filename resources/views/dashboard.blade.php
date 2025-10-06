@@ -630,7 +630,8 @@
     // Initialize all dashboard charts
     function initializeCharts() {
         // Load charts data
-        fetch('{{ route("dashboard.charts-data") }}')
+        fetch('{{ route('
+                dashboard.charts - data ') }}')
             .then(response => response.json())
             .then(data => {
                 initializeDepartmentChart(data.department_breakdown || {});
@@ -834,7 +835,8 @@
         icon.classList.add('fa-spin');
         button.disabled = true;
 
-        fetch('{{ route("dashboard.recent-activities") }}?limit=10')
+        fetch('{{ route('
+                dashboard.recent - activities ') }}?limit=10')
             .then(response => response.json())
             .then(activities => {
                 if (activities.length > 0) {
@@ -886,7 +888,8 @@
     // Auto-refresh dashboard data every 5 minutes
     setInterval(function() {
         // Refresh charts data
-        fetch('{{ route("dashboard.charts-data") }}')
+        fetch('{{ route('
+                dashboard.charts - data ') }}')
             .then(response => response.json())
             .then(data => {
                 initializeDepartmentChart(data.department_breakdown || {});

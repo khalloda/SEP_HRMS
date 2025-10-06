@@ -22,15 +22,15 @@
         <div class="card-body">
             <form method="GET" action="{{ route('documents.index') }}" class="row g-3">
                 <div class="col-md-3">
-                    <label for="search" class="form-label">{{ __('Search') }}</label>
+                    <label for="search" class="form-label">{{ __('common.search') }}</label>
                     <input type="text" class="form-control" id="search" name="search" 
-                           value="{{ request('search') }}" placeholder="{{ __('Search documents...') }}">
+                           value="{{ request('search') }}" placeholder="{{ __('common.search_documents') }}">
                 </div>
                 
                 <div class="col-md-2">
-                    <label for="type" class="form-label">{{ __('Type') }}</label>
+                    <label for="type" class="form-label">{{ __('common.type') }}</label>
                     <select class="form-select" id="type" name="type">
-                        <option value="">{{ __('All Types') }}</option>
+                        <option value="">{{ __('common.all_types') }}</option>
                         @foreach($documentTypes as $type)
                             <option value="{{ $type['value'] }}" {{ request('type') == $type['value'] ? 'selected' : '' }}>
                                 {{ $type['label'] }}
@@ -40,9 +40,9 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label for="employee_id" class="form-label">{{ __('Employee') }}</label>
+                    <label for="employee_id" class="form-label">{{ __('common.employee') }}</label>
                     <select class="form-select" id="employee_id" name="employee_id">
-                        <option value="">{{ __('All Employees') }}</option>
+                        <option value="">{{ __('common.all_employees') }}</option>
                         @foreach($employees as $employee)
                             <option value="{{ $employee->id }}" {{ request('employee_id') == $employee->id ? 'selected' : '' }}>
                                 {{ $employee->code }} - {{ $employee->display_name }}
@@ -52,37 +52,37 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label for="visibility" class="form-label">{{ __('Visibility') }}</label>
+                    <label for="visibility" class="form-label">{{ __('common.visibility') }}</label>
                     <select class="form-select" id="visibility" name="visibility">
-                        <option value="">{{ __('All') }}</option>
+                        <option value="">{{ __('common.all') }}</option>
                         <option value="private" {{ request('visibility') == 'private' ? 'selected' : '' }}>
-                            {{ __('Private') }}
+                            {{ __('common.private') }}
                         </option>
                         <option value="shared" {{ request('visibility') == 'shared' ? 'selected' : '' }}>
-                            {{ __('Shared') }}
+                            {{ __('common.shared') }}
                         </option>
                     </select>
                 </div>
 
                 <div class="col-md-2">
-                    <label for="expired" class="form-label">{{ __('Status') }}</label>
+                    <label for="expired" class="form-label">{{ __('common.status') }}</label>
                     <select class="form-select" id="expired" name="expired">
-                        <option value="">{{ __('All') }}</option>
+                        <option value="">{{ __('common.all') }}</option>
                         <option value="0" {{ request('expired') === '0' ? 'selected' : '' }}>
-                            {{ __('Valid') }}
+                            {{ __('common.valid') }}
                         </option>
                         <option value="1" {{ request('expired') === '1' ? 'selected' : '' }}>
-                            {{ __('Expired') }}
+                            {{ __('common.expired') }}
                         </option>
                     </select>
                 </div>
 
                 <div class="col-12">
                     <button type="submit" class="btn btn-brand-primary">
-                        <i class="fas fa-search"></i> {{ __('Search') }}
+                        <i class="fas fa-search"></i> {{ __('common.search') }}
                     </button>
                     <a href="{{ route('documents.index') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i> {{ __('Clear') }}
+                        <i class="fas fa-times"></i> {{ __('common.clear') }}
                     </a>
                 </div>
             </form>
@@ -96,7 +96,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="card-title text-muted mb-0">{{ __('Total Documents') }}</h5>
+                            <h5 class="card-title text-muted mb-0">{{ __('common.total_documents') }}</h5>
                             <h2 class="mb-0 brand-dark-green">{{ number_format($documents->total()) }}</h2>
                         </div>
                         <div class="text-brand-gold">
@@ -112,7 +112,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="card-title text-muted mb-0">{{ __('Expiring Soon') }}</h5>
+                            <h5 class="card-title text-muted mb-0">{{ __('common.expiring_soon') }}</h5>
                             <h2 class="mb-0 text-warning">
                                 {{ \App\Models\Document::expiringSoon(30)->count() }}
                             </h2>
@@ -130,7 +130,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="card-title text-muted mb-0">{{ __('Expired') }}</h5>
+                            <h5 class="card-title text-muted mb-0">{{ __('common.expired') }}</h5>
                             <h2 class="mb-0 text-danger">
                                 {{ \App\Models\Document::expired()->count() }}
                             </h2>
@@ -148,7 +148,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="card-title text-muted mb-0">{{ __('This Month') }}</h5>
+                            <h5 class="card-title text-muted mb-0">{{ __('common.this_month') }}</h5>
                             <h2 class="mb-0 text-success">
                                 {{ \App\Models\Document::whereMonth('created_at', now()->month)->count() }}
                             </h2>
@@ -173,14 +173,14 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-header-custom">
                             <tr>
-                                <th>{{ __('Document') }}</th>
-                                <th>{{ __('Type') }}</th>
-                                <th>{{ __('Employee') }}</th>
-                                <th>{{ __('Size') }}</th>
-                                <th>{{ __('Visibility') }}</th>
-                                <th>{{ __('Expires') }}</th>
-                                <th>{{ __('Created') }}</th>
-                                <th>{{ __('Actions') }}</th>
+                                <th>{{ __('common.document') }}</th>
+                                <th>{{ __('common.type') }}</th>
+                                <th>{{ __('common.employee') }}</th>
+                                <th>{{ __('common.size') }}</th>
+                                <th>{{ __('common.visibility') }}</th>
+                                <th>{{ __('common.expires') }}</th>
+                                <th>{{ __('common.created') }}</th>
+                                <th>{{ __('common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -210,9 +210,9 @@
                                                 {{ $document->employee->code }} - {{ $document->employee->display_name }}
                                             </a>
                                         @elseif($document->contract)
-                                            <span class="text-muted">{{ $document->contract->employee->display_name ?? 'N/A' }}</span>
+                                            <span class="text-muted">{{ $document->contract->employee->display_name ?? __('common.n_a') }}</span>
                                         @else
-                                            <span class="text-muted">{{ __('System') }}</span>
+                                            <span class="text-muted">{{ __('common.system') }}</span>
                                         @endif
                                     </td>
                                     <td>{{ $document->file_size }}</td>
@@ -243,7 +243,7 @@
                                                 </span>
                                             @endif
                                         @else
-                                            <span class="text-muted">{{ __('No expiry') }}</span>
+                                            <span class="text-muted">{{ __('common.no_expiry') }}</span>
                                         @endif
                                     </td>
                                     <td>
@@ -255,21 +255,21 @@
                                         <div class="btn-group btn-group-sm">
                                             @can('view', $document)
                                                 <a href="{{ route('documents.show', $document) }}" 
-                                                   class="btn btn-outline-brand-primary" title="{{ __('View') }}">
+                                                   class="btn btn-outline-brand-primary" title="{{ __('common.view') }}">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                             @endcan
                                             
                                             @can('download', $document)
                                                 <a href="{{ route('documents.download', $document) }}" 
-                                                   class="btn btn-outline-success" title="{{ __('Download') }}">
+                                                   class="btn btn-outline-success" title="{{ __('common.download') }}">
                                                     <i class="fas fa-download"></i>
                                                 </a>
                                             @endcan
                                             
                                             @can('update', $document)
                                                 <a href="{{ route('documents.edit', $document) }}" 
-                                                   class="btn btn-outline-warning" title="{{ __('Edit') }}">
+                                                   class="btn btn-outline-warning" title="{{ __('common.edit') }}">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @endcan
@@ -277,10 +277,10 @@
                                             @can('delete', $document)
                                                 <form method="POST" action="{{ route('documents.destroy', $document) }}" 
                                                       class="d-inline" 
-                                                      onsubmit="return confirm('{{ __('Are you sure you want to delete this document?') }}')">
+                                                      onsubmit="return confirm('{{ __('hrms.confirm_delete') }}')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger" title="{{ __('Delete') }}">
+                                                    <button type="submit" class="btn btn-outline-danger" title="{{ __('common.delete') }}">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -296,16 +296,15 @@
                 <!-- Pagination -->
                 <div class="d-flex justify-content-between align-items-center p-3">
                     <div class="text-muted">
-                        {{ __('Showing') }} {{ $documents->firstItem() }} {{ __('to') }} {{ $documents->lastItem() }} 
-                        {{ __('of') }} {{ $documents->total() }} {{ __('results') }}
+                        {{ __('common.showing_to_of_results', ['from' => $documents->firstItem(), 'to' => $documents->lastItem(), 'total' => $documents->total()]) }}
                     </div>
                     {{ $documents->links() }}
                 </div>
             @else
                 <div class="text-center py-4">
                     <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">{{ __('No documents found') }}</h5>
-                    <p class="text-muted">{{ __('Try adjusting your search criteria or add some documents.') }}</p>
+                    <h5 class="text-muted">{{ __('common.no_documents_found') }}</h5>
+                    <p class="text-muted">{{ __('common.try_adjust_search') }}</p>
                     @can('create', App\Models\Document::class)
                         <a href="{{ route('documents.create') }}" class="btn btn-brand-primary">
                             <i class="fas fa-plus"></i> {{ __('hrms.document.add_document') }}
