@@ -92,6 +92,7 @@ return [
     'inactive' => 'Inactive',
     'terminated' => 'Terminated',
     'on_leave' => 'On Leave',
+    'national_id' => 'National ID',
 
     // Contract Fields
     'contract_type' => 'Contract Type',
@@ -210,12 +211,27 @@ return [
         'file_size' => 'File Size',
         'uploaded_date' => 'Uploaded Date',
         'photo_actions' => 'Photo Actions',
+        'optional_arabic_name' => 'Optional - Arabic name',
+        'national_id_or_passport' => 'National ID or Passport Number',
+        'encrypted_info_note' => 'This information will be encrypted',
+        'select_department' => 'Select Department',
+        'select_position' => 'Select Position',
+        'select_employment_type' => 'Select Employment Type',
+        'select_manager_optional' => 'Select Manager (Optional)',
+        'current_information' => 'Current Information',
+        'created' => 'Created',
+        'last_updated' => 'Last Updated',
+        'years' => 'years',
+        'employees_label' => 'employees',
+        'recent_changes' => 'Recent Changes',
+        'no_recent_changes' => 'No recent changes',
+        'confirm_terminate' => 'Are you sure you want to terminate this employee? This action should be carefully considered.',
+        'salary_visibility_help' => 'Allow employee to view their own salary information',
     ],
 
     // Status translations (individual status items are defined above as simple strings)
 
     // Document Types
-    'national_id' => 'National ID',
     'bar_license' => 'Bar License',
     'contract_document' => 'Contract Document',
     'employment_proof' => 'Employment Proof',
