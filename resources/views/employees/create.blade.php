@@ -273,13 +273,13 @@
                 <div class="card">
                     <div class="card-header card-header-custom">
                         <h5 class="mb-0">
-                            <i class="fas fa-info-circle"></i> {{ __('Information') }}
+                            <i class="fas fa-info-circle"></i> {{ __('employees.help.information') }}
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="small text-muted">
                             <div class="mb-3">
-                                <strong>{{ __('Required Fields') }}:</strong>
+                                <strong>{{ __('employees.help.required_fields') }}:</strong>
                                 <ul class="mt-1 mb-0">
                                     <li>{{ __('hrms.first_name') }}</li>
                                     <li>{{ __('hrms.last_name') }}</li>
@@ -290,18 +290,18 @@
                             </div>
                             
                             <div class="mb-3">
-                                <strong>{{ __('Automatic Features') }}:</strong>
+                                <strong>{{ __('employees.help.automatic_features') }}:</strong>
                                 <ul class="mt-1 mb-0">
-                                    <li>{{ __('Employee code will be generated automatically') }}</li>
-                                    <li>{{ __('Status will be set to Active') }}</li>
-                                    <li>{{ __('Sensitive data will be encrypted') }}</li>
+                                    <li>{{ __('employees.help.auto_code') }}</li>
+                                    <li>{{ __('employees.help.status_active') }}</li>
+                                    <li>{{ __('employees.help.sensitive_encrypted') }}</li>
                                 </ul>
                             </div>
                             
                             <div>
-                                <strong>{{ __('Next Steps') }}:</strong>
+                                <strong>{{ __('employees.help.next_steps') }}:</strong>
                                 <p class="mt-1 mb-0">
-                                    {{ __('After creating the employee, you can add contracts, documents, and other details.') }}
+                                    {{ __('employees.help.next_steps_text') }}
                                 </p>
                             </div>
                         </div>

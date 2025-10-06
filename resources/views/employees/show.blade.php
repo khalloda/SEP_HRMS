@@ -378,7 +378,7 @@
             <div class="card-body d-grid gap-2">
                 @can('update', $employee)
                 <a href="{{ route('employees.edit', $employee) }}" class="btn btn-brand-primary">
-                    <i class="fas fa-edit"></i> {{ __('hrms.edit') }} {{ __('Employee') }}
+                    <i class="fas fa-edit"></i> {{ __('hrms.edit') }} {{ __('hrms.employee') }}
                 </a>
                 @endcan
 
@@ -393,19 +393,18 @@
                 </a>
                 @if(config('payroll.use_salary_structure_history'))
                 <a href="{{ route('employees.salary-history.index', $employee) }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-history"></i> {{ __('Salary History') }}
+                    <i class="fas fa-history"></i> {{ __('employees.actions.salary_history') }}
                 </a>
                 @endif
                 @endcan
 
                 <a href="{{ route('contracts.index', ['employee_id' => $employee->id]) }}" class="btn btn-outline-primary">
-                    <i class="fas fa-file-contract"></i> {{ __('View Contracts') }}
-                    <small class="d-block text-muted">{{ $employee->contracts()->count() }} {{ __('contracts') }}</small>
+                    <i class="fas fa-file-contract"></i> {{ __('employees.actions.view_contracts') }}
+                    <small class="d-block text-muted">{{ $employee->contracts()->count() }} {{ __('contracts.common.contracts') }}</small>
                 </a>
 
                 <a href="{{ route('documents.index', ['employee_id' => $employee->id]) }}" class="btn btn-outline-info">
-                    <i class="fas fa-file-alt"></i> {{ __('View Documents') }}
-                    <small class="d-block text-muted">{{ $employee->documents()->count() }} {{ __('documents') }}</small>
+                    <i class="fas fa-folder-open"></i> {{ __('employees.actions.view_documents') }}
                 </a>
             </div>
         </div>

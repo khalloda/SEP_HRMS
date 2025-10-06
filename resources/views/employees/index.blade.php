@@ -13,9 +13,9 @@
                     <i class="fas fa-download"></i> {{ __('hrms.employee.export') }}
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Excel (Coming Soon)</a></li>
-                    <li><a class="dropdown-item" href="#">PDF (Coming Soon)</a></li>
-                    <li><a class="dropdown-item" href="#">CSV (Coming Soon)</a></li>
+                    <li><a class="dropdown-item" href="#">Excel ({{ __('common.coming_soon') }})</a></li>
+                    <li><a class="dropdown-item" href="#">PDF ({{ __('common.coming_soon') }})</a></li>
+                    <li><a class="dropdown-item" href="#">CSV ({{ __('common.coming_soon') }})</a></li>
                 </ul>
             </div>
             
@@ -225,13 +225,13 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary">{{ $employee->department?->name ?? __('N/A') }}</span>
+                                        <span class="badge bg-secondary">{{ $employee->department?->name ?? __('common.n_a') }}</span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-info">{{ $employee->position?->name ?? __('N/A') }}</span>
+                                        <span class="badge bg-info">{{ $employee->position?->name ?? __('common.n_a') }}</span>
                                     </td>
                                     <td>
-                                        {{ $employee->hire_date?->format('Y-m-d') ?? __('N/A') }}
+                                        {{ $employee->hire_date?->format('Y-m-d') ?? __('common.n_a') }}
                                         @if($employee->hire_date)
                                             <br><small class="text-muted">{{ $employee->hire_date->diffForHumans() }}</small>
                                         @endif
