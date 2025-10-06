@@ -3,15 +3,15 @@
 @section('title', __('Generate Letter'))
 
 @section('header')
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h1 class="h3 mb-0 brand-dark-green">{{ __('Generate Letter') }}</h1>
-            <p class="text-muted mb-0">{{ __('Create a new HR letter from template') }}</p>
-        </div>
-        <a href="{{ route('letters.index') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> {{ __('Back to Letters') }}
-        </a>
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="h3 mb-0 brand-dark-green">{{ __('Generate Letter') }}</h1>
+        <p class="text-muted mb-0">{{ __('Create a new HR letter from template') }}</p>
     </div>
+    <a href="{{ route('letters.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> {{ __('Back to Letters') }}
+    </a>
+</div>
 @endsection
 
 @section('content')
@@ -36,10 +36,10 @@
                                 <option value="">{{ __('Select Employee') }}</option>
                                 @foreach($employees as $employee)
                                 <option value="{{ $employee->id }}"
-                                        data-name="{{ $employee->display_name }}"
-                                        data-code="{{ $employee->code }}"
-                                        data-position="{{ $employee->position->name_en ?? '' }}"
-                                        data-department="{{ $employee->department->name_en ?? '' }}">
+                                    data-name="{{ $employee->display_name }}"
+                                    data-code="{{ $employee->code }}"
+                                    data-position="{{ $employee->position->name_en ?? '' }}"
+                                    data-department="{{ $employee->department->name_en ?? '' }}">
                                     {{ $employee->display_name }} ({{ $employee->code }})
                                 </option>
                                 @endforeach
@@ -50,16 +50,16 @@
                             <select name="template_id" class="form-select" required>
                                 <option value="">{{ __('letters.templates.select') }}</option>
                                 @foreach($templates as $category => $categoryTemplates)
-                                    <optgroup label="{{ ucfirst(str_replace('_', ' ', $category)) }}">
-                                        @foreach($categoryTemplates as $template)
-                                        <option value="{{ $template->id }}"
-                                                data-type="{{ $template->type }}"
-                                                data-language="{{ $template->language }}"
-                                                data-variables="{{ json_encode($template->getAllAvailableVariables()) }}">
-                                            {{ $template->name }} ({{ $template->language === 'ar' ? __('common.language_name.ar') : __('common.language_name.en') }})
-                                        </option>
-                                        @endforeach
-                                    </optgroup>
+                                <optgroup label="{{ ucfirst(str_replace('_', ' ', $category)) }}">
+                                    @foreach($categoryTemplates as $template)
+                                    <option value="{{ $template->id }}"
+                                        data-type="{{ $template->type }}"
+                                        data-language="{{ $template->language }}"
+                                        data-variables="{{ json_encode($template->getAllAvailableVariables()) }}">
+                                        {{ $template->name }} ({{ $template->language === 'ar' ? __('common.language_name.ar') : __('common.language_name.en') }})
+                                    </option>
+                                    @endforeach
+                                </optgroup>
                                 @endforeach
                             </select>
                         </div>
@@ -167,180 +167,178 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const employeeSelect = document.querySelector('select[name="employee_id"]');
-    const templateSelect = document.querySelector('select[name="template_id"]');
-    const employeeInfo = document.getElementById('employeeInfo');
-    const templateInfo = document.getElementById('templateInfo');
-    const additionalVariables = document.getElementById('additionalVariables');
-    const variablesContainer = document.getElementById('variablesContainer');
-    const previewBtn = document.getElementById('previewBtn');
-    const saveDraftBtn = document.getElementById('saveDraftBtn');
-    const generateBtn = document.getElementById('generateBtn');
+    document.addEventListener('DOMContentLoaded', function() {
+        const employeeSelect = document.querySelector('select[name="employee_id"]');
+        const templateSelect = document.querySelector('select[name="template_id"]');
+        const employeeInfo = document.getElementById('employeeInfo');
+        const templateInfo = document.getElementById('templateInfo');
+        const additionalVariables = document.getElementById('additionalVariables');
+        const variablesContainer = document.getElementById('variablesContainer');
+        const previewBtn = document.getElementById('previewBtn');
+        const saveDraftBtn = document.getElementById('saveDraftBtn');
+        const generateBtn = document.getElementById('generateBtn');
 
-    // Employee selection handler
-    employeeSelect.addEventListener('change', function() {
-        const option = this.selectedOptions[0];
-        if (option.value) {
-            showEmployeeInfo(option);
-            checkFormValidity();
-        } else {
-            employeeInfo.style.display = 'none';
-        }
-    });
+        // Employee selection handler
+        employeeSelect.addEventListener('change', function() {
+            const option = this.selectedOptions[0];
+            if (option.value) {
+                showEmployeeInfo(option);
+                checkFormValidity();
+            } else {
+                employeeInfo.style.display = 'none';
+            }
+        });
 
-    // Template selection handler
-    templateSelect.addEventListener('change', function() {
-        const option = this.selectedOptions[0];
-        if (option.value) {
-            showTemplateInfo(option);
-            showAdditionalVariables(option);
-            checkFormValidity();
-        } else {
-            templateInfo.style.display = 'none';
-            additionalVariables.style.display = 'none';
-        }
-    });
+        // Template selection handler
+        templateSelect.addEventListener('change', function() {
+            const option = this.selectedOptions[0];
+            if (option.value) {
+                showTemplateInfo(option);
+                showAdditionalVariables(option);
+                checkFormValidity();
+            } else {
+                templateInfo.style.display = 'none';
+                additionalVariables.style.display = 'none';
+            }
+        });
 
-    function showEmployeeInfo(option) {
-        const details = document.getElementById('employeeDetails');
-        details.innerHTML = `
-            <p class="mb-2"><strong>Name:</strong> ${option.dataset.name}</p>
-            <p class="mb-2"><strong>Code:</strong> ${option.dataset.code}</p>
-            <p class="mb-2"><strong>Position:</strong> ${option.dataset.position}</p>
-            <p class="mb-0"><strong>Department:</strong> ${option.dataset.department}</p>
+        function showEmployeeInfo(option) {
+            const details = document.getElementById('employeeDetails');
+            details.innerHTML = `
+            <p class="mb-2"><strong>{{ __('letters.js.name') }}</strong> ${option.dataset.name}</p>
+            <p class="mb-0"><strong>{{ __('letters.js.code') }}</strong> ${option.dataset.code}</p>
         `;
-        employeeInfo.style.display = 'block';
-    }
+            employeeInfo.style.display = 'block';
+        }
 
-    function showTemplateInfo(option) {
-        const details = document.getElementById('templateDetails');
-        details.innerHTML = `
-            <p class="mb-2"><strong>Type:</strong> ${option.dataset.type}</p>
-            <p class="mb-0"><strong>Language:</strong> ${option.dataset.language === 'ar' ? __('common.language_name.ar') : __('common.language_name.en')}</p>
+        function showTemplateInfo(option) {
+            const details = document.getElementById('templateDetails');
+            details.innerHTML = `
+            <p class="mb-2"><strong>{{ __('letters.js.type') }}</strong> ${option.dataset.type}</p>
+            <p class="mb-0"><strong>{{ __('letters.js.language') }}</strong> ${option.dataset.language === 'ar' ? '{{ __('common.language_name.ar') }}' : '{{ __('common.language_name.en') }}'}</p>
         `;
-        templateInfo.style.display = 'block';
-    }
+            templateInfo.style.display = 'block';
+        }
 
-    function showAdditionalVariables(option) {
-        try {
-            const variables = JSON.parse(option.dataset.variables);
-            const defaultVars = ['employee_name', 'employee_code', 'position', 'department', 'hire_date', 'salary', 'manager_name', 'company_name', 'current_date', 'arabic_date'];
+        function showAdditionalVariables(option) {
+            try {
+                const variables = JSON.parse(option.dataset.variables);
+                const defaultVars = ['employee_name', 'employee_code', 'position', 'department', 'hire_date', 'salary', 'manager_name', 'company_name', 'current_date', 'arabic_date'];
 
-            // Find custom variables (not in default list)
-            const customVars = Object.keys(variables).filter(key => !defaultVars.includes(key));
+                // Find custom variables (not in default list)
+                const customVars = Object.keys(variables).filter(key => !defaultVars.includes(key));
 
-            if (customVars.length > 0) {
-                let html = '';
-                customVars.forEach((varName, index) => {
-                    html += `
+                if (customVars.length > 0) {
+                    let html = '';
+                    customVars.forEach((varName, index) => {
+                        html += `
                         <div class="col-md-6 mb-3">
                             <label class="form-label">${variables[varName]}</label>
                             <input type="text" name="additional_data[${varName}]" class="form-control"
                                    placeholder="Enter ${variables[varName].toLowerCase()}">
                         </div>
                     `;
-                });
-                variablesContainer.innerHTML = html;
-                additionalVariables.style.display = 'block';
-            } else {
+                    });
+                    variablesContainer.innerHTML = html;
+                    additionalVariables.style.display = 'block';
+                } else {
+                    additionalVariables.style.display = 'none';
+                }
+            } catch (e) {
+                console.error('Error parsing variables:', e);
                 additionalVariables.style.display = 'none';
             }
-        } catch (e) {
-            console.error('Error parsing variables:', e);
-            additionalVariables.style.display = 'none';
         }
-    }
 
-    function checkFormValidity() {
-        const isValid = employeeSelect.value && templateSelect.value;
-        previewBtn.disabled = !isValid;
-        saveDraftBtn.disabled = !isValid;
-        generateBtn.disabled = !isValid;
-    }
+        function checkFormValidity() {
+            const isValid = employeeSelect.value && templateSelect.value;
+            previewBtn.disabled = !isValid;
+            saveDraftBtn.disabled = !isValid;
+            generateBtn.disabled = !isValid;
+        }
 
-    // Preview button handler
-    previewBtn.addEventListener('click', function() {
-        const formData = new FormData(document.getElementById('letterForm'));
+        // Preview button handler
+        previewBtn.addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('letterForm'));
 
-        fetch('{{ route("letters.preview") }}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('subjectText').textContent = data.subject;
-            document.getElementById('previewContent').innerHTML = data.content;
-            new bootstrap.Modal(document.getElementById('previewModal')).show();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('{{ __("Error loading preview") }}');
+            fetch('{{ route("letters.preview") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('subjectText').textContent = data.subject;
+                    document.getElementById('previewContent').innerHTML = data.content;
+                    new bootstrap.Modal(document.getElementById('previewModal')).show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('{{ __('letters.js.error_preview') }}');
+                });
+        });
+
+        // Generate buttons handler
+        function generateLetter(status = 'pending_approval') {
+            const formData = new FormData(document.getElementById('letterForm'));
+            formData.append('status', status);
+
+            fetch('{{ route("letters.store") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok');
+                })
+                .then(data => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        window.location.href = '{{ route("letters.index") }}';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('{{ __('letters.js.error_generate') }}');
+                });
+        }
+
+        saveDraftBtn.addEventListener('click', () => generateLetter('draft'));
+        generateBtn.addEventListener('click', () => generateLetter('pending_approval'));
+        document.getElementById('generateFromPreview').addEventListener('click', () => {
+            bootstrap.Modal.getInstance(document.getElementById('previewModal')).hide();
+            generateLetter('pending_approval');
         });
     });
-
-    // Generate buttons handler
-    function generateLetter(status = 'pending_approval') {
-        const formData = new FormData(document.getElementById('letterForm'));
-        formData.append('status', status);
-
-        fetch('{{ route("letters.store") }}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Network response was not ok');
-        })
-        .then(data => {
-            if (data.redirect) {
-                window.location.href = data.redirect;
-            } else {
-                window.location.href = '{{ route("letters.index") }}';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('{{ __("Error generating letter") }}');
-        });
-    }
-
-    saveDraftBtn.addEventListener('click', () => generateLetter('draft'));
-    generateBtn.addEventListener('click', () => generateLetter('pending_approval'));
-    document.getElementById('generateFromPreview').addEventListener('click', () => {
-        bootstrap.Modal.getInstance(document.getElementById('previewModal')).hide();
-        generateLetter('pending_approval');
-    });
-});
 </script>
 @endpush
 
 @push('styles')
 <style>
-.required::after {
-    content: " *";
-    color: #dc3545;
-}
+    .required::after {
+        content: " *";
+        color: #dc3545;
+    }
 
-#previewContent {
-    font-family: 'Times New Roman', serif;
-    line-height: 1.6;
-}
+    #previewContent {
+        font-family: 'Times New Roman', serif;
+        line-height: 1.6;
+    }
 
-.card-header {
-    font-weight: 600;
-}
+    .card-header {
+        font-weight: 600;
+    }
 
-.form-label {
-    font-weight: 500;
-}
+    .form-label {
+        font-weight: 500;
+    }
 </style>
 @endpush
