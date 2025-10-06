@@ -1,23 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+
 <head>
     <meta charset="utf-8">
     <title>{{ __('reports.document_inventory.title') }} - {{ now()->format('Y-m-d') }}</title>
     <style>
-        body { font-family: 'DejaVu Sans', sans-serif; font-size: 10px; line-height: 1.4; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #c6a44a; padding-bottom: 10px; }
-        .company-name { font-size: 16px; font-weight: bold; color: #2e4029; margin-bottom: 5px; }
-        .report-title { font-size: 14px; color: #c6a44a; margin-bottom: 5px; }
-        .report-date { font-size: 10px; color: #666; }
-        .summary { margin: 10px 0; }
-        .summary-item { margin-bottom: 4px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #2e4029; color: white; font-weight: bold; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 8px; color: #666; border-top: 1px solid #ddd; padding-top: 5px; }
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #c6a44a;
+            padding-bottom: 10px;
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2e4029;
+            margin-bottom: 5px;
+        }
+
+        .report-title {
+            font-size: 14px;
+            color: #c6a44a;
+            margin-bottom: 5px;
+        }
+
+        .report-date {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .summary {
+            margin: 10px 0;
+        }
+
+        .summary-item {
+            margin-bottom: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2e4029;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 8px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 5px;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         <div class="company-name">{{ __('common.org_full_name') }}</div>
@@ -31,7 +93,7 @@
         <div class="summary-item">{{ __('reports.document_inventory.expiring_soon') }}: {{ $summary['expiring_soon'] }}</div>
         <div class="summary-item">{{ __('reports.document_inventory.expired') }}: {{ $summary['expired'] }}</div>
         @foreach($summary['by_type'] as $type => $count)
-            <div class="summary-item">{{ __(ucfirst(str_replace('_', ' ', $type))) }}: {{ $count }}</div>
+        <div class="summary-item">{{ __(ucfirst(str_replace('_', ' ', $type))) }}: {{ $count }}</div>
         @endforeach
     </div>
 
@@ -71,4 +133,5 @@
         {{ __('reports.document_inventory.generated_by') }} | {{ __('hrms.page') }} {PAGENO} {{ __('hrms.of') }} {nbpg}
     </div>
 </body>
+
 </html>

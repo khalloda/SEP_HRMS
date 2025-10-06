@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+
 <head>
     <meta charset="utf-8">
     <title>{{ __('reports.employee_directory.title') }} - {{ now()->format('Y-m-d') }}</title>
@@ -9,57 +10,70 @@
             font-size: 10px;
             line-height: 1.4;
         }
+
         .header {
             text-align: center;
             margin-bottom: 20px;
             border-bottom: 2px solid #c6a44a;
             padding-bottom: 10px;
         }
+
         .company-name {
             font-size: 16px;
             font-weight: bold;
             color: #2e4029;
             margin-bottom: 5px;
         }
+
         .report-title {
             font-size: 14px;
             color: #c6a44a;
             margin-bottom: 5px;
         }
+
         .report-date {
             font-size: 10px;
             color: #666;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
+
         th {
             background-color: #2e4029;
             color: white;
             font-weight: bold;
         }
+
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+
         .status-active {
             color: #28a745;
             font-weight: bold;
         }
+
         .status-inactive {
             color: #ffc107;
             font-weight: bold;
         }
+
         .status-terminated {
             color: #dc3545;
             font-weight: bold;
         }
+
         .footer {
             position: fixed;
             bottom: 0;
@@ -72,23 +86,24 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <div class="company-name">{{ __('common.org_full_name') }}</div>
         <div class="report-title">{{ __('reports.employee_directory.title') }}</div>
         <div class="report-date">{{ __('reports.employee_directory.generated_on') }}: {{ now()->format('F j, Y \a\t g:i A') }}</div>
         @if($filters)
-            <div class="report-date">
-                @if($filters['department_id'] ?? null)
-                    {{ __('reports.employee_directory.filters.department') }}: {{ \App\Models\Department::find($filters['department_id'])->name_en ?? 'Unknown' }} |
-                @endif
-                @if($filters['position_id'] ?? null)
-                    {{ __('reports.employee_directory.filters.position') }}: {{ \App\Models\Position::find($filters['position_id'])->name_en ?? 'Unknown' }} |
-                @endif
-                @if($filters['employment_status'] ?? null)
-                    {{ __('reports.employee_directory.filters.status') }}: {{ ucfirst($filters['employment_status']) }}
-                @endif
-            </div>
+        <div class="report-date">
+            @if($filters['department_id'] ?? null)
+            {{ __('reports.employee_directory.filters.department') }}: {{ \App\Models\Department::find($filters['department_id'])->name_en ?? 'Unknown' }} |
+            @endif
+            @if($filters['position_id'] ?? null)
+            {{ __('reports.employee_directory.filters.position') }}: {{ \App\Models\Position::find($filters['position_id'])->name_en ?? 'Unknown' }} |
+            @endif
+            @if($filters['employment_status'] ?? null)
+            {{ __('reports.employee_directory.filters.status') }}: {{ ucfirst($filters['employment_status']) }}
+            @endif
+        </div>
         @endif
     </div>
 
@@ -126,4 +141,5 @@
         {{ __('reports.employee_directory.generated_by') }} | {{ __('hrms.page') }} {PAGENO} {{ __('hrms.of') }} {nbpg}
     </div>
 </body>
+
 </html>
