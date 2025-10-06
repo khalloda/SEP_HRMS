@@ -32,5 +32,3 @@ class ComponentNameTest extends TestCase
         $this->assertNotSame('', ComponentName::display($comp));
     }
 }
-
-
