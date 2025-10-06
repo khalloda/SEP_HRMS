@@ -103,7 +103,8 @@ class SalaryHistoryService
         }
 
         $ttl = (int) config('payroll.salary_history_eval_ttl', 1800);
-        $hashSource = $structure->updated_at?->timestamp . '|' . $structure->structureComponents->max('updated_at');
+        $locale = app()->getLocale();
+        $hashSource = $structure->updated_at?->timestamp . '|' . $structure->structureComponents->max('updated_at') . '|' . $locale;
         $key = 'salary_history_eval:' . $structure->employee_id . ':' . $structure->id . ':' . sha1((string) $hashSource);
 
         return Cache::remember($key, $ttl, function () use ($structure) {
