@@ -201,7 +201,7 @@ class DashboardService
                     'title' => __('common.information'),
                     'icon' => 'fas fa-info-circle',
                     'color' => 'light',
-                    'data' => ['message' => __('Widget not configured')],
+                    'data' => ['message' => __('hrms.dashboard.widget_not_configured')],
                     'size' => 'col-lg-4',
                 ];
         }
