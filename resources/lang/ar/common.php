@@ -54,6 +54,7 @@ return [
     'reports' => 'التقارير',
     'reports_title' => 'التقارير',
     'reports_dashboard' => 'لوحة تقارير',
+    'reports_quick' => 'لوحة التقارير',
     'employee_directory' => 'دليل الموظفين',
     'contract_status' => 'حالة العقود',
     'payroll_summary' => 'ملخص الرواتب',
