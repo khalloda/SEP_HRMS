@@ -122,9 +122,9 @@
                                             </div>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <div class="fw-bold">{{ $activity['description'] }}</div>
+                                            <div class="fw-bold">{{ __('hrms.activity.' . $activity['description']) }}</div>
                                             <small class="text-muted">
-                                                {{ $activity['causer_name'] }} •
+                                                {{ $activity['causer_name'] === 'System' ? __('common.system') : $activity['causer_name'] }} •
                                                 {{ $activity['time_ago'] }}
                                             </small>
                                         </div>
