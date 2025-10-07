@@ -194,6 +194,7 @@ return [
         'Salary component created' => 'تم إنشاء مكون الراتب',
         'Salary component updated' => 'تم تحديث مكون الراتب',
         'Salary component deleted' => 'تم حذف مكون الراتب',
+        'Salary structure created' => 'تم إنشاء هيكل راتب',
         'Payroll run created' => 'تم إنشاء دورة راتب',
         'Payslip created' => 'تم إنشاء قسيمة راتب',
         'User logged in' => 'تم تسجيل دخول المستخدم',

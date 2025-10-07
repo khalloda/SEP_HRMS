@@ -52,6 +52,7 @@ return [
     'generate_letter' => 'إنشاء خطاب',
     'manage_templates' => 'إدارة القوالب',
     'reports' => 'التقارير',
+    'reports_title' => 'التقارير',
     'reports_dashboard' => 'لوحة تقارير',
     'employee_directory' => 'دليل الموظفين',
     'contract_status' => 'حالة العقود',

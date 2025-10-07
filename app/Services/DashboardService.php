@@ -217,13 +217,13 @@ class DashboardService
                 ['title' => __('hrms.add_employee'), 'url' => route('employees.create'), 'icon' => 'fas fa-user-plus', 'color' => 'primary'],
                 ['title' => __('common.new_contract'), 'url' => route('contracts.create'), 'icon' => 'fas fa-file-circle-plus', 'color' => 'success'],
                 ['title' => __('common.upload_documents'), 'url' => route('documents.create'), 'icon' => 'fas fa-upload', 'color' => 'info'],
-                ['title' => (\Illuminate\Support\Facades\Lang::has('reports.title') ? __('reports.title') : __('common.reports')), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-bar', 'color' => 'warning'],
+                ['title' => (\Illuminate\Support\Facades\Lang::has('reports.title') ? __('reports.title') : (\Illuminate\Support\Facades\Lang::has('common.reports_title') ? __('common.reports_title') : __('common.reports'))), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-bar', 'color' => 'warning'],
             ];
         } elseif ($user->hasRole('Accounting_Manager')) {
             return [
                 ['title' => __('common.payroll_summary'), 'url' => route('reports.payroll.summary'), 'icon' => 'fas fa-calculator', 'color' => 'success'],
                 ['title' => __('hrms.salary', [], app()->getLocale()), 'url' => route('salary-components.index'), 'icon' => 'fas fa-cogs', 'color' => 'primary'],
-                ['title' => (\Illuminate\Support\Facades\Lang::has('reports.title') ? __('reports.title') : __('common.reports')), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-line', 'color' => 'warning'],
+                ['title' => (\Illuminate\Support\Facades\Lang::has('reports.title') ? __('reports.title') : (\Illuminate\Support\Facades\Lang::has('common.reports_title') ? __('common.reports_title') : __('common.reports'))), 'url' => route('reports.index'), 'icon' => 'fas fa-chart-line', 'color' => 'warning'],
             ];
         } elseif ($user->hasRole('HR_Coordinator')) {
             return [
@@ -241,7 +241,7 @@ class DashboardService
         } elseif ($user->hasRole('IT_Admin')) {
             return [
                 ['title' => __('common.audit_trail'), 'url' => route('audit-trail.index'), 'icon' => 'fas fa-history', 'color' => 'secondary'],
-                ['title' => (\Illuminate\Support\Facades\Lang::has('reports.title') ? __('reports.title') : __('common.reports')), 'url' => route('reports.index'), 'icon' => 'fas fa-server', 'color' => 'dark'],
+                ['title' => (\Illuminate\Support\Facades\Lang::has('reports.title') ? __('reports.title') : (\Illuminate\Support\Facades\Lang::has('common.reports_title') ? __('common.reports_title') : __('common.reports'))), 'url' => route('reports.index'), 'icon' => 'fas fa-server', 'color' => 'dark'],
                 ['title' => __('common.weekly_digest'), 'url' => route('weekly-digest.index'), 'icon' => 'fas fa-envelope-open', 'color' => 'info'],
             ];
         }
