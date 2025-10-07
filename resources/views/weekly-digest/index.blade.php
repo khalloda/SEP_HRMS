@@ -3,20 +3,20 @@
 @section('title', __('common.weekly_digest'))
 
 @section('header')
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2 class="h3 brand-dark-green mb-1">{{ __('common.weekly_digest') }}</h2>
-            <p class="text-muted mb-0">{{ __('common.manage_preview_weekly_digest') }}</p>
-        </div>
-        <div>
-            <a href="{{ route('weekly-digest.preview') }}" class="btn btn-outline-secondary me-2" target="_blank">
-                <i class="fas fa-eye"></i> {{ __('common.preview_email') }}
-            </a>
-            <button type="button" class="btn btn-brand-secondary" onclick="sendTestDigest()">
-                <i class="fas fa-paper-plane"></i> {{ __('weekly.buttons.send_test') }}
-            </button>
-        </div>
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="h3 brand-dark-green mb-1">{{ __('common.weekly_digest') }}</h2>
+        <p class="text-muted mb-0">{{ __('common.manage_preview_weekly_digest') }}</p>
     </div>
+    <div>
+        <a href="{{ route('weekly-digest.preview') }}" class="btn btn-outline-secondary me-2" target="_blank">
+            <i class="fas fa-eye"></i> {{ __('common.preview_email') }}
+        </a>
+        <button type="button" class="btn btn-brand-secondary" onclick="sendTestDigest()">
+            <i class="fas fa-paper-plane"></i> {{ __('weekly.buttons.send_test') }}
+        </button>
+    </div>
+</div>
 @endsection
 
 @section('content')
@@ -31,9 +31,9 @@
                 <!-- Send Status -->
                 <div class="alert {{ $preview['should_send'] ? 'alert-success' : 'alert-warning' }} mb-4">
                     @if($preview['should_send'])
-                        <i class="fas fa-check-circle"></i> {{ __('common.weekly_will_send') }}
+                    <i class="fas fa-check-circle"></i> {{ __('common.weekly_will_send') }}
                     @else
-                        <i class="fas fa-exclamation-triangle"></i> {{ __('common.weekly_will_not_send') }}
+                    <i class="fas fa-exclamation-triangle"></i> {{ __('common.weekly_will_not_send') }}
                     @endif
                 </div>
 
@@ -147,7 +147,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <strong>{{ $employee->display_name }}</strong>
-                                    <br><small class="text-muted">{{ $employee->department->name ?? __('common.n_a') }}</small>
+                                        <br><small class="text-muted">{{ $employee->department->name ?? __('common.n_a') }}</small>
                                     </div>
                                     <span class="badge bg-info">{{ $employee->birth_date->format('M j') }}</span>
                                 </div>
@@ -183,9 +183,9 @@
 
                 <!-- No Content Message -->
                 @if($preview['summary']['expiring_contracts_total'] == 0 &&
-                    $preview['summary']['expiring_documents_total'] == 0 &&
-                    $preview['summary']['birthdays_total'] == 0 &&
-                    $preview['summary']['new_hires_total'] == 0)
+                $preview['summary']['expiring_documents_total'] == 0 &&
+                $preview['summary']['birthdays_total'] == 0 &&
+                $preview['summary']['new_hires_total'] == 0)
                 <div class="text-center py-4">
                     <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
                     <h5 class="text-muted">{{ __('common.no_significant_activities') }}</h5>
@@ -233,22 +233,22 @@
             </div>
             <div class="card-body">
                 @if($preview['recipients']->count() > 0)
-                    <ul class="list-group list-group-flush">
-                        @foreach($preview['recipients'] as $user)
-                        <li class="list-group-item px-0 py-2">
-                            <div>
-                                <strong>{{ $user->name }}</strong>
-                                <br><small class="text-muted">{{ $user->email }}</small>
-                                <br><span class="badge bg-secondary">{{ $user->roles->pluck('name')->join(', ') }}</span>
-                            </div>
-                        </li>
-                        @endforeach
-                    </ul>
+                <ul class="list-group list-group-flush">
+                    @foreach($preview['recipients'] as $user)
+                    <li class="list-group-item px-0 py-2">
+                        <div>
+                            <strong>{{ $user->name }}</strong>
+                            <br><small class="text-muted">{{ $user->email }}</small>
+                            <br><span class="badge bg-secondary">{{ $user->roles->pluck('name')->join(', ') }}</span>
+                        </div>
+                    </li>
+                    @endforeach
+                </ul>
                 @else
-                    <div class="text-center py-3">
-                        <i class="fas fa-users-slash fa-2x text-muted mb-2"></i>
-                        <p class="text-muted mb-0">{{ __('common.no_recipients_configured') }}</p>
-                    </div>
+                <div class="text-center py-3">
+                    <i class="fas fa-users-slash fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">{{ __('common.no_recipients_configured') }}</p>
+                </div>
                 @endif
             </div>
         </div>
@@ -293,57 +293,65 @@
 
 @push('scripts')
 <script>
-function sendDigest(force = false) {
-    const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
-    modal.show();
+    function sendDigest(force = false) {
+        const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        modal.show();
 
-    fetch('{{ route("weekly-digest.send") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ force: force })
-    })
-    .then(response => response.json())
-    .then(data => {
-        modal.hide();
-        if (data.success) {
-            alert('✅ ' + (data.message || '{{ __('weekly.messages.success') }}'));
-        } else {
-            alert('❌ ' + (data.message || '{{ __('weekly.messages.error') }}'));
-        }
-    })
-    .catch(error => {
-        modal.hide();
-        alert('❌ {{ __('weekly.messages.error_prefix') }} ' + (error.message || ''));
-    });
-}
+        fetch('{{ route("weekly-digest.send") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    force: force
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                modal.hide();
+                if (data.success) {
+                    alert('✅ ' + (data.message || '{{ __('
+                        weekly.messages.success ') }}'));
+                } else {
+                    alert('❌ ' + (data.message || '{{ __('
+                        weekly.messages.error ') }}'));
+                }
+            })
+            .catch(error => {
+                modal.hide();
+                alert('❌ {{ __('
+                    weekly.messages.error_prefix ') }} ' + (error.message || ''));
+            });
+    }
 
-function sendTestDigest() {
-    const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
-    modal.show();
+    function sendTestDigest() {
+        const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        modal.show();
 
-    fetch('{{ route("weekly-digest.test") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        modal.hide();
-        if (data.success) {
-            alert('✅ ' + (data.message || '{{ __('weekly.messages.success') }}'));
-        } else {
-            alert('❌ ' + (data.message || '{{ __('weekly.messages.error') }}'));
-        }
-    })
-    .catch(error => {
-        modal.hide();
-        alert('❌ {{ __('weekly.messages.error_prefix') }} ' + (error.message || ''));
-    });
-}
+        fetch('{{ route("weekly-digest.test") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                modal.hide();
+                if (data.success) {
+                    alert('✅ ' + (data.message || '{{ __('
+                        weekly.messages.success ') }}'));
+                } else {
+                    alert('❌ ' + (data.message || '{{ __('
+                        weekly.messages.error ') }}'));
+                }
+            })
+            .catch(error => {
+                modal.hide();
+                alert('❌ {{ __('
+                    weekly.messages.error_prefix ') }} ' + (error.message || ''));
+            });
+    }
 </script>
 @endpush

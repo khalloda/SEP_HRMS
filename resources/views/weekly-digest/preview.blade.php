@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,30 +15,36 @@
             padding: 20px;
             background-color: #f8f9fa;
         }
+
         .email-container {
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
+
         .header {
             background: linear-gradient(135deg, #2e4029 0%, #c6a44a 100%);
             color: white;
             padding: 30px 40px;
             text-align: center;
         }
+
         .content {
             padding: 40px;
         }
+
         .greeting {
             font-size: 24px;
             font-weight: 600;
             color: #2e4029;
             margin-bottom: 20px;
         }
+
         .section {
             margin-bottom: 30px;
         }
+
         .section h2 {
             color: #c6a44a;
             font-size: 20px;
@@ -45,29 +52,34 @@
             border-bottom: 2px solid #c6a44a;
             padding-bottom: 5px;
         }
+
         .urgent {
             background-color: #fff5f5;
             border-left: 4px solid #e53e3e;
             padding: 15px;
             margin-bottom: 15px;
         }
+
         .critical {
             background-color: #fefcbf;
             border-left: 4px solid #d69e2e;
             padding: 15px;
             margin-bottom: 15px;
         }
+
         .soon {
             background-color: #f7fafc;
             border-left: 4px solid #4299e1;
             padding: 15px;
             margin-bottom: 15px;
         }
+
         .item {
             margin: 8px 0;
             padding-left: 20px;
             position: relative;
         }
+
         .item::before {
             content: '•';
             position: absolute;
@@ -75,6 +87,7 @@
             color: #c6a44a;
             font-weight: bold;
         }
+
         .action-button {
             display: inline-block;
             background-color: #c6a44a;
@@ -86,12 +99,14 @@
             margin: 20px 0;
             text-align: center;
         }
+
         .footer {
             background-color: #2e4029;
             color: white;
             padding: 30px 40px;
             text-align: center;
         }
+
         .preview-note {
             background-color: #fff3cd;
             border: 1px solid #ffeaa7;
@@ -101,10 +116,12 @@
             margin-bottom: 20px;
             text-align: center;
         }
+
         ul {
             list-style: none;
             padding: 0;
         }
+
         .summary-stats {
             display: flex;
             justify-content: space-around;
@@ -113,20 +130,24 @@
             border-radius: 6px;
             margin: 20px 0;
         }
+
         .stat {
             text-align: center;
         }
+
         .stat-number {
             font-size: 24px;
             font-weight: bold;
             color: #c6a44a;
         }
+
         .stat-label {
             font-size: 12px;
             color: #666;
         }
     </style>
 </head>
+
 <body>
     <div class="preview-note">
         <strong>📧 {{ __('common.email_preview') }}</strong> - {{ __('common.preview_notice') }}
@@ -169,8 +190,8 @@
 
             <!-- Contract Expiries Section -->
             @if(!empty($digestData['contracts']['expiring_urgently']) ||
-                !empty($digestData['contracts']['expiring_critically']) ||
-                !empty($digestData['contracts']['expiring_soon']))
+            !empty($digestData['contracts']['expiring_critically']) ||
+            !empty($digestData['contracts']['expiring_soon']))
             <div class="section">
                 <h2>{{ __('common.contract_expiries') }}</h2>
 
@@ -243,11 +264,11 @@
                 <ul>
                     @foreach($digestData['birthdays'] as $employee)
                     @php
-                        $birthdayDate = \Carbon\Carbon::createFromFormat('m-d', $employee->birth_date->format('m-d'));
-                        if ($birthdayDate->isPast()) {
-                            $birthdayDate->addYear();
-                        }
-                        $daysUntil = now()->diffInDays($birthdayDate, false);
+                    $birthdayDate = \Carbon\Carbon::createFromFormat('m-d', $employee->birth_date->format('m-d'));
+                    if ($birthdayDate->isPast()) {
+                    $birthdayDate->addYear();
+                    }
+                    $daysUntil = now()->diffInDays($birthdayDate, false);
                     @endphp
                     <li class="item">
                         {{ $employee->display_name }} - {{ $birthdayDate->format('M j') }} ({{ $daysUntil }} {{ __('common.days') }})
@@ -277,9 +298,9 @@
                 <h2>{{ __('common.weekly_activity_summary') }}</h2>
                 <ul>
                     @foreach($digestData['activity_summary'] as $type => $count)
-                        @if($count > 0)
-                        <li class="item">{{ ucfirst(str_replace('_', ' ', $type)) }}: {{ $count }}</li>
-                        @endif
+                    @if($count > 0)
+                    <li class="item">{{ ucfirst(str_replace('_', ' ', $type)) }}: {{ $count }}</li>
+                    @endif
                     @endforeach
                 </ul>
             </div>
@@ -298,4 +319,5 @@
         <strong>ℹ️ {{ __('common.note') }}:</strong> {{ __('common.preview_notice') }}
     </div>
 </body>
+
 </html>

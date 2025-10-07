@@ -3,17 +3,17 @@
 @section('title', __('Reports & Analytics'))
 
 @section('header')
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h2 class="h3 brand-dark-green mb-1">{{ __('Reports & Analytics') }}</h2>
-            <p class="text-muted mb-0">{{ __('Generate comprehensive reports and export data') }}</p>
-        </div>
-        <div>
-            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> {{ __('Back to Dashboard') }}
-            </a>
-        </div>
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="h3 brand-dark-green mb-1">{{ __('Reports & Analytics') }}</h2>
+        <p class="text-muted mb-0">{{ __('Generate comprehensive reports and export data') }}</p>
     </div>
+    <div>
+        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> {{ __('Back to Dashboard') }}
+        </a>
+    </div>
+</div>
 @endsection
 
 @section('content')
@@ -96,7 +96,7 @@
                 <div class="list-group list-group-flush">
                     @foreach($category['reports'] as $reportKey => $reportName)
                     <a href="{{ route('reports.' . str_replace('-', '.', $reportKey)) }}"
-                       class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
+                        class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center">
                         <div>
                             <i class="fas fa-chart-bar text-primary me-2"></i>
                             <span>{{ $reportName }}</span>
@@ -124,25 +124,25 @@
                 <div class="row">
                     <div class="col-md-3 col-sm-6 mb-3">
                         <a href="{{ route('reports.employee.list') }}?export_format=excel"
-                           class="btn btn-outline-success w-100">
+                            class="btn btn-outline-success w-100">
                             <i class="fas fa-file-excel"></i> {{ __('Export All Employees') }}
                         </a>
                     </div>
                     <div class="col-md-3 col-sm-6 mb-3">
                         <a href="{{ route('reports.contract.status') }}?status=active&export_format=pdf"
-                           class="btn btn-outline-danger w-100">
+                            class="btn btn-outline-danger w-100">
                             <i class="fas fa-file-pdf"></i> {{ __('Active Contracts PDF') }}
                         </a>
                     </div>
                     <div class="col-md-3 col-sm-6 mb-3">
                         <a href="{{ route('reports.payroll.summary') }}?month={{ now()->format('Y-m') }}&export_format=excel"
-                           class="btn btn-outline-primary w-100">
+                            class="btn btn-outline-primary w-100">
                             <i class="fas fa-calculator"></i> {{ __('Current Payroll') }}
                         </a>
                     </div>
                     <div class="col-md-3 col-sm-6 mb-3">
                         <a href="{{ route('reports.document.inventory') }}?expiry_status=expiring&export_format=pdf"
-                           class="btn btn-outline-warning w-100">
+                            class="btn btn-outline-warning w-100">
                             <i class="fas fa-clock"></i> {{ __('Expiring Documents') }}
                         </a>
                     </div>
@@ -155,37 +155,37 @@
 
 @push('styles')
 <style>
-.card-header-custom {
-    background-color: var(--color-gold);
-    color: white;
-    font-weight: 600;
-}
+    .card-header-custom {
+        background-color: var(--color-gold);
+        color: white;
+        font-weight: 600;
+    }
 
-.brand-gold {
-    color: var(--color-gold);
-}
+    .brand-gold {
+        color: var(--color-gold);
+    }
 
-.brand-dark-green {
-    color: var(--color-dark-green);
-}
+    .brand-dark-green {
+        color: var(--color-dark-green);
+    }
 
-.list-group-item-action:hover {
-    background-color: var(--color-cream);
-    transform: translateX(5px);
-    transition: all 0.2s ease;
-}
+    .list-group-item-action:hover {
+        background-color: var(--color-cream);
+        transform: translateX(5px);
+        transition: all 0.2s ease;
+    }
 
-.card-title {
-    font-size: 1.8rem;
-    font-weight: bold;
-}
+    .card-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
 
-.quick-action-btn {
-    transition: transform 0.2s;
-}
+    .quick-action-btn {
+        transition: transform 0.2s;
+    }
 
-.quick-action-btn:hover {
-    transform: translateY(-2px);
-}
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+    }
 </style>
 @endpush
