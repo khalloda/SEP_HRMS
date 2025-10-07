@@ -524,6 +524,7 @@ return [
         'access_restricted' => 'الوصول مقيد',
         'refresh' => 'تحديث',
         'urgent_contract_expiry' => 'انتهاء عقد عاجل',
+        'widget_not_configured' => 'الويدجت غير مُعد',
         'total_employees' => 'إجمالي الموظفين',
         'active_employees' => 'الموظفون النشطون',
         'new_hires_this_month' => 'التعيينات الجديدة هذا الشهر',
@@ -557,6 +558,20 @@ return [
         'documents_expiring_soon' => ':count مستندات تنتهي قريباً',
         'employees_paid' => 'الموظفون المدفوعون',
         'total_net_pay' => 'إجمالي الراتب الصافي',
+    ],
+
+    'system' => [
+        'database' => 'قاعدة البيانات',
+        'online' => 'متصل',
+        'offline' => 'غير متصل',
+        'cache' => 'الذاكرة المؤقتة',
+        'working' => 'يعمل',
+        'failed' => 'فشل',
+        'disk_space' => 'مساحة القرص',
+        'active_users' => 'المستخدمون النشطون',
+        'activities_today' => 'أنشطة اليوم',
+        'system_health' => 'صحة النظام',
+        'healthy' => 'صحي',
     ],
 
     // مكون الراتب

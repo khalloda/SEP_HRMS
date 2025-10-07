@@ -6,6 +6,6 @@
     @if(isset($data['message']))
         <p class="text-muted mb-0">{{ $data['message'] }}</p>
     @else
-        <p class="text-muted mb-0">{{ __('Widget not configured') }}</p>
+        <p class="text-muted mb-0">{{ __('hrms.dashboard.widget_not_configured') }}</p>
     @endif
 </div>
