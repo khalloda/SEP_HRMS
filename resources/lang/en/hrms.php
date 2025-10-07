@@ -568,6 +568,7 @@ return [
         'access_restricted' => 'Access restricted',
         'refresh' => 'Refresh',
         'urgent_contract_expiry' => 'Urgent Contract Expiry',
+        'widget_not_configured' => 'Widget not configured',
         'total_employees' => 'Total Employees',
         'active_employees' => 'Active Employees',
         'new_hires_this_month' => 'New Hires This Month',
@@ -601,6 +602,21 @@ return [
         'documents_expiring_soon' => ':count documents expiring soon',
         'employees_paid' => 'Employees Paid',
         'total_net_pay' => 'Total Net Pay',
+    ],
+
+    // System health widget strings
+    'system' => [
+        'database' => 'Database',
+        'online' => 'Online',
+        'offline' => 'Offline',
+        'cache' => 'Cache',
+        'working' => 'Working',
+        'failed' => 'Failed',
+        'disk_space' => 'Disk Space',
+        'active_users' => 'Active Users',
+        'activities_today' => 'Activities Today',
+        'system_health' => 'System Health',
+        'healthy' => 'Healthy',
     ],
 
     // Salary Component
