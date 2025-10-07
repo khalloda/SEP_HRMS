@@ -262,6 +262,8 @@ return [
         'Salary component created' => 'Salary component created',
         'Salary component updated' => 'Salary component updated',
         'Salary component deleted' => 'Salary component deleted',
+        'Payroll run created' => 'Payroll run created',
+        'Payslip created' => 'Payslip created',
         'User logged in' => 'User logged in',
         'User logged out' => 'User logged out',
         'User registered' => 'User registered',

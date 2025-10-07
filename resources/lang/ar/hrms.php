@@ -194,6 +194,8 @@ return [
         'Salary component created' => 'تم إنشاء مكون الراتب',
         'Salary component updated' => 'تم تحديث مكون الراتب',
         'Salary component deleted' => 'تم حذف مكون الراتب',
+        'Payroll run created' => 'تم إنشاء دورة راتب',
+        'Payslip created' => 'تم إنشاء قسيمة راتب',
         'User logged in' => 'تم تسجيل دخول المستخدم',
         'User logged out' => 'تم تسجيل خروج المستخدم',
         'User registered' => 'تم تسجيل المستخدم',
@@ -572,6 +574,16 @@ return [
         'activities_today' => 'أنشطة اليوم',
         'system_health' => 'صحة النظام',
         'healthy' => 'صحي',
+    ],
+
+    'notifications' => [
+        'refresh_alerts' => 'تحديث التنبيهات',
+        'expiry_alerts' => 'تنبيهات انتهاء العقود',
+        'types' => [
+            'urgent' => 'عاجل (≤7 أيام)',
+            'critical' => 'حرج (≤15 يوم)',
+            'soon' => 'قريباً (≤30 يوم)'
+        ],
     ],
 
     // مكون الراتب
