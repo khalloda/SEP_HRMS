@@ -88,6 +88,8 @@ return [
     'department' => 'القسم',
     'position' => 'المنصب',
     'manager' => 'المدير',
+    'employment_type' => 'نوع التوظيف',
+    'all_managers' => 'جميع المديرين',
     'active' => 'نشط',
     'inactive' => 'غير نشط',
     'terminated' => 'منتهي الخدمة',

@@ -135,7 +135,7 @@
             <div class="col-md-2">
                 <label for="sort_by" class="form-label">{{ __('common.sort_by') }}</label>
                 <select name="sort_by" id="sort_by" class="form-select">
-                    <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>{{ __('Name') }}</option>
+                    <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>{{ __('common.name') }}</option>
                     <option value="code" {{ request('sort_by') === 'code' ? 'selected' : '' }}>{{ __('hrms.employee_code') }}</option>
                     <option value="hire_date" {{ request('sort_by') === 'hire_date' ? 'selected' : '' }}>{{ __('hrms.hire_date') }}</option>
                 </select>

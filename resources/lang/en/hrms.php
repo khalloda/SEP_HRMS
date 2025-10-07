@@ -88,6 +88,8 @@ return [
     'department' => 'Department',
     'position' => 'Position',
     'manager' => 'Manager',
+    'employment_type' => 'Employment Type',
+    'all_managers' => 'All Managers',
     'active' => 'Active',
     'inactive' => 'Inactive',
     'terminated' => 'Terminated',
