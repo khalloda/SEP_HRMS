@@ -49,9 +49,9 @@
 
             <!-- Status Filter -->
             <div class="col-md-2">
-                <label for="status" class="form-label">{{ __('Status') }}</label>
+                <label for="status" class="form-label">{{ __('hrms.status.status') }}</label>
                 <select name="status" id="status" class="form-select">
-                    <option value="">{{ __('All Statuses') }}</option>
+                    <option value="">{{ __('common.status') === 'Status' ? __('hrms.status.status') : __('common.status') }}</option>
                     @foreach($statusOptions as $value => $label)
                     <option value="{{ $value }}" {{ request('status') === $value ? 'selected' : '' }}>
                         {{ $label }}
@@ -64,7 +64,7 @@
             <div class="col-md-2">
                 <label for="department_id" class="form-label">{{ __('hrms.department') }}</label>
                 <select name="department_id" id="department_id" class="form-select">
-                    <option value="">{{ __('All Departments') }}</option>
+                    <option value="">{{ __('common.all_types') ?? __('common.all') }} {{ __('hrms.departments') ?? '' }}</option>
                     @foreach($departments as $department)
                     <option value="{{ $department->id }}" {{ request('department_id') == $department->id ? 'selected' : '' }}>
                         {{ $department->name }}
@@ -77,7 +77,7 @@
             <div class="col-md-2">
                 <label for="position_id" class="form-label">{{ __('hrms.position') }}</label>
                 <select name="position_id" id="position_id" class="form-select">
-                    <option value="">{{ __('All Positions') }}</option>
+                    <option value="">{{ __('common.all') }}</option>
                     @foreach($positions as $position)
                     <option value="{{ $position->id }}" {{ request('position_id') == $position->id ? 'selected' : '' }}>
                         {{ $position->name }}
@@ -88,9 +88,9 @@
 
             <!-- Employment Type Filter -->
             <div class="col-md-2">
-                <label for="employment_type_id" class="form-label">{{ __('Employment Type') }}</label>
+                <label for="employment_type_id" class="form-label">{{ __('hrms.employment_type') }}</label>
                 <select name="employment_type_id" id="employment_type_id" class="form-select">
-                    <option value="">{{ __('All Types') }}</option>
+                    <option value="">{{ __('common.all_types') ?? __('common.all') }}</option>
                     @foreach($employmentTypes as $type)
                     <option value="{{ $type->id }}" {{ request('employment_type_id') == $type->id ? 'selected' : '' }}>
                         {{ $type->name }}
@@ -103,7 +103,7 @@
             <div class="col-md-3">
                 <label for="manager_id" class="form-label">{{ __('hrms.manager') }}</label>
                 <select name="manager_id" id="manager_id" class="form-select">
-                    <option value="">{{ __('All Managers') }}</option>
+                    <option value="">{{ __('hrms.all_managers') ?? __('common.all') }}</option>
                     @foreach($managers as $manager)
                     <option value="{{ $manager->id }}" {{ request('manager_id') == $manager->id ? 'selected' : '' }}>
                         {{ $manager->first_name }} {{ $manager->last_name }}
@@ -114,7 +114,7 @@
 
             <!-- Date Filters -->
             <div class="col-md-2">
-                <label for="hire_date_from" class="form-label">{{ __('hrms.hire_date') }} {{ __('From') }}</label>
+                <label for="hire_date_from" class="form-label">{{ __('hrms.hire_date') }} {{ __('common.from') ?? __('From') }}</label>
                 <input type="date"
                     class="form-control"
                     id="hire_date_from"
@@ -123,7 +123,7 @@
             </div>
 
             <div class="col-md-2">
-                <label for="hire_date_to" class="form-label">{{ __('hrms.hire_date') }} {{ __('To') }}</label>
+                <label for="hire_date_to" class="form-label">{{ __('hrms.hire_date') }} {{ __('common.to') ?? __('To') }}</label>
                 <input type="date"
                     class="form-control"
                     id="hire_date_to"
@@ -133,7 +133,7 @@
 
             <!-- Sort Options -->
             <div class="col-md-2">
-                <label for="sort_by" class="form-label">{{ __('Sort By') }}</label>
+                <label for="sort_by" class="form-label">{{ __('common.sort_by') ?? __('Sort By') }}</label>
                 <select name="sort_by" id="sort_by" class="form-select">
                     <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>{{ __('Name') }}</option>
                     <option value="code" {{ request('sort_by') === 'code' ? 'selected' : '' }}>{{ __('hrms.employee_code') }}</option>
@@ -142,10 +142,10 @@
             </div>
 
             <div class="col-md-1">
-                <label for="sort_dir" class="form-label">{{ __('Direction') }}</label>
+                <label for="sort_dir" class="form-label">{{ __('common.direction') ?? __('Direction') }}</label>
                 <select name="sort_dir" id="sort_dir" class="form-select">
-                    <option value="asc" {{ request('sort_dir') === 'asc' ? 'selected' : '' }}>{{ __('Ascending') }}</option>
-                    <option value="desc" {{ request('sort_dir') === 'desc' ? 'selected' : '' }}>{{ __('Descending') }}</option>
+                    <option value="asc" {{ request('sort_dir') === 'asc' ? 'selected' : '' }}>{{ __('common.ascending') ?? __('Ascending') }}</option>
+                    <option value="desc" {{ request('sort_dir') === 'desc' ? 'selected' : '' }}>{{ __('common.descending') ?? __('Descending') }}</option>
                 </select>
             </div>
 
